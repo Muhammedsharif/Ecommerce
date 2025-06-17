@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - 1NOTONE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/styles/user/signup.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <h1>1NOTONE</h1>
+      <img src="/images/shoe.png" alt="Shoe" />
+    </div>
+    <div class="right">
+      <div class="lang">English (UK)</div>
+
+ 
+  
+
+      <div class="social-btns">
+        <a href="/auth/google" class="google-btn"><img src="https://img.icons8.com/color/16/google-logo.png" class="google-logo"/> Sign up with Google</a>
+      </div>
+      <div class="divider">– OR –</div>
+      <form  id="signform" action="/signup" method="POST">
+        <!-- <input type="text" name="name" id="name" placeholder="Full Name" /> -->
+         <input type="text" name="name" id="name" placeholder="Full Name" value="<%= typeof name !== 'undefined' ? name : '' %>" />
+        <div id="error1" class="error-message"></div>
+        <!-- <input name="email" id="email" placeholder="Email Address"/> -->
+         <input name="email" id="email" placeholder="Email Address" value="<%= typeof email !== 'undefined' ? email : '' %>" />
+        <div id="error2" class="error-message"></div>
+        <!-- <input type="text" name="phone" id="phone" placeholder="Phone" /> -->
+         <input type="text" name="phone" id="phone" placeholder="Phone" value="<%= typeof phone !== 'undefined' ? phone : '' %>" />
+        <div id="error3" class="error-message"></div>
+        <input type="password" name="password" id="password" placeholder="Password" />
+        <div id="error4" class="error-message"></div>
+        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
+        <div id="error5" class="error-message"></div>
+        <% if (message) { %>
+    <div class="server-message text-center" style="margin-bottom: 10px;">
+      <%= message %>
+    </div>
+  <% } %>
+        <button class="submit-btn" type="submit">Create Account</button>
+        <div class="login-link">Already have an account? <a href="/login">Log in</a></div>
+      </form>
+      
+    </div>
+  </div>
+
+
+  <script>
+     const nameid = document.getElementById("name")
+     const emailid = document.getElementById("email")
+     const phoneid = document.getElementById("phone")
+     const passid = document.getElementById("password")
+     const cpassid = document.getElementById("confirmPassword")
+     const error1 = document.getElementById("error1")
+     const error2 = document.getElementById("error2")
+     const error3 = document.getElementById("error3")
+     const error4 = document.getElementById("error4")
+     const error5 = document.getElementById("error5")
+     const signform = document.getElementById("signform")
+
+
+     function nameValidateChecking(e){
+
+      const nameval = nameid.value
+      const namepattern = /^[A-Za-z\s]+$/
+      console.log(nameval)
+
+      if(nameval.trim()===""){
+        error1.style.display="block"
+        error1.innerHTML="Please enter a valid name"
+      }else if(!namepattern.test(nameval)){
+        error1.style.display="block"
+        error1.innerHTML="Name can only contain alphabets and spaces"
+      }else{
+        error1.style.display="none"
+        error1.innerHTML=""
+      }
+     }
+
+
+     function emailValidateChecking(e){
+
+      const emailval = emailid.value
+      const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/
+
+      if(!emailpattern.test(emailval)){
+        error2.style.display="block"
+        error2.innerHTML="Inavlid Format"
+      }else{
+        error2.style.display="none"
+        error2.innerHTML=""
+      }
+
+     }
+
+
+     function phoneValidateChecking(e){
+
+      const phoneval = phoneid.value
+      
+
+      if(phoneval.trim()===""){
+        error3.style.display="block"
+        error3.innerHTML="Enter a valid phone number"
+      }else if(phoneval.length<10 || phoneval.length>10){
+        error3.style.display="block"
+        error3.innerHTML="Enter 10 digit"
+      }else{
+        error3.style.display="none"
+        error3.innerHTML=""
+      }
+     }
+
+     function passValidateChecking(e){
+      
+
+      const passval = passid.value
+      const cpassval = cpassid.value
+      const alpha = /[a-zA-Z]/
+      const digit = /\d/
+
+      if(passval.length<8){
+        error4.style.display="block"
+        error4.innerHTML="Should contain atleast 8 characters"
+      }else if(!alpha.test(passval) || !digit.test(passval)){
+        error4.style.display="block"
+        error4.innerHTML="Should contain numbers and alphabets"
+      }else{
+        error4.style.display="none"
+        error4.innerHTML=""
+      }
+
+      if(passval !== cpassval){
+        error5.style.display="block"
+        error5.innerHTML="Passwords do not match"
+      }else{
+        error5.style.display="none"
+        error5.innerHTML=""  
+      }
+
+     }
+
+
+
+     document.addEventListener("DOMContentLoaded",function(){
+      signform.addEventListener("submit",function(e){
+
+          nameValidateChecking()
+          emailValidateChecking()
+          phoneValidateChecking()
+          passValidateChecking()
+
+          if(!nameid||!emailid||!phoneid||!passid||!error1||!error2||!error3||!error4||!error5||!signform){
+            console.error("One or more elements not found")
+          }
+
+          if(
+            error1.innerHTML||
+            error2.innerHTML||
+            error3.innerHTML||
+            error4.innerHTML||
+            error5.innerHTML
+
+          ){
+            e.preventDefault()
+          }
+
+      })
+     })
+
+
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>

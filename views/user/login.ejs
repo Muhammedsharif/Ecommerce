@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - 1NOTONE</title>
+    <link rel="stylesheet" href="/styles/user/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Left side - Form -->
+        <div class="form-section">
+            <div class="brand-title">1NOTONE</div>
+            <div class="form-title">Welcome Back</div>
+            <div class="form-subtitle">Please enter your details to sign in</div>
+            
+            <form id="loginform" method="post" action="/login">
+                <div class="input-group">
+                    <input 
+                        type="email" 
+                        class="input-field" 
+                        name="email" 
+                        id="email" 
+                        placeholder="Enter your email"
+                        value="<%= typeof email !== 'undefined' ? email : '' %>"
+                    />
+                    <span class="input-icon icon-user"></span>
+                    <div id="error1" class="error-message"></div>
+                </div>
+                
+                <div class="input-group">
+                    <input 
+                        type="password" 
+                        class="input-field" 
+                        name="password" 
+                        id="password" 
+                        placeholder="Enter your password"
+                        value="<%= typeof password !== 'undefined' ? password : '' %>"
+                    />
+                    <div id="error2" class="error-message"></div>
+                </div>
+
+                <% if(locals.message && message.length > 0) { %>
+                <div class="alert alert-danger text-center">
+                    <%= message %>
+                </div>
+                <% } %>
+                
+                <a href="#" class="forgot-password">Forgot your password?</a>
+                
+                
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Login Now</button>
+                    <a href="/signup" class="btn btn-secondary">Sign Up</a>
+                </div>
+            </form>
+            
+            <div class="divider">OR CONTINUE WITH</div>
+            
+            <div class="social-buttons">
+                <a href="/auth/google" class="social-btn">
+                    <div class="google-icon"></div>
+                    Continue with Google
+                </a>
+            </div>
+            
+            <a href="/signup" class="signup-link">Don't have an account? Sign up</a>
+        </div>
+        
+        <!-- Right side - Illustration -->
+        <div class="illustration-section">
+            <div class="sneaker-container">
+                <div class="sneaker-image"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const emailField = document.getElementById("email");
+        const passwordField = document.getElementById("password");
+        const emailError = document.getElementById("error1");
+        const passwordError = document.getElementById("error2");
+        const loginForm = document.getElementById("loginform");
+
+        function validateEmail() {
+            const emailValue = emailField.value;
+            const emailPattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+            
+            if (!emailPattern.test(emailValue)) {
+                emailError.style.display = "block";
+                emailError.innerHTML = "Please enter a valid email address";
+                return false;
+            } else {
+                emailError.style.display = "none";
+                emailError.innerHTML = "";
+                return true;
+            }
+        }
+
+        function validatePassword() {
+            const passwordValue = passwordField.value;
+            
+            if (passwordValue.length < 8) {
+                passwordError.style.display = "block";
+                passwordError.innerHTML = "Password must be at least 8 characters long";
+                return false;
+            } else {
+                passwordError.style.display = "none";
+                passwordError.innerHTML = "";
+                return true;
+            }
+        }
+
+        // Real-time validation
+        emailField.addEventListener("blur", validateEmail);
+        passwordField.addEventListener("blur", validatePassword);
+
+        // Form submission validation
+        loginForm.addEventListener("submit", function(e) {
+            const isEmailValid = validateEmail();
+            const isPasswordValid = validatePassword();
+            
+            if (!isEmailValid || !isPasswordValid) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

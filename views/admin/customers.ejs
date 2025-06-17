@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    /* Content Header Styles */
+.content-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.content-title {
+    color: white !important;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header Styles */
+.card-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: none !important;
+    border-radius: 15px !important;
+    padding: 25px !important;
+    margin-bottom: 25px !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Search Input Group */
+.input-group {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease;
+    background: white;
+    margin-left: 0 !important;
+    max-width: 500px;
+    margin: 0 auto !important;
+}
+
+.input-group:hover {
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2) !important;
+}
+
+.form-control {
+    border: none !important;
+    padding: 15px 20px !important;
+    font-size: 16px;
+    background: transparent !important;
+}
+
+.form-control:focus {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.input-group .btn {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 25px !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.input-group .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Right Section */
+.right {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Table Styles */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    background: white;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.table thead th {
+    color: white !important;
+    font-weight: 600;
+    padding: 20px;
+    border: none;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9ff, #f0f2ff) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: #fafbff;
+}
+
+/* Button Styles */
+.btn-success {
+    background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 10px 15px !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 90px !important;
+    box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4) !important;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 10px 15px !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 90px !important;
+    box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4) !important;
+}
+
+.text-white {
+    color: white !important;
+    text-decoration: none !important;
+    font-size: 14px;
+}
+
+.text-white:hover {
+    color: white !important;
+    text-decoration: none !important;
+}
+
+/* Container Styles */
+.container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Pagination Styles */
+.pagination {
+    margin: 0 !important;
+    gap: 8px;
+}
+
+.page-item .page-link {
+    border: 2px solid #e0e0e0;
+    color: #667eea;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: white;
+    margin: 0;
+}
+
+.page-item .page-link:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border-color: #667eea !important;
+    color: white !important;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Utility Classes */
+.mb-20 {
+    margin-bottom: 20px !important;
+}
+
+.mt-5 {
+    margin-top: 30px !important;
+}
+
+.mt-3 {
+    margin-top: 20px !important;
+}
+
+/* Body Background */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .content-title {
+        font-size: 1.8rem;
+    }
+    
+    .input-group {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    .card-header {
+        padding: 20px !important;
+    }
+    
+    .right {
+        padding: 20px;
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 600px;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .btn-success,
+    .btn-danger {
+        width: 70px !important;
+        padding: 8px 10px !important;
+        font-size: 12px;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    .pagination .page-link {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+</style>
+<body>
+    <%- include("../../views/partials/admin/header") %>
+<div class="content-header row">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="content-title card-title">Customers</h2>
+       
+    </div>
+</div>         
+        </div>
+        
+            <header class="card-header text-center mb-20">
+                <form action="/admin/users/" method="get" class="d-inline">
+                    <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
+                        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search customers..." name="search">
+                        <button class="btn  border-0" type="submit">Search</button>
+                    </div>
+                </form>
+            </header>
+            <div class="right mt-5">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col"><b>Name</b></th>
+                        <th scope="col"><b>Email</b></th>
+                        <th scope="col"><b>Phone No</b></th>
+                        <th scope="col"><b>Action</b></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <%for(let i=0;i<data.length;i++){%>
+                            <tr>
+                                <td><%=data[i].name%></td>
+                                <td><%=data[i].email%></td>
+                                <td><%=data[i].phone%></td>
+                                <td> 
+                                    <%if(data[i].isBlocked===false){%>
+                                        <button class="btn btn-danger" style="width: 80px;">
+                                            <a href="/admin/blockCustomer?id=<%=data[i].id%>" class="text-white" style="text-decoration: none;">Block</a>
+                                        </button>
+                                        <%}else{%>
+                                        <button class="btn btn-success" style="width: 80px;">
+                                            <a href="/admin/unblockCustomer?id=<%=data[i].id%>" class="text-white" style="text-decoration: none;">Unblock</a>
+                                        </button> 
+                                        <%}%>
+                                </td>
+                                </tr>
+                                <%} %>        
+                    </tbody>
+                       
+                </table>
+                   </div>
+        <div class="container mt-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= (i===currentPage)? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                        <% } %>
+                </ul>
+            </nav>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
+

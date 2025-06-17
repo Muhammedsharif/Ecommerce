@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - 1NOTONE</title>
+    <link rel="stylesheet" href="/styles/admin/sidebar.css">
+    <link rel="stylesheet" href="/styles/admin/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+      <%- include("../partials/admin/header") %>
+            <!-- Quick Actions -->
+           <div class="quick-actions">
+                <a href="/admin/products/add" class="quick-action">
+                    <span class="icon">➕</span>
+                    <strong>Add Product</strong>
+                </a>
+                <a href="/admin/orders/new" class="quick-action">
+                    <span class="icon">📝</span>
+                    <strong>New Order</strong>
+                </a>
+                <a href="/admin/customers/add" class="quick-action">
+                    <span class="icon">👤</span>
+                    <strong>Add Customer</strong>
+                </a>
+                <a href="/admin/reports" class="quick-action">
+                    <span class="icon">📊</span>
+                    <strong>View Reports</strong>
+                </a>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-overview">
+                <div class="stat-item total-sales">
+                    <div class="stat-label">Total Sales</div>
+                    <div class="stat-value">₹ 5,55,000</div>
+                </div>
+                <div class="stat-item visitors">
+                    <div class="stat-label">Visitors</div>
+                    <div class="stat-value">2,500</div>
+                </div>
+                <div class="stat-item total-orders">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value">1,500</div>
+                </div>
+                <div class="stat-item users">
+                    <div class="stat-label">Users</div>
+                    <div class="stat-value">1,013</div>
+                </div>
+            </div>
+
+            <!-- Revenue Chart Section -->
+            <div class="revenue-section">
+                <div class="revenue-header">
+                    <div class="revenue-info">
+                        <h3>Total Revenue</h3>
+                        <div class="revenue-amount">₹50,23780</div>
+                        <div class="revenue-growth">
+                            <span>↗</span> 3% than last month
+                        </div>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot profit"></div>
+                            <span>Profit</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot loss"></div>
+                            <span>Loss</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 120px;"></div>
+                            <div class="bar loss" style="height: 80px;"></div>
+                        </div>
+                        <div class="chart-label">Jan</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 100px;"></div>
+                            <div class="bar loss" style="height: 60px;"></div>
+                        </div>
+                        <div class="chart-label">Feb</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 130px;"></div>
+                            <div class="bar loss" style="height: 40px;"></div>
+                        </div>
+                        <div class="chart-label">Mar</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 90px;"></div>
+                            <div class="bar loss" style="height: 50px;"></div>
+                        </div>
+                        <div class="chart-label">Apr</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 140px;"></div>
+                            <div class="bar loss" style="height: 35px;"></div>
+                        </div>
+                        <div class="chart-label">May</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 70px;"></div>
+                            <div class="bar loss" style="height: 45px;"></div>
+                        </div>
+                        <div class="chart-label">Jun</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 110px;"></div>
+                            <div class="bar loss" style="height: 55px;"></div>
+                        </div>
+                        <div class="chart-label">Jul</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 125px;"></div>
+                            <div class="bar loss" style="height: 65px;"></div>
+                        </div>
+                        <div class="chart-label">Aug</div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="bar-group">
+                            <div class="bar profit" style="height: 105px;"></div>
+                            <div class="bar loss" style="height: 70px;"></div>
+                        </div>
+                        <div class="chart-label">Sep</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Latest Orders -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">Latest Orders</h3>
+                </div>
+                <div class="orders-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="selectAll">
+                                    Order ID
+                                </th>
+                                <th>Product</th>
+                                <th>Date ↓</th>
+                                <th>Customer</th>
+                                <th>Total ↓</th>
+                                <th>Payment ↓</th>
+                                <th>Status ↓</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="checkbox">
+                                    <span class="order-id">#302012</span>
+                                </td>
+                                <td>
+                                    <div class="product-info">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23ff6b6b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20'%3E👟%3C/text%3E%3C/svg%3E" alt="Nike CITY" class="product-image">
+                                        <div>
+                                            <div class="product-name">Nike CITY</div>
+                                            <div class="product-details">+3 Products</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>29 Dec 2022</td>
+                                <td>jayasdev</td>
+                                <td>₹59000</td>
+                                <td>24 Jun 2023</td>
+                                <td><span class="status processing">Processing</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit" title="Edit">✏️</button>
+                                        <button class="action-btn view" title="View">👁️</button>
+                                        <button class="action-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox">
+                                    <span class="order-id">#302012</span>
+                                </td>
+                                <td>
+                                    <div class="product-info">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%234ecdc4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20'%3E👟%3C/text%3E%3C/svg%3E" alt="Nike Zoom" class="product-image">
+                                        <div>
+                                            <div class="product-name">Nike Zoom</div>
+                                            <div class="product-details">+3 Products</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>29 Dec 2022</td>
+                                <td>jayasdev</td>
+                                <td>₹59000</td>
+                                <td>24 Jun 2023</td>
+                                <td><span class="status processing">Processing</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit" title="Edit">✏️</button>
+                                        <button class="action-btn view" title="View">👁️</button>
+                                        <button class="action-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox">
+                                    <span class="order-id">#302012</span>
+                                </td>
+                                <td>
+                                    <div class="product-info">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%236c5ce7'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20'%3E👟%3C/text%3E%3C/svg%3E" alt="Jordan Retro 3" class="product-image">
+                                        <div>
+                                            <div class="product-name">Jordan Retro 3</div>
+                                            <div class="product-details">+3 Products</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>29 Dec 2022</td>
+                                <td>jayasdev</td>
+                                <td>₹59000</td>
+                                <td>24 Jun 2023</td>
+                                <td><span class="status processing">Processing</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit" title="Edit">✏️</button>
+                                        <button class="action-btn view" title="View">👁️</button>
+                                        <button class="action-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox">
+                                    <span class="order-id">#302012</span>
+                                </td>
+                                <td>
+                                    <div class="product-info">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23fd79a8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20'%3E👟%3C/text%3E%3C/svg%3E" alt="AntaKaSpeed" class="product-image">
+                                        <div>
+                                            <div class="product-name">AntaKaSpeed</div>
+                                            <div class="product-details">+3 Products</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>29 Dec 2022</td>
+                                <td>jayasdev</td>
+                                <td>₹59000</td>
+                                <td>24 Jun 2023</td>
+                                <td><span class="status processing">Processing</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit" title="Edit">✏️</button>
+                                        <button class="action-btn view" title="View">👁️</button>
+                                        <button class="action-btn delete" title="Delete">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        menuToggle.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('visible');
+            } else {
+                sidebar.classList.toggle('hidden');
+                mainContent.classList.toggle('full-width');
+            }
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('visible');
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('visible');
+            }
+        });
+
+        // Simulate real-time updates (you can replace this with actual WebSocket or polling)
+        function updateStats() {
+            // This would be replaced with actual API calls
+            console.log('Updating dashboard stats...');
+        }
+
+        // Update stats every 30 seconds
+        setInterval(updateStats, 30000);
+    </script>
+</body>
+</html>

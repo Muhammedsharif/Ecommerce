@@ -1,0 +1,267 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.form-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    max-width: 800px;
+    width: 100%;
+    min-height: 480px;
+}
+
+/* Left side with illustration */
+.form-container::before {
+    content: '';
+    flex: 1;
+    background: linear-gradient(135deg, #a855f7 0%, #f97316 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 480px;
+}
+
+/* Sneaker illustration */
+.form-container::after {
+    content: '';
+    position: absolute;
+    left: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 280px;
+    height: 200px;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 280 200' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- Sneaker base --%3E%3Cpath d='M40 140 L220 140 L210 130 L190 120 L170 115 L150 112 L130 115 L110 120 L90 130 Z' fill='%23ffffff' stroke='%23000' stroke-width='1'/%3E%3C!-- Sneaker sole --%3E%3Cpath d='M50 140 L210 140 L205 150 L55 150 Z' fill='%23333333'/%3E%3C!-- Red accent --%3E%3Cpath d='M60 140 L200 140 L195 135 L180 125 L160 122 L140 122 L120 125 L105 135 Z' fill='%23e74c3c'/%3E%3C!-- White stripes --%3E%3Cpath d='M80 130 L90 120 L95 125 L85 135 Z' fill='%23ffffff'/%3E%3Cpath d='M100 125 L110 115 L115 120 L105 130 Z' fill='%23ffffff'/%3E%3Cpath d='M120 122 L130 112 L135 117 L125 127 Z' fill='%23ffffff'/%3E%3C!-- Brand text --%3E%3Ctext x='140' y='50' text-anchor='middle' font-family='Arial Black, sans-serif' font-size='32' font-weight='900' fill='%23000' letter-spacing='2px'%3E1NOTONE%3C/text%3E%3C/svg%3E") no-repeat center;
+    background-size: contain;
+    z-index: 1;
+}
+
+/* Right side form */
+#otpForm {
+    flex: 1;
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: white;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.form-header p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* OTP Input Section */
+.otp-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.otp-input {
+    width: 48px;
+    height: 48px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    background: white;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.otp-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.otp-input:not(:placeholder-shown) {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+/* Error message */
+.error-message {
+    color: #ef4444;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+    display: none;
+}
+
+/* Form footer */
+.form-footer {
+    text-align: center;
+}
+
+.resend-container {
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #6b7280;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resend-container:last-of-type {
+    margin-bottom: 24px;
+}
+
+.timer {
+    font-weight: 600;
+    color: #374151;
+    font-family: 'Courier New', monospace;
+}
+
+#resendBtn {
+    background: #3b82f6;
+    border: none;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+#resendBtn:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+#resendBtn:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+
+/* Verify button */
+.verify-btn {
+    width: 100%;
+    padding: 12px 24px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.025em;
+}
+
+.verify-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.verify-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .form-container {
+        flex-direction: column;
+        max-width: 400px;
+        min-height: auto;
+    }
+    
+    .form-container::before {
+        min-height: 200px;
+        flex: none;
+    }
+    
+    .form-container::after {
+        position: relative;
+        left: 0;
+        top: 0;
+        transform: translateY(-50%);
+        width: 200px;
+        height: 140px;
+        margin: 0 auto;
+    }
+    
+    #otpForm {
+        padding: 40px 30px;
+    }
+    
+    .form-header h1 {
+        font-size: 22px;
+    }
+    
+    .otp-input {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+    
+    .otp-group {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .form-container {
+        margin: 0;
+    }
+    
+    #otpForm {
+        padding: 30px 20px;
+    }
+    
+    .otp-input {
+        width: 40px;
+        height: 40px;
+        font-size: 15px;
+    }
+    
+    .otp-group {
+        gap: 8px;
+    }
+    
+    .form-header h1 {
+        font-size: 20px;
+    }
+}
