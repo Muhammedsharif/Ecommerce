@@ -37,6 +37,7 @@ const login = async (req, res) => {
 
         // Find admin user
         const admin = await User.findOne({ email, isAdmin: true });
+       
 
         if (admin) {
             const passwordMatch = await bcrypt.compare(password, admin.password);
@@ -57,8 +58,10 @@ const login = async (req, res) => {
 };
 
 const loadDashboard = async (req,res) =>{
+    
     if(req.session.admin){
         try {
+            console.log("Session admin:", req.session.admin);
             res.render("dashboard");
         } catch (error) {
             res.redirect("/pageerror");
@@ -67,19 +70,19 @@ const loadDashboard = async (req,res) =>{
 }
 
 
-const logout = async (req,res) =>{
+const logout = async (req, res) => {
     try {
-        req.session.destroy(err =>{
-            if(err){
-                console.log("Error destroying session",err);
+        req.session.destroy((err) => {
+            if (err) {
+                console.log("Error in logout", err);
                 return res.redirect("/pageerror");
             }
+            res.clearCookie('connect.sid'); // Use your session cookie name if different
             res.redirect("/admin/login");
-        })
+        });
     } catch (error) {
-        console.log("unexpected error in logout",error);
+        console.log("Error in logout", error);
         res.redirect("/pageerror");
-        
     }
 }
 

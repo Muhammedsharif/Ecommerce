@@ -1,7 +1,7 @@
     const mongoose=require("mongoose")
     const {Schema}=mongoose
 
-    const categorySchema=new mongoose.Schema({
+    const categorySchema=new Schema({
         name:{
             type:String,
             required:true,
@@ -19,11 +19,8 @@
             type:Number,
             default:0
         },
-        createAt:{
-            type:Date,
-            default:Date.now
-        }
-    })
+        
+    }, { timestamps: true })
 
     const Category=mongoose.model("Category",categorySchema)
 

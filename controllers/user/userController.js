@@ -32,7 +32,6 @@
                 res.render("home",{user:userData})
 
             }else{
-                console.log("No user found")
                 return res.render("home")
             }
             

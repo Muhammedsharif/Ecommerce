@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Category</title>
+   <link rel="stylesheet" href="/styles/admin/editCategory.css">
+</head>
+<%- include("../partials/admin/header") %>
+<body>
+    
+
+    <div class="container">
+        <div class="header">
+            <h1>Edit Category</h1>
+            <p>Update category information</p>
+        </div>
+
+        <form id="editCategoryForm" method="post" action="/admin/editCategory/<%=category._id%>" >
+            <div class="form-group">
+                <label for="categoryName">Category Name *</label>
+                <input type="text" id="categoryName" name="categoryName" value="<%=category.name%>" required placeholder="Enter category name...">
+            </div>
+
+            <div class="form-group">
+                <label for="categoryDescription">Description</label>
+                <textarea id="categoryDescription" name="categoryDescription" placeholder="Enter category description..."><%=category.description%></textarea>
+            </div>
+
+
+            <div class="button-group">
+                <button type="button" class="btn-secondary" onclick="cancelEdit()">Cancel</button>
+                <button type="submit" class="btn-primary">Update Category</button>
+            </div>
+        </form>
+    </div>
