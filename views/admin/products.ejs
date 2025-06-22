@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --shadow-primary: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--light-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .content-wrapper {
+            padding: 2rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #ffffff 100%);
+            position: relative;
+        }
+
+        .content-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(102,126,234,0.02)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .content-wrapper > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Breadcrumb Navigation Styles */
+.breadcrumb-nav {
+    margin-bottom: 20px;
+    padding: 0;
+    background: transparent;
+}
+
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    padding: 14px 24px;
+    margin: 0;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 
+                0 2px 8px rgba(255, 255, 255, 0.1) inset;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb-item a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.breadcrumb-item a:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.7);
+    outline-offset: 2px;
+}
+
+.breadcrumb-item.active {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    padding: 8px 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb-separator {
+    margin: 0 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+    font-size: 16px;
+    user-select: none;
+}
+
+/* Icon styles */
+.breadcrumb-item i {
+    font-size: 13px;
+    margin-right: 4px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .breadcrumb {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    
+    .breadcrumb-item a,
+    .breadcrumb-item.active {
+        padding: 3px 6px;
+    }
+    
+    .breadcrumb-separator {
+        margin: 0 6px;
+    }
+    
+    .breadcrumb-item i {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .breadcrumb {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    
+    .breadcrumb-separator {
+        margin: 0 4px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .breadcrumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .breadcrumb-item a:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .breadcrumb-item.active {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .breadcrumb-separator {
+        color: rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* Alternative style variations for gradient backgrounds */
+.breadcrumb-nav.glass .breadcrumb {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb-nav.minimal .breadcrumb {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding: 8px 0;
+}
+
+.breadcrumb-nav.minimal .breadcrumb-item a:hover {
+    background: rgba(255, 255, 255, 0.15);
+    text-decoration: none;
+}
+
+.breadcrumb-nav.solid .breadcrumb {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+        /* Page Header */
+        .page-header {
+            background: var(--primary-gradient);
+            padding: 2.5rem;
+            border-radius: 24px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: white;
+        }
+
+        .add-product-btn {
+            background: var(--success-gradient);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-product-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .add-product-btn:hover::before {
+            left: 100%;
+        }
+
+        .add-product-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(79, 172, 254, 0.5);
+            color: white;
+        }
+
+        /* Statistics Cards */
+        .stats-row {
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-primary);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-primary);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 1.2rem 4rem 1.2rem 2rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Filters Section */
+        .filters-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-primary);
+            margin-bottom: 2rem;
+        }
+
+        .form-select {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+        }
+
+        .form-select option {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        /* Table Container */
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-primary);
+        }
+
+        .table {
+            margin-bottom: 0;
+            color: var(--text-primary);
+        }
+
+       .table thead th {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 1.5rem 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1.2px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    padding: 1.5rem 1rem;
+    vertical-align: middle;
+    border: none;
+    text-align: center;
+}
+
+.table tbody td:first-child {
+    text-align: left;
+}
+
+.table tbody td:last-child {
+    text-align: center;
+}
+
+/* Product Info Styling */
+.product-name {
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    line-height: 0.5;
+}
+
+.product-sku {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* Pricing Info */
+.pricing-info {
+    text-align: center;
+}
+
+.price-original {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.price-sale {
+    color: #28a745;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Stock Info */
+.stock-info {
+    text-align: center;
+}
+
+.stock-quantity {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.action-btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 100px;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.5);
+    color: white;
+}
+
+/* Badge Styling */
+.badge {
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bg-success {
+    background: var(--success-gradient) !important;
+}
+
+.bg-danger {
+    background: var(--danger-gradient) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .action-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .action-btn {
+        min-width: 80px;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 800px;
+    }
+    
+    .product-name {
+        font-size: 1rem;
+    }
+    
+    .price-sale {
+        font-size: 1.1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    
+    .action-btn {
+        min-width: 70px;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+    }
+}
+  .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 2rem;
+            background: rgba(248, 250, 252, 0.5);
+        }
+
+        .pagination a, .pagination span {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pagination a:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .pagination .current-page {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .pagination-wrapper {
+        padding: 1.5rem 1rem;
+    }
+    
+    .pagination-wrapper > div {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .pagination-info {
+        text-align: center;
+        order: 3;
+    }
+    
+    .items-per-page {
+        justify-content: center;
+        order: 1;
+    }
+    
+    nav[aria-label="Product pagination"] {
+        order: 2;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        min-width: 40px;
+    }
+    
+    .pagination .page-item {
+        margin: 0 0.1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+        min-width: 35px;
+    }
+}
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+            
+            .page-header {
+                padding: 1.5rem;
+                text-align: center;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .action-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                margin: 0.1rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+        .action-btn.btn-edit {
+    background-color: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.action-btn.btn-edit:hover {
+    background-color: #2980b9;
+}
+
+/* Block Button - Red Theme */
+.action-btn.btn-block {
+    background-color: #e74c3c;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.action-btn.btn-block:hover {
+    background-color: #c0392b;
+}
+
+/* Unblock Button - Green Theme */
+.action-btn.btn-unblock {
+    background-color: #2ecc71;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.action-btn.btn-unblock:hover {
+    background-color: #27ae60;
+}
+
+/* Common styles for all action buttons */
+.action-btn {
+    margin: 0 3px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.action-btn i {
+    font-size: 12px;
+}
+
+        /* Scroll animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Glassmorphism effect */
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: var(--shadow-primary);
+        }
+
+        /* Status indicators */
+        .status-blocked {
+            opacity: 0.6;
+            background: #f8f9fa !important;
+        }
+
+        .status-active {
+            opacity: 1;
+        }
+
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-gradient);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+     <%- include("../partials/admin/header") %>
+    <div class="content-wrapper">
+         <nav class="breadcrumb-nav" aria-label="breadcrumb" style="margin-bottom: 20px;">
+        <ol class="breadcrumb" style="display: flex; list-style: none; padding: 0; font-size: 14px;">
+            <li class="breadcrumb-item">
+                <a href="/admin/dashboard" style="text-decoration: none; color: #007bff;">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
+            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
+            <li class="breadcrumb-item active" style="color: #6c757d;">
+                 Products
+            </li>
+        </ol>
+    </nav>
+        <!-- Page Header -->
+        <div class="page-header glass-effect animate-fade-in">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h1><i class="fas fa-box-open me-3"></i>Product Management</h1>
+                    <p class="mb-0">Manage your product inventory and listings with style</p>
+                </div>
+                <a href="/admin/addProducts" class="add-product-btn">
+                    <i class="fas fa-plus"></i>Add New Product
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Row -->
+        <div class="stats-row animate-fade-in">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stat-card glass-effect">
+                        <div class="stat-number">124</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card glass-effect">
+                        <div class="stat-number">98</div>
+                        <div class="stat-label">Active Products</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card glass-effect">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Out of Stock</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card glass-effect">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Low Stock</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section glass-effect animate-fade-in">
+            <form action="" method="get">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search products, brands, or categories..." name="search">
+                    <button class="search-btn" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section glass-effect animate-fade-in">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="books">Books</option>
+                        <option value="home">Home & Garden</option>
+                        <option value="sports">Sports</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="brand">
+                        <option value="">All Brands</option>
+                        <option value="techpro">TechPro</option>
+                        <option value="sportmax">SportMax</option>
+                        <option value="phonix">PhoniX</option>
+                        <option value="bookworm">BookWorm</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="blocked">Blocked</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="stock">
+                        <option value="">All Stock Levels</option>
+                        <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+       <!-- Products Table -->
+<div class="table-container glass-effect animate-fade-in">
+    <table class="table">
+        <thead>
+            <tr>
+                <th><i class="fas fa-box me-2"></i>PRODUCT</th>
+                <th><i class="fas fa-folder me-2"></i>CATEGORY</th>
+                <th><i class="fas fa-dollar-sign me-2"></i>PRICING</th>
+                <th><i class="fas fa-boxes me-2"></i>STOCK</th>
+                <th><i class="fas fa-toggle-on me-2"></i>STATUS</th>
+                <th><i class="fas fa-cog me-2"></i>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(let i = data.length - 1; i >= 0; i--) { %>
+            <tr class="status-active">
+                <td>
+                    <div class="d-flex align-items-center">
+                        <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+                            <img style="width: 50px; height: 50px;"  src="/uploads/product-images/<%= data[i].productImage[0] %>" 
+                                 alt="<%= data[i].productName %>" 
+                                 class="product-image me-3" >
+                        <% } else { %>
+                            <div class="product-image me-3 d-flex align-items-center justify-content-center bg-light">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        <% } %>
+                        <div>
+                            <div class="product-name"><%= data[i].productName %></div>
+                            <div class="product-sku">SKU: <%= data[i].sku || 'N/A' %></div>
+                            <% if (data[i].brand) { %>
+                                <span class="brand-badge mt-1"><%= data[i].brand %></span>
+                            <% } %>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <%= data[i].category ? data[i].category.name : 'No Category' %>
+                </td>
+                <td>
+                    <div class="pricing-info">
+                        <% if (data[i].regularPrice && data[i].salePrice < data[i].regularPrice) { %>
+                            <div class="price-original">₹<%= data[i].regularPrice.toLocaleString() %></div>
+                            <div class="price-sale">₹<%= data[i].salePrice.toLocaleString() %></div>
+                            <% 
+                                let discount = Math.round(((data[i].regularPrice - data[i].salePrice) / data[i].regularPrice) * 100);
+                            %>
+                            <span class="offer-badge"><%= discount %>% OFF</span>
+                        <% } else { %>
+                            <div class="price-sale">₹<%= data[i].salePrice.toLocaleString() %></div>
+                        <% } %>
+                    </div>
+                </td>
+                <td>
+                    <div class="stock-info">
+                        <div class="stock-quantity"><%= data[i].quantity %> units</div>
+                        <% if (data[i].quantity > 50) { %>
+                            <span class="stock-badge stock-high">High Stock</span>
+                        <% } else if (data[i].quantity > 10) { %>
+                            <span class="stock-badge stock-medium">Medium Stock</span>
+                        <% } else if (data[i].quantity > 0) { %>
+                            <span class="stock-badge stock-low">Low Stock</span>
+                        <% } else { %>
+                            <span class="stock-badge stock-out">Out of Stock</span>
+                        <% } %>
+                    </div>
+                </td>
+                <td>
+                    <% if (data[i].isBlocked) { %>
+                        <span class="badge bg-danger">Blocked</span>
+                    <% } else { %>
+                        <span class="badge bg-success">Active</span>
+                    <% } %>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="/admin/editProduct?id=<%= data[i]._id %>" class="action-btn btn-edit">
+                            <i class="fas fa-edit"></i>Edit
+                        </a>
+                        <button onclick="deleteProduct('<%= data[i]._id %>')" class="action-btn btn-delete">
+                            <i class="fas fa-trash"></i>Delete
+                        </button>
+                        <% if (data[i].isBlocked) { %>
+                            <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="action-btn btn-unblock">
+                                <i class="fas fa-check"></i>Unblock
+                            </a>
+                        <% } else { %>
+                            <a href="/admin/blockProduct?id=<%= data[i]._id %>" class="action-btn btn-block">
+                                <i class="fas fa-ban"></i>Block
+                            </a>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>
+            <% } %>
+            
+            <!-- Empty State -->
+            <% if (!data || data.length === 0) { %>
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h4>No Products Found</h4>
+                        <p>Add your first product to get started</p>
+                        <a href="/admin/addProducts" class="add-product-btn">
+                            <i class="fas fa-plus"></i>Add Product
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+       
+
+       <!-- Pagination -->
+            <div class="pagination">
+               
+                
+               
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <% if (i === currentPage) { %>
+                        <span class="current-page"><%= i %></span>
+                    <% } else { %>
+                        <a href="?page=<%= i %>"><%= i %></a>
+                    <% } %>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+                <% } %>
+               
+            </div>
+
+        <script>
+function changeItemsPerPage(limit) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('limit', limit);
+    urlParams.set('page', '1'); // Reset to first page when changing items per page
+    window.location.search = urlParams.toString();
+}
+
+// Preserve search parameters when navigating
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams();
+    
+    // Preserve search and filter parameters
+    ['search', 'category', 'brand', 'status', 'stock', 'limit'].forEach(param => {
+        if (urlParams.has(param)) {
+            searchParams.set(param, urlParams.get(param));
+        }
+    });
+    
+    // Update pagination links to include search parameters
+    const paginationLinks = document.querySelectorAll('.pagination .page-link');
+    paginationLinks.forEach(link => {
+        if (link.href && !link.href.includes('javascript:')) {
+            const url = new URL(link.href);
+            searchParams.forEach((value, key) => {
+                if (key !== 'page') {
+                    url.searchParams.set(key, value);
+                }
+            });
+            link.href = url.toString();
+        }
+    });
+});
+
+function deleteProduct(productId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to delete this product? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/deleteProduct/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Deleted!',
+                        'The product has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Failed!',
+                        'Failed to delete product: ' + data.message,
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while deleting the product',
+                    'error'
+                );
+            });
+        }
+    });
+}
+</script>
+
+                    
+                        
+                            

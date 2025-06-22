@@ -1,4 +1,6 @@
     const User = require("../../models/userSchema")
+    const Category = require("../../models/categorySchema")
+    const Product = require("../../models/productSchema")
     const env=require("dotenv").config()
     const nodemailer = require("nodemailer")
     const bcrypt = require("bcrypt")
@@ -18,6 +20,44 @@
 
     }
 
+    const googleCallbackHandler = async (req, res) => {
+  try {
+    // Fetch the user from the database first
+    const user = await User.findOne({ _id: req.user._id });
+    if (!user) {
+      return res.render("login", { message: "User not found" });
+    }
+
+    // Check if the user is blocked before setting the session
+    if (user.isBlocked) {
+      console.log("User is blocked:", user._id);
+      // Destroy the session to ensure the user isn't logged in
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.redirect("/pageNotFound");
+        }
+        return res.render("login", { message: "User is blocked by admin" });
+      });
+      return; 
+    }
+
+    // If user is not blocked, set the session and proceed
+    req.session.user = req.user._id;
+    console.log("User logged in via Google:", req.user._id);
+    res.redirect("/");
+  } catch (error) {
+    console.error("Error in Google callback handler:", error);
+    // Destroy session in case of error to prevent partial login states
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+      res.redirect("/login");
+    });
+  }
+};
+
 
 
 
@@ -26,13 +66,24 @@
 
         try{
             const user = req.session.user
+            const categories = await Category.find({isListed:true})
+            let productData = await Product.find({isBlocked:false,
+                category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
+
+            })
+
+            productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
+            productData=productData.slice(0,9)
+
+
+
             if(user){
                 console.log("User found:", user)
                 const userData = await User.findById(user)
-                res.render("home",{user:userData})
+                res.render("home",{user:userData,products:productData})
 
             }else{
-                return res.render("home")
+                return res.render("home",{products:productData})
             }
             
 
@@ -280,7 +331,22 @@
         }
     }
 
+    const loadShoppingPage = async (req,res) =>{
+        try {
+
+            
+
+            res.render("shop")
+            
+        } catch (error) {
+
+            res.redirect("/pageNotFound")
+            
+        }
+    }
+
     module.exports = {
+        googleCallbackHandler,
         loadHomepage,
         pageNotFound,
         loadSignup,
@@ -290,4 +356,5 @@
         loadLogin,
         login,
         logout,
+        loadShoppingPage,
     }

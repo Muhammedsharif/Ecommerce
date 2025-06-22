@@ -16,27 +16,40 @@
    
  <%- include("../partials/user/header") %>
     <!-- Hero Section -->
-    <section class="hero">
+ <section class="hero">
+    <
+        <video autoplay muted loop playsinline>
+            <source src="videos/Epic Adidas shoe commercial concept _ product video B-ROLL.mp4" type="video/mp4">
+            <source src="https://www.example.com/your-video.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
         <div class="hero-content">
-            <h1>Just Do It</h1>
-            <p>Move, shop, customize and celebrate with us. No matter what you feel like doing today, It's better as a member.</p>
-            <button class="cta-button">Join Us</button>
+            <h1>Discover Your Style</h1>
+            <p>Explore the latest trends and find the perfect fit for you.</p>
+            <button class="cta-button">Shop Now</button>
         </div>
-    </section>
+    
+</section>
 
     <!-- Featured Products -->
     <section class="featured">
-        <h2 class="section-title">Featured</h2>
+        <h2 class="section-title">New Arrivals</h2>
         <div class="product-grid">
+            <%for(let i=0;i<products.length;i++){%>
             <div class="product-card">
-                <div class="product-image">👟</div>
-                <div class="product-info">
-                    <h3 class="product-name">Air Max 270</h3>
-                    <p class="product-category">Men's Shoes</p>
-                    <p class="product-price">$150</p>
+                <div class="product-image">
+                    <a href="/productDetails?id=<%=products[i]._id%>">
+                    <img src="/uploads/product-images/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>">
+                </a>
                 </div>
+                <div class="product-info">
+                    <h3 class="product-name"><%=products[i].productName%></h3>
+                    <p class="product-category">Men's Shoes</p>
+                    <p class="product-price"><%=products[i].regularPrice%></p>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('Air Max Ultra', 149.99)">Add to Cart</button>
             </div>
-            <div class="product-card">
+            <!-- <div class="product-card">
                 <div class="product-image">👕</div>
                 <div class="product-info">
                     <h3 class="product-name">Dri-FIT Tee</h3>
@@ -51,7 +64,8 @@
                     <p class="product-category">Basketball Shoes</p>
                     <p class="product-price">$190</p>
                 </div>
-            </div>
+            </div> -->
+            <%}%>
         </div>
     </section>
 
@@ -136,6 +150,24 @@
                 this.style.transform = 'scale(1)';
             }, 150);
         });
+
+             function addToCart(productName, price) {
+            cartCount++;
+            cartItems.push({ name: productName, price: price });
+            
+            // Update cart counter
+            document.getElementById('cart-count').textContent = cartCount;
+            
+            // Add visual feedback
+            const cartButton = document.querySelector('.cart-icon');
+            cartButton.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                cartButton.style.transform = 'scale(1)';
+            }, 200);
+            
+            // Show confirmation
+            showNotification(`${productName} added to cart!`);
+        }
 
         // Close mobile nav when clicking outside
         document.addEventListener('click', function(event) {

@@ -25,7 +25,7 @@ const variantSchema = new Schema(
 
 
 const productSchema=new Schema({
-    title:{
+    productName:{
         type:String,
         required:true
     },
@@ -35,7 +35,7 @@ const productSchema=new Schema({
     },
     brand:{
         type:String,
-        required:true
+        required:false
     },
     category:{
         type:Schema.Types.ObjectId,
@@ -85,6 +85,10 @@ const productSchema=new Schema({
       default: 0
     }
   },
+  isDeleted:
+   { type: Boolean,
+     default: false
+     },
     status:{
         type:String,
         enum:["Available","out of stock","Discountinued"],

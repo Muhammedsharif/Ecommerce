@@ -13,7 +13,7 @@ const loadLogin = async (req, res) => {
 
     const error = req.query.message;
 const email = req.query.email;
-    if(req.session.user){
+    if(req.session.admin){
         return res.redirect("/admin/dashboard");
     }
  
@@ -61,7 +61,7 @@ const loadDashboard = async (req,res) =>{
     
     if(req.session.admin){
         try {
-            console.log("Session admin:", req.session.admin);
+           
             res.render("dashboard");
         } catch (error) {
             res.redirect("/pageerror");
@@ -77,7 +77,6 @@ const logout = async (req, res) => {
                 console.log("Error in logout", err);
                 return res.redirect("/pageerror");
             }
-            res.clearCookie('connect.sid'); // Use your session cookie name if different
             res.redirect("/admin/login");
         });
     } catch (error) {
