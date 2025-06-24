@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nike - Just Do It</title>
+    <title>1NOTONE - Just Do It</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -33,9 +33,10 @@
 
     <!-- Featured Products -->
     <section class="featured">
-        <h2 class="section-title">New Arrivals</h2>
+            
+<h2 class="new-arrivals-title">New Arrivals</h2>
         <div class="product-grid">
-            <%for(let i=0;i<products.length;i++){%>
+            <%for(let i=0;i<products.length && i<4;i++){%>
             <div class="product-card">
                 <div class="product-image">
                     <a href="/productDetails?id=<%=products[i]._id%>">
@@ -44,28 +45,36 @@
                 </div>
                 <div class="product-info">
                     <h3 class="product-name"><%=products[i].productName%></h3>
-                    <p class="product-category">Men's Shoes</p>
-                    <p class="product-price"><%=products[i].regularPrice%></p>
+             
+                    <p class="product-price">₹<%=products[i].salePrice%></p>
                 </div>
                 <button class="add-to-cart" onclick="addToCart('Air Max Ultra', 149.99)">Add to Cart</button>
             </div>
-            <!-- <div class="product-card">
-                <div class="product-image">👕</div>
-                <div class="product-info">
-                    <h3 class="product-name">Dri-FIT Tee</h3>
-                    <p class="product-category">Training Top</p>
-                    <p class="product-price">$25</p>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-image">🏀</div>
-                <div class="product-info">
-                    <h3 class="product-name">Jordan Retro</h3>
-                    <p class="product-category">Basketball Shoes</p>
-                    <p class="product-price">$190</p>
-                </div>
-            </div> -->
+      
             <%}%>
+        </div>
+    </section>
+
+    <!-- Banner Section -->
+    <section class="banner-section">
+        <div class="banner-container">
+            <div  class="banner-card" >
+                <!-- <h3>Summer Essentials</h3>
+                <h2>Green Crest</h2>
+                <p>Breathable fabrics designed for comfort in warm weather</p>
+                <p><em>A Louis Philippe Sustainability Initiative</em></p> -->
+                <img src="" alt="">
+                <button class="banner-button">Explore</button>
+                <button class="banner-button">Shop Now</button>
+            </div>
+            <div class="banner-card" style="background-color: #0d1b2a;">
+                <h3>Professional Collection</h3>
+                <h2>The Crest</h2>
+                <p>Elevate your workwear with our premium formal attire</p>
+                <p><em>Celebrating customers 15th - 30th May</em></p>
+                <button class="banner-button">Discover</button>
+                <button class="banner-button">Visit Your Nearest Store Today!</button>
+            </div>
         </div>
     </section>
 

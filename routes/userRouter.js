@@ -30,6 +30,9 @@ router.get("/logout",userController.logout)
 //Home page & Shopping page
 router.get("/",userController.loadHomepage)
 router.get("/shop",userAuth,userController.loadShoppingPage)
+router.get("/filter",userAuth,userController.filterProducts)
+router.post("/search",userAuth,userController.searchProduct)
+router.get('/products',userAuth,userController.getAllProducts);
 
 //Profile Management
  router.get("/Profile",userAuth,profileController.userProfile)

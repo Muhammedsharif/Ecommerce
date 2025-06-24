@@ -71,6 +71,7 @@
                 category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
 
             })
+            
 
             productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
             productData=productData.slice(0,9)
@@ -78,7 +79,7 @@
 
 
             if(user){
-                console.log("User found:", user)
+                
                 const userData = await User.findById(user)
                 res.render("home",{user:userData,products:productData})
 
@@ -330,20 +331,229 @@
             
         }
     }
+    
 
-    const loadShoppingPage = async (req,res) =>{
-        try {
 
-            
+const loadShoppingPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const { page } = req.query;
 
-            res.render("shop")
-            
-        } catch (error) {
+        const query = {
+            isBlocked: false,
+            quantity: { $gt: 0 },
+        };
 
-            res.redirect("/pageNotFound")
-            
+        let findProducts = await Product.find(query).lean();
+        findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const categories = await Category.find({ isListed: true }).lean();
+
+        let itemsPerPage = 9;
+        let currentPage = parseInt(page) || 1;
+        let startIndex = (currentPage - 1) * itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length / itemsPerPage);
+        const currentProducts = findProducts.slice(startIndex, endIndex);
+
+        let userData = null;
+        if (user) {
+            userData = await User.findOne({ _id: user }).lean();
         }
+
+        req.session.filteredProducts = currentProducts;
+
+        res.render("shop", {
+            user: userData,
+            products: currentProducts,
+            categories: categories,
+            totalPages,
+            currentPage,
+            selectedCategory: null,
+            minPrice: '',
+            maxPrice: '',
+            rating: '0',
+        });
+    } catch (error) {
+        console.error('Error in loadShoppingPage:', error);
+        res.redirect("/pageNotFound");
     }
+};
+
+const filterProducts = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const { category, minPrice, maxPrice, rating, page } = req.query;
+
+        const query = {
+            isBlocked: false,
+            quantity: { $gt: 0 },
+        };
+
+        // Category filter
+        if (category) {
+            const findCategory = await Category.findOne({ _id: category });
+            if (findCategory) {
+                query.category = findCategory._id;
+            }
+        }
+
+        // Price range filter
+        if (minPrice || maxPrice) {
+            query.salePrice = {};
+            if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
+            if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
+        }
+
+        // Rating filter (assuming Product schema has a rating field)
+        if (rating && rating !== '0') {
+            query.rating = { $gte: parseInt(rating) };
+        }
+
+        let findProducts = await Product.find(query).lean();
+        findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const categories = await Category.find({ isListed: true }).lean();
+
+        let itemsPerPage = 9;
+        let currentPage = parseInt(page) || 1;
+        let startIndex = (currentPage - 1) * itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length / itemsPerPage);
+        const currentProducts = findProducts.slice(startIndex, endIndex);
+
+        let userData = null;
+        if (user) {
+            userData = await User.findOne({ _id: user }).lean();
+            if (userData) {
+                const searchEntry = {
+                    category: category ? category : null,
+                    searchedOn: new Date(),
+                };
+                await User.updateOne(
+                    { _id: user },
+                    { $push: { searchHistory: searchEntry } }
+                );
+            }
+        }
+
+        req.session.filteredProducts = currentProducts;
+
+        res.render("shop", {
+            user: userData,
+            products: currentProducts,
+            categories: categories,
+            totalPages,
+            currentPage,
+            selectedCategory: category || null,
+            minPrice: minPrice || '',
+            maxPrice: maxPrice || '',
+            rating: rating || '0',
+        });
+    } catch (error) {
+        console.error('Error in filterProducts:', error);
+        res.redirect("/pageNotFound");
+    }
+};
+
+const searchProduct = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const { search } = req.body;
+
+        const categories = await Category.find({ isListed: true }).lean();
+        const categoryIds = categories.map(category => category._id.toString());
+
+        let searchResult = [];
+        if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
+            searchResult = req.session.filteredProducts.filter(product =>
+                product.productName.toLowerCase().includes(search.toLowerCase())
+            );
+        } else {
+            searchResult = await Product.find({
+                productName: { $regex: `.*${search}.*`, $options: 'i' },
+                isBlocked: false,
+                quantity: { $gt: 0 },
+                category: { $in: categoryIds },
+            }).lean();
+        }
+
+        searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const itemsPerPage = 9;
+        const currentPage = parseInt(req.query.page) || 1;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const totalPages = Math.ceil(searchResult.length / itemsPerPage);
+        const currentProducts = searchResult.slice(startIndex, endIndex);
+
+        let userData = null;
+        if (user) {
+            userData = await User.findById(user).select('name email').lean();
+            await User.updateOne(
+                { _id: user },
+                { $push: { searchHistory: { searchedOn: new Date() } } }
+            );
+        }
+
+        res.status(200).json({
+            user: userData,
+            products: currentProducts,
+            totalPages,
+            currentPage,
+        });
+    } catch (error) {
+        console.error('Error in searchProduct:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+const getAllProducts = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const { page } = req.query;
+
+        const categories = await Category.find({ isListed: true }).lean();
+        const categoryIds = categories.map(category => category._id.toString());
+
+        const products = await Product.find({
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            category: { $in: categoryIds },
+        }).lean();
+
+        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const itemsPerPage = 9;
+        const currentPage = parseInt(page) || 1;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const totalPages = Math.ceil(products.length / itemsPerPage);
+        const currentProducts = products.slice(startIndex, endIndex);
+        const totalProducts = products.length; // Total product count
+
+        let userData = null;
+        if (user) {
+            userData = await User.findById(user).select('name email').lean();
+        }
+
+        req.session.filteredProducts = null; // Clear filtered products
+
+        res.status(200).json({
+            user: userData,
+            products: currentProducts,
+            totalPages,
+            currentPage,
+            totalProducts, // Include total product count
+        });
+    } catch (error) {
+        console.error('Error fetching all products:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
 
     module.exports = {
         googleCallbackHandler,
@@ -357,4 +567,7 @@
         login,
         logout,
         loadShoppingPage,
+        filterProducts,
+        searchProduct,
+        getAllProducts,
     }

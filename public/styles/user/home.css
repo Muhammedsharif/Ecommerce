@@ -125,15 +125,27 @@
             letter-spacing: -1px;
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
+            .new-arrivals-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #000000;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px; /* Reduced gap for better fit */
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding: 0 20px; /* Add padding to avoid edge clipping */
+}
 
         .product-card {
             background: #ffffff;
@@ -195,20 +207,25 @@
         }
 
         .product-image {
-            width: 100%;
-            height: 250px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-            border-radius: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: #999;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
+    width: 100%;
+    height: 200px; /* Adjusted height for better fit */
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+    border-radius: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures images scale while maintaining aspect ratio */
+    border-radius: 15px;
+}
 
         .product-card:hover .product-image {
             transform: scale(1.05);
@@ -266,6 +283,78 @@
             box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
         }
 
+.banner-section {
+    padding: 50px 20px;
+    background: #f8f9fa;
+}
+
+.banner-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    flex-wrap: nowrap;
+}
+
+.banner-card {
+    flex: 1;
+    padding: 30px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 100px;
+    width: 50%;
+    box-sizing: border-box;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.banner-card:hover {
+    transform: scale(1.02); /* Slight scale up on hover */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3); /* Add shadow on hover */
+}
+
+.banner-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.banner-card h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.banner-card p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.banner-card p em {
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.banner-button {
+    background: white;
+    color: #1a2a44;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for button hover */
+}
+
+.banner-button:hover {
+    background: #e0e0e0; /* Lighter background on hover */
+    transform: scale(1.05); /* Slight scale up on hover */
+    color: #0d1b2a; /* Darker text for contrast */
+}
         /* Collections */
         .collections {
             padding: 100px 50px;
@@ -421,6 +510,16 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
+
+    .banner-container {
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+    .banner-card {
+        margin-bottom: 20px;
+        min-height: 350px;
+        width: 100%;
+    }
 
             .collection-grid {
                 grid-template-columns: 1fr;
