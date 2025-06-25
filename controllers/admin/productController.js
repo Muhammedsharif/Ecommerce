@@ -54,6 +54,8 @@ const getAllProducts = async (req, res) => {
                 currentPage:page,
                 totalPages:Math.ceil(count/limit),
                 cat:category,
+                search,
+               
                 
 
             })

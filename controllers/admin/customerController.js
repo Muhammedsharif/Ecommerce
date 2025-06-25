@@ -39,10 +39,18 @@ const customerInfo = async (req, res) => {
 
         }).countDocuments()
 
+           if (req.xhr) {
+            return res.status(200).json({
+                users: userData
+            });
+        }
+
         res.render("customers",{
             data:userData,
             totalPages:Math.ceil(count/limit),
-            currentPage:page
+            currentPage:page,
+            search,
+
         })
         
     } catch (error) {

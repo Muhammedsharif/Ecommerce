@@ -32,7 +32,7 @@
             font-size: 3.5rem;
             font-weight: 900;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #333, #4ecdc4);
+            background: linear-gradient(45deg, #e5e1e1, #5e4d4d); 
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -48,7 +48,7 @@
         }
 
         .cta-button {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #e5e1e1, #6b4444); 
             color: white;
             padding: 18px 40px;
             border: none;
@@ -106,7 +106,7 @@
 
         /* Featured Products */
         .featured {
-            padding: 150px 50px 100px;
+            padding: 100px 50px 100px;
             background: #f8f9fa;
             position: relative;
             z-index: 1;
@@ -124,16 +124,22 @@
             text-transform: uppercase;
             letter-spacing: -1px;
         }
+        .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
 
             .new-arrivals-title {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
             color: #000000;
-            text-align: center;
+            text-align: left;
             margin-bottom: 1.5rem;
-            text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
+            margin-left: 23px;
+
             }
 
   .product-grid {
@@ -248,9 +254,9 @@
         }
 
         .product-price {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #4ecdc4;
+            color: black;
             margin-bottom: 15px;
         }
 
@@ -267,20 +273,23 @@
 
         .add-to-cart {
             width: 100%;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            border: none;
+
+             background: linear-gradient(45deg, #ccbfbf, #5e4d4d); 
+            /* border: none; */
+            /* border-color: red; */
             padding: 15px;
             border-radius: 10px;
-            color: white;
+            color: rgb(255, 255, 255);
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            
         }
 
         .add-to-cart:hover {
             transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
 
 .banner-section {
@@ -299,7 +308,7 @@
 
 .banner-card {
     flex: 1;
-    padding: 30px;
+    padding: 0; /* No padding to make image full inside */
     border-radius: 15px;
     color: white;
     text-align: center;
@@ -308,37 +317,27 @@
     min-height: 100px;
     width: 50%;
     box-sizing: border-box;
-    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    cursor: pointer;
 }
 
-.banner-card:hover {
-    transform: scale(1.02); /* Slight scale up on hover */
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3); /* Add shadow on hover */
+.banner-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+    border-radius: 15px;
 }
 
-.banner-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
-.banner-card h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.banner-card p {
-    font-size: 1rem;
-    margin-bottom: 15px;
-    opacity: 0.9;
-}
-
-.banner-card p em {
-    font-style: italic;
-    font-size: 0.9rem;
+/* Zoom effect on hover */
+.banner-card:hover img {
+    transform: scale(1.1);
 }
 
 .banner-button {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     background: white;
     color: #1a2a44;
     border: none;
@@ -347,103 +346,45 @@
     font-weight: bold;
     margin: 5px;
     cursor: pointer;
-    transition: all 0.3s ease; /* Smooth transition for button hover */
+    transition: all 0.3s ease;
+    z-index: 2;
 }
 
 .banner-button:hover {
-    background: #e0e0e0; /* Lighter background on hover */
-    transform: scale(1.05); /* Slight scale up on hover */
-    color: #0d1b2a; /* Darker text for contrast */
+    background: #e0e0e0;
+    transform: translateX(-50%) scale(1.05);
+    color: #0d1b2a;
 }
-        /* Collections */
-        .collections {
-            padding: 100px 50px;
-            background: #111;
-            color: white;
-            position: relative;
-            z-index: 1;
-        }
 
-        .collections .section-title {
-            color: white;
-        }
 
-        .collection-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
 
-        .collection-card {
-            position: relative;
-            height: 300px;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
 
-        .collection-card:hover {
-            transform: scale(1.05);
-        }
 
-        .collection-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
-            opacity: 0.8;
-        }
+       .slideshow-container {
+  max-width: 100%;
+  position: relative;
+  margin: auto;
+  overflow: hidden;
+}
 
-        .collection-card:nth-child(1) .collection-bg {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
+.slide {
+  display: none;
+}
 
-        .collection-card:nth-child(2) .collection-bg {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-        }
+.slide img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
 
-        .collection-content {
-            position: relative;
-            z-index: 2;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px;
-        }
+.fade {
+  animation: fade 4s ease-in-out infinite;
+}
 
-        .collection-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .collection-subtitle {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        .notification {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-weight: bold;
-            z-index: 9998;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+@keyframes fade {
+  from {opacity: 0.6;}
+  to {opacity: 1;}
+}
 
         @keyframes fadeInUp {
             from {

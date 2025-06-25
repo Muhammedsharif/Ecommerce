@@ -4,11 +4,22 @@ const Category = require("../../models/categorySchema");
 const categoryInfo = async (req, res) => {
     try {
 
+          let search="";
+        if(req.query.search){
+            search = req.query.search
+        }
+
         const page = parseInt(req.query.page) || 1
         const limit = 4
         const skip = (page - 1) * limit;
 
-        const categoryData = await Category.find({})
+        const categoryData = await Category.find({
+            isListed: true, 
+            $or: [
+                { name: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                // { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+            ],
+        })
         .sort({createdAt:-1})
         .skip(skip)
         .limit(limit)
@@ -20,7 +31,8 @@ const categoryInfo = async (req, res) => {
             cat:categoryData,
             currentPage:page,
             totalPages:totalPages,
-            totalCategories:totalCategories
+            totalCategories:totalCategories,
+            search,
         })
 
         

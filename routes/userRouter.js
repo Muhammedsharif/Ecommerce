@@ -3,6 +3,7 @@ const router=express.Router()
 const passport = require('passport');
 const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController")
+const productController=require("../controllers/user/productController")
 const { userAuth } = require("../middlewares/auth");
 
 
@@ -34,8 +35,21 @@ router.get("/filter",userAuth,userController.filterProducts)
 router.post("/search",userAuth,userController.searchProduct)
 router.get('/products',userAuth,userController.getAllProducts);
 
+
+
+//Product Management
+router.get("/productDetails",userAuth,productController.loadProductDetails)
+
 //Profile Management
- router.get("/Profile",userAuth,profileController.userProfile)
+router.get("/forgot-Password",profileController.loadForgotPassword)
+router.post("/forgot-email-valid",profileController.forgotEmailValid)
+router.post("/verify-password-otp",profileController.verifyForgotPassOtp)
+router.get("/reset-password",profileController.loadResetPassword)
+router.post("/resend-forgot-otp",profileController.resendOtp)
+router.post("/reset-password",profileController.resetPassword)
+router.get("/Profile",userAuth,profileController.userProfile)
+
+
 
 
 

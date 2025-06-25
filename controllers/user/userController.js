@@ -62,39 +62,31 @@
 
 
 
-    const loadHomepage = async (req,res)=>{
+    const loadHomepage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const categories = await Category.find({ isListed: true });
+    let productData = await Product.find({
+      isBlocked: false,
+      category: { $in: categories.map(category => category._id) },
+      quantity: { $gt: 0 }
+    });
 
-        try{
-            const user = req.session.user
-            const categories = await Category.find({isListed:true})
-            let productData = await Product.find({isBlocked:false,
-                category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
-
-            })
-            
-
-            productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
-            productData=productData.slice(0,9)
-
+    productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+    productData = productData.slice(0, 9);
 
 
-            if(user){
-                
-                const userData = await User.findById(user)
-                res.render("home",{user:userData,products:productData})
-
-            }else{
-                return res.render("home",{products:productData})
-            }
-            
-
-        }catch(error){
-            console.log("Home page not found")
-            res.status(500).send("Server error")
-        }
-
+    if (user) {
+      const userData = await User.findById(user);
+      res.render("home", { user: userData, products: productData });
+    } else {
+      res.render("home", { products: productData });
     }
-
+  } catch (error) {
+    console.log("Home page not found", error); // Log the full error
+    res.status(500).send("Server error");
+  }
+};
     const loadSignup = async (req,res)=>{
 
         try{
@@ -385,6 +377,8 @@ const filterProducts = async (req, res) => {
         const user = req.session.user;
         const { category, minPrice, maxPrice, rating, page } = req.query;
 
+        console.log('Filter request received with:', { category, minPrice, maxPrice, rating, page });
+
         const query = {
             isBlocked: false,
             quantity: { $gt: 0 },
@@ -439,7 +433,7 @@ const filterProducts = async (req, res) => {
 
         req.session.filteredProducts = currentProducts;
 
-        res.render("shop", {
+        res.status(200).json({
             user: userData,
             products: currentProducts,
             categories: categories,
@@ -449,10 +443,11 @@ const filterProducts = async (req, res) => {
             minPrice: minPrice || '',
             maxPrice: maxPrice || '',
             rating: rating || '0',
+            totalProducts: findProducts.length
         });
     } catch (error) {
         console.error('Error in filterProducts:', error);
-        res.redirect("/pageNotFound");
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -486,6 +481,7 @@ const searchProduct = async (req, res) => {
         const endIndex = startIndex + itemsPerPage;
         const totalPages = Math.ceil(searchResult.length / itemsPerPage);
         const currentProducts = searchResult.slice(startIndex, endIndex);
+        const totalProducts = searchResult.length; // Add total product count
 
         let userData = null;
         if (user) {
@@ -501,6 +497,7 @@ const searchProduct = async (req, res) => {
             products: currentProducts,
             totalPages,
             currentPage,
+            totalProducts
         });
     } catch (error) {
         console.error('Error in searchProduct:', error);

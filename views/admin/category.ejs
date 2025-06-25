@@ -33,6 +33,20 @@
 </head>
 <body>
      <%- include("../partials/admin/header") %>
+     <nav class="breadcrumb-nav" aria-label="breadcrumb" style="margin-bottom: 20px;">
+        <ol class="breadcrumb" style="display: flex; list-style: none; padding: 0; font-size: 14px;">
+            <li class="breadcrumb-item">
+                <a href="/admin/dashboard" style="text-decoration: none; color: #007bff;">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
+            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
+            <li class="breadcrumb-item active" style="color: #6c757d;">
+                 Products
+            </li>
+        </ol>
+    </nav>
     <div class="container">
         <!-- Header Section -->
         <div class="header">
@@ -52,7 +66,7 @@
             <!-- Search Section -->
             <div class="search-container">
                 <form action="/admin/category/" method="get" class="search-wrapper">
-                    <input type="text" class="search-input" placeholder="Search categories..." name="search">
+                    <input type="text" class="search-input" placeholder="Search categories..." name="search" value="<%=search%>">
                     <button type="submit" class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>

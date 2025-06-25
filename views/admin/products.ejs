@@ -860,6 +860,9 @@
             font-size: 0.7rem;
             font-weight: 600;
         }
+        .btn-secondary{
+            margin-right:-100px;
+        }
     </style>
 </head>
 <body>
@@ -926,10 +929,12 @@
         <div class="search-section glass-effect animate-fade-in">
             <form action="" method="get">
                 <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Search products, brands, or categories..." name="search">
+                    <input type="text" class="search-input" placeholder="Search products, brands, or categories..." name="search" value="<%= search %>">
                     <button class="search-btn" type="submit">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search"></i>                  
                     </button>
+                    
+  
                 </div>
             </form>
         </div>
@@ -940,11 +945,9 @@
                 <div class="col-md-3">
                     <select class="form-select" name="category">
                         <option value="">All Categories</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="clothing">Clothing</option>
-                        <option value="books">Books</option>
-                        <option value="home">Home & Garden</option>
-                        <option value="sports">Sports</option>
+                        <%for(let i=0;i<cat.length;i++){%>
+                        <option value=" <%=cat[i].name%>"> <%=cat[i].name%></option>
+                          <%}%>
                     </select>
                 </div>
                 <div class="col-md-3">
