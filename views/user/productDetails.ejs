@@ -305,36 +305,40 @@
         } */
 
         /* Quantity */
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+       .quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-        .quantity-btn {
-            width: 40px;
-            height: 40px;
-            border: 1px solid #d1d5db;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: border-color 0.3s;
-        }
+.quantity-input {
+  width: 50px;
+  text-align: center;
+  padding: 6px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
 
-        .quantity-btn:hover {
-            border-color: #000;
-        }
+.minus-btn,
+.plus-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: #222;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-        .quantity-input {
-            width: 64px;
-            height: 40px;
-            text-align: center;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-        }
+.minus-btn:hover,
+.plus-btn:hover {
+  background-color: #444;
+}
+
 
         /* Buttons */
         .button-group {
@@ -771,8 +775,8 @@
                     </div>
 
                     <div class="price-container">
-                        <span class="current-price">₹<%=product.salePrice%></span>
-                        <span class="original-price">₹<%=product.regularPrice%></span>
+                        <span class="current-price" id="total-price" >₹<%=product.salePrice.toFixed(0)%></span>
+                        <span class="original-price" id="total-price1" >₹<%=product.regularPrice%></span>
                         <span class="discount-badge">
                             <%if(!totalOffer){%>
                                 No Offers
@@ -810,12 +814,13 @@
                     <div class="quantity-section">
                         <h3>Quantity:</h3>
                         <div class="quantity-controls">
-                            <button class="quantity-btn">-</button>
+                            <button class="minus-btn">-</button>
                             <input type="number" class="quantity-input" value="1" min="1">
-                            <button class="quantity-btn">+</button>
+                            <button class="plus-btn">+</button>
                         </div>
                     </div>
 
+ 
                     <!-- Action Buttons -->
                     <div class="button-group">
                         <button class="btn btn-primary">
@@ -1064,7 +1069,9 @@
                 // Size selection and price adjustment
                 const sizeInputs = document.querySelectorAll('input[name="size"]');
                 const currentPriceElement = document.querySelector(".current-price");
+                const regularPriceElement = document.querySelector(".original-price");
                 const basePrice = parseFloat("<%=product.salePrice%>");
+                const regularPrice = parseFloat("<%=product.regularPrice%>");
                 console.log(basePrice)
 
                 sizeInputs.forEach((input) => {
@@ -1082,26 +1089,32 @@
                         switch (selectedSize) {
                             
                             case "7":
-                                priceMultiplier = basePrice*1; // 10% increase
+                                priceMultiplier = 1.1; // 10% increase
                                 break;
                             case "8":
-                                priceMultiplier = basePrice*2; // 20% increase
+                                priceMultiplier = 1.2; // 20% increase
                                 break;
                             case "9":
-                                priceMultiplier = basePrice*3; // 30% increase
+                                priceMultiplier = 1.3; // 30% increase
                                 break;
                             case "10":
-                                priceMultiplier = basePrice*4; // 40% increase
+                                priceMultiplier = 1.4; // 40% increase
                                 break;
                             default:
-                                priceMultiplier = 0; // No increase for size 6
+                                priceMultiplier = 1; // No increase for size 6
                         }
 
-                        const newPrice = (basePrice + priceMultiplier)
+                        const newPrice = (basePrice * priceMultiplier).toFixed()
+                        const newregularPrice = (regularPrice * priceMultiplier).toFixed()
                         
                         currentPriceElement.textContent = `₹${newPrice}`;
+                        regularPriceElement .textContent = `₹${newregularPrice}`;
                     });
                 });
+
+                
+
+                
                
 
                 // Set size 6 as active on page load
@@ -1111,6 +1124,7 @@
                     defaultSizeInput.nextElementSibling.classList.add("active");
                 }
             });
+
 
 
              // Image zoom functionality
@@ -1157,6 +1171,68 @@
             mainImage.style.cursor = 'zoom-in';
         }
     });
+
+   
+
+ 
+ 
+  
+ 
+  document.addEventListener("DOMContentLoaded", () => {
+    const minusBtn = document.querySelector(".minus-btn");
+    const plusBtn = document.querySelector(".plus-btn");
+    const quantityInput = document.querySelector(".quantity-input");
+    const priceElement = document.querySelector(".current-price");
+    const regularPriceElement = document.querySelector(".original-price");
+    const totalPriceElement = document.getElementById("total-price");
+    const regularTotalPriceElement = document.getElementById("total-price1");
+
+    if (!priceElement || !totalPriceElement) {
+      console.error("❌ Price or Total element missing!");
+      return;
+    }
+
+    const unitPrice = parseFloat(priceElement.textContent.replace(/[^\d.]/g, ''));
+    const regularPrice = parseFloat(regularPriceElement.textContent.replace(/[^\d.]/g, ''));
+
+    function updateTotal() {
+      let qty = parseInt(quantityInput.value);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      quantityInput.value = qty;
+      const total = (unitPrice * qty).toFixed();
+      const regularTotal = (regularPrice * qty).toFixed();
+      totalPriceElement.textContent = `₹${total}`;
+      regularTotalPriceElement.textContent = `₹${regularTotal}`;
+
+    }
+
+    minusBtn.addEventListener("click", () => {
+      let qty = parseInt(quantityInput.value);
+      if (qty > 1) {
+        quantityInput.value = qty - 1;
+        updateTotal();
+      }
+    });
+
+    plusBtn.addEventListener("click", () => {
+      let qty = parseInt(quantityInput.value);
+      quantityInput.value = qty + 1;
+      updateTotal();
+    });
+
+    quantityInput.addEventListener("input", updateTotal);
+
+    // Initial run
+    updateTotal();
+  });
+
+
+
+
+
+
+
+
 
 
         </script>
