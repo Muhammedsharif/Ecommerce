@@ -1143,8 +1143,8 @@ if (sizes.length === 0) {
                 isValid = false;
             }
 
-            if (!images.files || images.files.length === 0) {
-                displayErrorMessage("images-error", 'Please select at least one image.');
+            if (!images.files || images.files.length === 0 || images.files.length<3 ) {
+                displayErrorMessage("images-error", 'Please select at least three image.');
                 isValid = false;
             }
 

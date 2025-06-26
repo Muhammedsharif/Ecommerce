@@ -206,3 +206,161 @@ textarea:focus-visible {
     outline: 2px solid #7c6df0;
     outline-offset: 2px;
 }
+
+        .breadcrumb-nav {
+    margin-bottom: 20px;
+    padding: 0;
+    background: transparent;
+}
+
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    padding: 14px 24px;
+    margin: 0;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 
+                0 2px 8px rgba(255, 255, 255, 0.1) inset;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb-item a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.breadcrumb-item a:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.7);
+    outline-offset: 2px;
+}
+
+.breadcrumb-item.active {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    padding: 8px 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb-separator {
+    margin: 0 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+    font-size: 16px;
+    user-select: none;
+}
+
+/* Icon styles */
+.breadcrumb-item i {
+    font-size: 13px;
+    margin-right: 4px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .breadcrumb {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    
+    .breadcrumb-item a,
+    .breadcrumb-item.active {
+        padding: 3px 6px;
+    }
+    
+    .breadcrumb-separator {
+        margin: 0 6px;
+    }
+    
+    .breadcrumb-item i {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .breadcrumb {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    
+    .breadcrumb-separator {
+        margin: 0 4px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .breadcrumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .breadcrumb-item a:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .breadcrumb-item.active {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .breadcrumb-separator {
+        color: rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* Alternative style variations for gradient backgrounds */
+.breadcrumb-nav.glass .breadcrumb {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb-nav.minimal .breadcrumb {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding: 8px 0;
+}
+
+.breadcrumb-nav.minimal .breadcrumb-item a:hover {
+    background: rgba(255, 255, 255, 0.15);
+    text-decoration: none;
+}
+
+.breadcrumb-nav.solid .breadcrumb {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
