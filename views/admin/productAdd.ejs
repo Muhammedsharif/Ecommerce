@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-  <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -251,15 +251,17 @@
             color: #374151;
             font-size: 0.95rem;
         }
+
         .checkbox-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 5px 0;
-}
-.checkbox-group label {
-    font-size: 14px;
-}
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+        }
 
         .form-control {
             width: 100%;
@@ -359,7 +361,7 @@
             width: 60px;
             height: 60px;
             object-fit: cover;
-            background: white !important; /* Force white background */
+            background: white !important;
         }
 
         .remove-icon {
@@ -396,7 +398,7 @@
         .image-preview {
             width: 100%;
             height: 150px;
-            background: #ffffff !important; /* Force white background */
+            background: #ffffff !important;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -410,14 +412,14 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: cover;
-            background: #ffffff !important; /* Force white background */
+            background: #ffffff !important;
             display: block;
         }
 
         .image-preview.empty {
             border: 2px dashed #d1d5db;
             color: #9ca3af;
-            background: #ffffff !important; /* Force white background even when empty */
+            background: #ffffff !important;
         }
 
         .file-input-wrapper {
@@ -463,13 +465,12 @@
         }
 
         .image-cropper img {
-            background: white !important; /* Force white background for cropper images */
+            background: white !important;
             max-width: 100%;
             max-height: 200px;
             object-fit: contain;
         }
 
-        /* Fix Cropper.js dark background issue */
         .cropper-container {
             background: white !important;
         }
@@ -479,7 +480,7 @@
         }
 
         .cropper-modal {
-            background: rgba(0, 0, 0, 0.5) !important; /* Semi-transparent overlay instead of full black */
+            background: rgba(0, 0, 0, 0.5) !important;
         }
 
         .crop-button {
@@ -548,7 +549,6 @@
             background: #9ca3af;
         }
 
-        /* Additional fixes for image backgrounds */
         canvas {
             background: white !important;
         }
@@ -557,16 +557,15 @@
             background: white !important;
         }
 
-        /* Fix any potential transparent background issues */
-     .thumbnail img,
-.image-preview img,
-.image-cropper img,
-canvas,
-img[src*="blob:"],
-img[src*="data:"] {
-    background-color: white !important;
-    background-image: none !important;
-}
+        .thumbnail img,
+        .image-preview img,
+        .image-cropper img,
+        canvas,
+        img[src*="blob:"],
+        img[src*="data:"] {
+            background-color: white !important;
+            background-image: none !important;
+        }
 
         @media (max-width: 768px) {
             .form-body {
@@ -586,7 +585,6 @@ img[src*="data:"] {
             }
         }
 
-        /* Custom animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -616,24 +614,24 @@ img[src*="data:"] {
 <body>
     <div class="container">
         <nav class="breadcrumb-nav" aria-label="breadcrumb" style="margin-bottom: 20px;">
-        <ol class="breadcrumb" style="display: flex; list-style: none; padding: 0; font-size: 14px;">
-            <li class="breadcrumb-item">
-                <a href="/admin/dashboard" style="text-decoration: none; color: #007bff;">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-            </li>
-            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
-            <li class="breadcrumb-item">
-                <a href="/admin/products" style="text-decoration: none; color: #007bff;">
-                    Products
-                </a>
-            </li>
-            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
-            <li class="breadcrumb-item active" style="color: #6c757d;">
-                Add New Product
-            </li>
-        </ol>
-    </nav>
+            <ol class="breadcrumb" style="display: flex; list-style: none; padding: 0; font-size: 14px;">
+                <li class="breadcrumb-item">
+                    <a href="/admin/dashboard" style="text-decoration: none; color: #007bff;">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
+                <li class="breadcrumb-item">
+                    <a href="/admin/products" style="text-decoration: none; color: #007bff;">
+                        Products
+                    </a>
+                </li>
+                <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
+                <li class="breadcrumb-item active" style="color: #6c757d;">
+                    Add New Product
+                </li>
+            </ol>
+        </nav>
         <div class="header">
             <h1><i class="fas fa-plus-circle"></i> Add New Product</h1>
             <p>Create and manage your product inventory with ease</p>
@@ -713,36 +711,35 @@ img[src*="data:"] {
                                 </label>
                                 <select class="form-control form-select" name="category">
                                     <option value="">Select category</option>
-                                   
-                                     <% if (typeof cat !== 'undefined') { %>
+                                    <% if (typeof cat !== 'undefined') { %>
                                         <% for(let i = 0; i < cat.length; i++) { %>
                                             <option value="<%=cat[i].name%>"><%=cat[i].name%></option>
                                         <% } %>
-                                    <% } %> 
+                                    <% } %>
                                 </select>
                                 <div id="category-error" class="error-message"></div>
                             </div>
                         </div>
                     </div>
 
-   <div class="form-group">
-    <label class="form-label">
-        <i class="fas fa-ruler-combined"></i> Available Sizes
-    </label>
-    <div class="checkbox-group">
-        <label><input type="checkbox" name="sizes" value="6"> Size 6</label>
-        <label><input type="checkbox" name="sizes" value="7"> Size 7</label>
-        <label><input type="checkbox" name="sizes" value="8"> Size 8</label>
-        <label><input type="checkbox" name="sizes" value="9"> Size 9</label>
-        <label><input type="checkbox" name="sizes" value="10"> Size 10</label>
-    </div>
-    <div id="sizes-error" class="error-message"></div>
-</div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-ruler-combined"></i> Available Sizes
+                        </label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="sizes" value="6"> Size 6</label>
+                            <label><input type="checkbox" name="sizes" value="7"> Size 7</label>
+                            <label><input type="checkbox" name="sizes" value="8"> Size 8</label>
+                            <label><input type="checkbox" name="sizes" value="9"> Size 9</label>
+                            <label><input type="checkbox" name="sizes" value="10"> Size 10</label>
+                        </div>
+                        <div id="sizes-error" class="error-message"></div>
+                    </div>
 
                     <div class="image-upload-section">
                         <div class="image-upload-header">
                             <h3><i class="fas fa-images"></i> Product Images</h3>
-                            <p>Upload up to 4 high-quality images of your product</p>
+                            <p>Upload exactly 3 high-quality images of your product</p>
                         </div>
 
                         <div class="thumbnails-container" id="addedImagesContainer">
@@ -803,24 +800,6 @@ img[src*="data:"] {
                                     </button>
                                 </div>
                             </div>
-
-                            <!-- <div class="image-input-item">
-                                <div class="image-preview empty" id="preview4">
-                                    <i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>
-                                </div>
-                                <div class="file-input-wrapper">
-                                    <input class="file-input" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg" onchange="viewImage4(event); viewImage(event, 4);">
-                                    <label for="input4" class="file-input-button">
-                                        <i class="fas fa-upload"></i> Choose Image 4
-                                    </label>
-                                </div>
-                                <div id="cropperContainer4" class="image-cropper" style="display:none;">
-                                    <img src="" id="croppedImg4" alt="">
-                                    <button type="button" id="saveButton4" class="crop-button">
-                                        <i class="fas fa-crop"></i> Crop & Save
-                                    </button>
-                                </div>
-                            </div> -->
                         </div>
                         <div id="images-error" class="error-message"></div>
                     </div>
@@ -837,85 +816,64 @@ img[src*="data:"] {
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-
-const sizes = document.querySelectorAll('input[name="sizes"]:checked');
-if (sizes.length === 0) {
-    displayErrorMessage('sizes-error', 'Please select at least one size.');
-    isValid = false;
-}     
         const croppers = {};
-        
+
         async function validateAndSubmit() {
-            if (validateForm()) {
-                // Show loading state
-                document.body.classList.add('loading');
-                
-                // Show loading SweetAlert
-                Swal.fire({
-                    title: 'Publishing Product...',
-                    text: 'Please wait while we add your product to the store',
-                    icon: 'info',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                try {
-                    // Submit the form
-                    const form = document.getElementById('productForm');
-                    const formData = new FormData(form);
-                    
-                    const response = await fetch('/admin/addProducts', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        // Success
-                        await Swal.fire({
-                            title: 'Success!',
-                            text: 'Product has been added successfully to your store',
-                            icon: 'success',
-                            confirmButtonText: 'Great!',
-                            confirmButtonColor: '#10b981',
-                            timer: 3000,
-                            timerProgressBar: true
-                        });
-
-                          window.location.href = '/admin/products';
-                        // Reset form or redirect
-                        // form.reset();
-                        // clearErrorMessages();
-                        // resetImagePreviews();
-                        
-                      
-                        
-                    } else {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Failed to add product');
-                    }
-                } catch (error) {
-                    console.log(error);
-                    // Error
-                    Swal.fire({
-                        title: 'Oops!',
-                        text: error.message || 'Something went wrong while adding the product',
-                        icon: 'error',
-                        confirmButtonText: 'Try Again',
-                        confirmButtonColor: '#ef4444'
-                    });
-                } finally {
-                    // Remove loading state
-                    document.body.classList.remove('loading');
-                }
+    if (validateForm()) {
+        document.body.classList.add('loading');
+        console.log(`Submitting form at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
+        
+        Swal.fire({
+            title: 'Publishing Product...',
+            text: 'Please wait while we add your product to the store',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
-        }
+        });
 
-        // Preview image functions
+        try {
+            const form = document.getElementById('productForm');
+            const formData = new FormData(form);
+            const response = await fetch('/admin/addProducts', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({
+                    title: 'Success!',
+                    text: `Product has been added successfully on ${new Date(data.createdOn).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
+                    icon: 'success',
+                    confirmButtonText: 'Great!',
+                    confirmButtonColor: '#10b981',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                window.location.href = '/admin/products';
+            } else {
+                throw new Error(data.error || 'Failed to add product');
+            }
+        } catch (error) {
+            resetImagePreviews();
+            console.error(`Error at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}:`, error);
+            Swal.fire({
+                title: 'Oops!',
+                text: error.message || 'Something went wrong while adding the product',
+                icon: 'error',
+                confirmButtonText: 'Try Again',
+                confirmButtonColor: '#ef4444'
+            });
+        } finally {
+            document.body.classList.remove('loading');
+        }
+    }
+}
+
         function viewImage1(event) {
             updateImagePreview(event, 1);
         }
@@ -926,10 +884,6 @@ if (sizes.length === 0) {
 
         function viewImage3(event) {
             updateImagePreview(event, 3);
-        }
-
-        function viewImage4(event) {
-            updateImagePreview(event, 4);
         }
 
         function updateImagePreview(event, index) {
@@ -945,7 +899,6 @@ if (sizes.length === 0) {
             }
         }
 
-        // Initialize Cropper
         function viewImage(event, index) {
             let input = event.target;
             if (!input.files || !input.files[0]) return;
@@ -955,12 +908,10 @@ if (sizes.length === 0) {
                 let image = document.getElementById("croppedImg" + index);
                 image.src = reader.result;
 
-                // Destroy existing Cropper if any
                 if (croppers[index]) {
                     croppers[index].destroy();
                 }
 
-                // Initialize new Cropper
                 croppers[index] = new Cropper(image, {
                     aspectRatio: 1,
                     viewMode: 1,
@@ -971,11 +922,9 @@ if (sizes.length === 0) {
                     fillColor: '#ffffff'
                 });
 
-                // Show cropper container
                 let cropperContainer = document.querySelector("#cropperContainer" + index);
                 cropperContainer.style.display = 'block';
 
-                // Handle save button
                 let saveButton = document.querySelector("#saveButton" + index);
                 saveButton.addEventListener("click", function () {
                     let croppedCanvas = croppers[index].getCroppedCanvas({
@@ -987,24 +936,20 @@ if (sizes.length === 0) {
 
                     croppedCanvas.toBlob(blob => {
                         let input = document.getElementById('input' + index);
-                        let imgFile = new File([blob], fileName, blob);
+                        let imgFile = new File([blob], fileName, { type: 'image/png' });
                         let fileList = new DataTransfer();
                         fileList.items.add(imgFile);
                         input.files = fileList.files;
 
-                        // Update thumbnails
                         handleFileSelect({ target: input });
 
-                        // Update preview
                         const preview = document.getElementById(`preview${index}`);
                         preview.innerHTML = `<img src="${croppedCanvas.toDataURL()}" alt="Cropped ${index}">`;
 
-                        // Hide and clean up
                         cropperContainer.style.display = 'none';
                         croppers[index].destroy();
                         delete croppers[index];
 
-                        // Success feedback
                         Swal.fire({
                             title: 'Image Cropped!',
                             text: 'Your image has been cropped successfully',
@@ -1014,16 +959,18 @@ if (sizes.length === 0) {
                             toast: true,
                             position: 'top-end'
                         });
-                    }, 'image/jpeg');
+                    }, 'image/png');
                 }, { once: true });
             };
             reader.readAsDataURL(input.files[0]);
         }
 
-        // Handle thumbnails
         const selectedImages = [];
-        ['input1', 'input2', 'input3', 'input4'].forEach(id => {
-            document.getElementById(id).addEventListener("change", handleFileSelect);
+        ['input1', 'input2', 'input3'].forEach(id => {
+            const inputElement = document.getElementById(id);
+            if (inputElement) {
+                inputElement.addEventListener("change", handleFileSelect);
+            }
         });
 
         function handleFileSelect(event) {
@@ -1031,59 +978,64 @@ if (sizes.length === 0) {
             const files = event.target.files;
 
             if (files.length > 0) {
-                // Clear the "no images" message
                 addedImagesContainer.innerHTML = "";
                 
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (!selectedImages.some(img => img.name === file.name)) {
-                        selectedImages.push(file);
-                    }
+                const file = files[0];
+                if (!selectedImages.some(img => img.name === file.name && img.size === file.size)) {
+                    selectedImages.push(file);
+                }
 
+                selectedImages.forEach((file, index) => {
                     const thumbnail = document.createElement("div");
                     thumbnail.classList.add("thumbnail");
 
                     const img = document.createElement("img");
                     img.src = URL.createObjectURL(file);
-                    img.alt = "thumbnail";
+                    img.alt = `Thumbnail ${index + 1}`;
 
                     const removeIcon = document.createElement("span");
                     removeIcon.classList.add("remove-icon");
                     removeIcon.innerHTML = "×";
                     removeIcon.addEventListener("click", function () {
-                        const index = selectedImages.findIndex(img => img.name === file.name);
-                        if (index !== -1) {
-                            selectedImages.splice(index, 1);
+                        const idx = selectedImages.findIndex(img => img.name === file.name && img.size === file.size);
+                        if (idx !== -1) {
+                            selectedImages.splice(idx, 1);
                         }
                         thumbnail.remove();
                         
-                        // Show "no images" message if no images left
                         if (selectedImages.length === 0) {
-                            addedImagesContainer.innerHTML = '<p style="color: #fcfcfc; font-style: italic;">No images selected</p>';
+                            addedImagesContainer.innerHTML = '<p style="color: #b9bec7; font-style: italic;">No images selected</p>';
                         }
                     });
 
                     thumbnail.appendChild(img);
                     thumbnail.appendChild(removeIcon);
                     addedImagesContainer.appendChild(thumbnail);
-                }
+                });
+
+                showImageUploadSuccess(1);
             }
         }
 
         function resetImagePreviews() {
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 3; i++) {
                 const preview = document.getElementById(`preview${i}`);
-                preview.innerHTML = `<i class="fas fa-camera" style="font-size: 2rem; color: #fcfcfc;"></i>`;
-                preview.classList.add('empty');
+                if (preview) {
+                    preview.innerHTML = `<i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>`;
+                    preview.classList.add('empty');
+                }
+                const input = document.getElementById(`input${i}`);
+                if (input) {
+                    input.value = '';
+                }
             }
             
             const addedImagesContainer = document.getElementById("addedImagesContainer");
-            addedImagesContainer.innerHTML = '<p style="color: #fcfcfc; font-style: italic;">No images selected</p>';
+            addedImagesContainer.innerHTML = '<p style="color: #b9bec7; font-style: italic;">No images selected</p>';
             
             selectedImages.length = 0;
         }
 
-        // Form validation
         function validateForm() {
             clearErrorMessages();
             const name = document.getElementsByName('productName')[0].value;
@@ -1093,15 +1045,15 @@ if (sizes.length === 0) {
             const salePrice = document.getElementsByName('salePrice')[0].value;
             const color = document.getElementsByName('color')[0].value;
             const category = document.getElementsByName('category')[0].value;
-            const images = document.getElementById('input1');
             const quantity = document.getElementsByName('quantity')[0].value;
+            const sizes = document.querySelectorAll('input[name="sizes"]:checked');
             let isValid = true;
 
             if (!name || name.trim() === "") {
                 displayErrorMessage('productName-error', 'Please enter a product name.');
                 isValid = false;
             } else if (!/^[a-zA-Z0-9\s]+$/.test(name.trim())) {
-                displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+                displayErrorMessage('productName-error', 'Product name should contain only alphanumeric characters.');
                 isValid = false;
             }
 
@@ -1109,17 +1061,17 @@ if (sizes.length === 0) {
                 displayErrorMessage('description-error', 'Please enter a product description.');
                 isValid = false;
             } else if (!/^[a-zA-Z0-9\s.,'"’“”\-()\/:!&?—]+$/.test(description.trim())) {
-                displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
+                displayErrorMessage('description-error', 'Product description should contain only valid characters.');
                 isValid = false;
             }
 
-            if (!quantity || parseInt(quantity) < 0) {
+            if (!quantity || parseInt(quantity) < 0 || !/^\d+$/.test(quantity)) {
                 displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
                 isValid = false;
             }
 
-            if (!price || !/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+            if (!price || !/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) <= 0) {
+                displayErrorMessage('regularPrice-error', 'Please enter a valid positive price.');
                 isValid = false;
             }
 
@@ -1143,12 +1095,17 @@ if (sizes.length === 0) {
                 isValid = false;
             }
 
-            if (!images.files || images.files.length === 0 || images.files.length<3 ) {
-                displayErrorMessage("images-error", 'Please select at least three image.');
+            if (sizes.length === 0) {
+                displayErrorMessage('sizes-error', 'Please select at least one size.');
                 isValid = false;
             }
 
-            // Show validation result with SweetAlert
+            if (selectedImages.length < 3) {
+                displayErrorMessage('images-error', 'Please select at least three images.');
+                isValid = false;
+                console.log(selectedImages.length, "selectedImages.length");
+            }
+
             if (!isValid) {
                 Swal.fire({
                     title: 'Validation Error!',
@@ -1163,7 +1120,7 @@ if (sizes.length === 0) {
         }
 
         function displayErrorMessage(elementId, message) {
-            var errorElement = document.getElementById(elementId);
+            const errorElement = document.getElementById(elementId);
             if (errorElement) {
                 errorElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
                 errorElement.style.display = "block";
@@ -1177,9 +1134,7 @@ if (sizes.length === 0) {
             });
         }
 
-        // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Add focus effects to form controls
             const formControls = document.querySelectorAll('.form-control');
             formControls.forEach(control => {
                 control.addEventListener('focus', function() {
@@ -1191,26 +1146,24 @@ if (sizes.length === 0) {
                 });
             });
 
-            // Add hover effects to image upload areas
             const imageInputItems = document.querySelectorAll('.image-input-item');
             imageInputItems.forEach(item => {
                 item.addEventListener('mouseenter', function() {
                     this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 8px 16px rgba(255, 255, 255)';
+                    this.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
                 });
                 
                 item.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 6px rgba(255, 255, 255)';
+                    this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
                 });
             });
         });
 
-        // Success message for when images are uploaded
         function showImageUploadSuccess(count) {
             Swal.fire({
-                title: 'Images Uploaded!',
-                text: `${count} image(s) uploaded successfully`,
+                title: 'Image Uploaded!',
+                text: `${count} image${count > 1 ? 's' : ''} uploaded successfully`,
                 icon: 'success',
                 timer: 1500,
                 showConfirmButton: false,
@@ -1219,7 +1172,6 @@ if (sizes.length === 0) {
             });
         }
 
-        // Add drag and drop functionality
         const imageUploadSection = document.querySelector('.image-upload-section');
         
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -1255,16 +1207,14 @@ if (sizes.length === 0) {
             const dt = e.dataTransfer;
             const files = dt.files;
             
-            if (files.length > 0) {
-                // Find the first empty input field
-                for (let i = 1; i <= 4; i++) {
+            if (files.length > 0 && selectedImages.length < 3) {
+                for (let i = 1; i <= 3; i++) {
                     const input = document.getElementById(`input${i}`);
                     if (!input.files || input.files.length === 0) {
                         const dataTransfer = new DataTransfer();
                         dataTransfer.items.add(files[0]);
                         input.files = dataTransfer.files;
                         
-                        // Trigger the change event
                         const event = new Event('change', { bubbles: true });
                         input.dispatchEvent(event);
                         

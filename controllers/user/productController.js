@@ -23,7 +23,7 @@ const loadProductDetails = async (req,res)=>{
     }).limit(4);
 
    const availableSizes = [...new Set(product.variant.map(v => v.size))];
-   console.log(availableSizes)
+
         res.render("productDetails",{
             user:userData,
             product:product,
@@ -34,6 +34,8 @@ const loadProductDetails = async (req,res)=>{
             category:findCategory,
             sizes: availableSizes
         })
+
+
        
 
         

@@ -78,6 +78,7 @@ const addProducts = async (req, res) => {
             productName: products.productName,
         });
 
+        
         if (!productExists) {
             const image = [];
 
@@ -128,7 +129,7 @@ const variantData = selectedSizes.map(size => ({
   salePrice: products.salePrice,
   varientquantity: products.quantity
 }));
-
+console.log("from addProduct",products.color)
             const newProduct = new Product({
                 productName: products.productName,
                 description: products.description,
@@ -137,12 +138,12 @@ const variantData = selectedSizes.map(size => ({
                 salePrice: products.salePrice,
                 createdOn: new Date(),
                 quantity: products.quantity,
-                
                 color: products.color,
                 productImage: image,
                 variant: variantData,  // ✅ stored as array
                 status: "Available",
             });
+            
 
             await newProduct.save();
             return res.status(200).json({ success: true, message: "Product has been added successfully" });
