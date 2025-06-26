@@ -517,7 +517,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
-            align-items: center;
+            align-ite ms: center;
             gap: 10px;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
@@ -528,7 +528,7 @@
         }
 
         .submit-button:active {
-            transform: translateY(0);
+ MPH            transform: translateY(0);
         }
 
         .error-message {
@@ -752,7 +752,7 @@
                                     <i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>
                                 </div>
                                 <div class="file-input-wrapper">
-                                    <input class="file-input" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage1(event); viewImage(event, 1);">
+                                    <input class="file-input" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage1(event);">
                                     <label for="input1" class="file-input-button">
                                         <i class="fas fa-upload"></i> Choose Image 1
                                     </label>
@@ -770,7 +770,7 @@
                                     <i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>
                                 </div>
                                 <div class="file-input-wrapper">
-                                    <input class="file-input" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage2(event); viewImage(event, 2);">
+                                    <input class="file-input" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage2(event);">
                                     <label for="input2" class="file-input-button">
                                         <i class="fas fa-upload"></i> Choose Image 2
                                     </label>
@@ -788,7 +788,7 @@
                                     <i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>
                                 </div>
                                 <div class="file-input-wrapper">
-                                    <input class="file-input" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage3(event); viewImage(event, 3);">
+                                    <input class="file-input" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage3(event);">
                                     <label for="input3" class="file-input-button">
                                         <i class="fas fa-upload"></i> Choose Image 3
                                     </label>
@@ -817,73 +817,85 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
         const croppers = {};
+        const selectedImages = new Array(3).fill(null); // Array to store one image per input (index 0, 1, 2)
 
         async function validateAndSubmit() {
-    if (validateForm()) {
-        document.body.classList.add('loading');
-        console.log(`Submitting form at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
-        
-        Swal.fire({
-            title: 'Publishing Product...',
-            text: 'Please wait while we add your product to the store',
-            icon: 'info',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        try {
-            const form = document.getElementById('productForm');
-            const formData = new FormData(form);
-            const response = await fetch('/admin/addProducts', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                await Swal.fire({
-                    title: 'Success!',
-                    text: `Product has been added successfully on ${new Date(data.createdOn).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
-                    icon: 'success',
-                    confirmButtonText: 'Great!',
-                    confirmButtonColor: '#10b981',
-                    timer: 3000,
-                    timerProgressBar: true
+            if (validateForm()) {
+                document.body.classList.add('loading');
+                console.log(`Submitting form at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
+                
+                Swal.fire({
+                    title: 'Publishing Product...',
+                    text: 'Please wait while we add your product to the store',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
                 });
-                window.location.href = '/admin/products';
-            } else {
-                throw new Error(data.error || 'Failed to add product');
+
+                try {
+                    const form = document.getElementById('productForm');
+                    const formData = new FormData(form);
+                    // Ensure only the selected images are included
+                    formData.delete('images'); // Remove existing images
+                    selectedImages.forEach((file, index) => {
+                        if (file) {
+                            formData.append('images', file, file.name);
+                        }
+                    });
+
+                    const response = await fetch('/admin/addProducts', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        await Swal.fire({
+                            title: 'Success!',
+                            text: `Product has been added successfully on ${new Date(data.createdOn).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
+                            icon: 'success',
+                            confirmButtonText: 'Great!',
+                            confirmButtonColor: '#10b981',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        window.location.href = '/admin/products';
+                    } else {
+                        throw new Error(data.error || 'Failed to add product');
+                    }
+                } catch (error) {
+                    resetImagePreviews();
+                    console.error(`Error at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}:`, error);
+                    Swal.fire({
+                        title: 'Oops!',
+                        text: error.message || 'Something went wrong while adding the product',
+                        icon: 'error',
+                        confirmButtonText: 'Try Again',
+                        confirmButtonColor: '#ef4444'
+                    });
+                } finally {
+                    document.body.classList.remove('loading');
+                }
             }
-        } catch (error) {
-            resetImagePreviews();
-            console.error(`Error at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}:`, error);
-            Swal.fire({
-                title: 'Oops!',
-                text: error.message || 'Something went wrong while adding the product',
-                icon: 'error',
-                confirmButtonText: 'Try Again',
-                confirmButtonColor: '#ef4444'
-            });
-        } finally {
-            document.body.classList.remove('loading');
         }
-    }
-}
 
         function viewImage1(event) {
             updateImagePreview(event, 1);
+            viewImage(event, 1);
         }
 
         function viewImage2(event) {
             updateImagePreview(event, 2);
+            viewImage(event, 2);
         }
 
         function viewImage3(event) {
             updateImagePreview(event, 3);
+            viewImage(event, 3);
         }
 
         function updateImagePreview(event, index) {
@@ -935,16 +947,19 @@
                     let fileName = `cropped-img-${timestamp}-${index}.png`;
 
                     croppedCanvas.toBlob(blob => {
-                        let input = document.getElementById('input' + index);
                         let imgFile = new File([blob], fileName, { type: 'image/png' });
                         let fileList = new DataTransfer();
                         fileList.items.add(imgFile);
                         input.files = fileList.files;
 
-                        handleFileSelect({ target: input });
-
+                        // Update preview
                         const preview = document.getElementById(`preview${index}`);
                         preview.innerHTML = `<img src="${croppedCanvas.toDataURL()}" alt="Cropped ${index}">`;
+                        preview.classList.remove('empty');
+
+                        // Update selectedImages and thumbnails
+                        selectedImages[index - 1] = imgFile;
+                        updateThumbnails();
 
                         cropperContainer.style.display = 'none';
                         croppers[index].destroy();
@@ -965,56 +980,63 @@
             reader.readAsDataURL(input.files[0]);
         }
 
-        const selectedImages = [];
-        ['input1', 'input2', 'input3'].forEach(id => {
+        ['input1', 'input2', 'input3'].forEach((id, index) => {
             const inputElement = document.getElementById(id);
             if (inputElement) {
-                inputElement.addEventListener("change", handleFileSelect);
+                inputElement.addEventListener("change", (event) => handleFileSelect(event, index));
             }
         });
 
-        function handleFileSelect(event) {
-            const addedImagesContainer = document.getElementById("addedImagesContainer");
+        function handleFileSelect(event, index) {
             const files = event.target.files;
 
             if (files.length > 0) {
-                addedImagesContainer.innerHTML = "";
-                
                 const file = files[0];
-                if (!selectedImages.some(img => img.name === file.name && img.size === file.size)) {
-                    selectedImages.push(file);
-                }
+                selectedImages[index] = file;
+                updateThumbnails();
+            }
+        }
 
-                selectedImages.forEach((file, index) => {
-                    const thumbnail = document.createElement("div");
-                    thumbnail.classList.add("thumbnail");
+        function updateThumbnails() {
+            const addedImagesContainer = document.getElementById("addedImagesContainer");
+            addedImagesContainer.innerHTML = "";
 
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(file);
-                    img.alt = `Thumbnail ${index + 1}`;
+            const validImages = selectedImages.filter(img => img !== null);
+            if (validImages.length === 0) {
+                addedImagesContainer.innerHTML = '<p style="color: #b9bec7; font-style: italic;">No images selected</p>';
+                return;
+            }
 
-                    const removeIcon = document.createElement("span");
-                    removeIcon.classList.add("remove-icon");
-                    removeIcon.innerHTML = "×";
-                    removeIcon.addEventListener("click", function () {
-                        const idx = selectedImages.findIndex(img => img.name === file.name && img.size === file.size);
-                        if (idx !== -1) {
-                            selectedImages.splice(idx, 1);
-                        }
-                        thumbnail.remove();
-                        
-                        if (selectedImages.length === 0) {
-                            addedImagesContainer.innerHTML = '<p style="color: #b9bec7; font-style: italic;">No images selected</p>';
-                        }
-                    });
+            validImages.forEach((file, idx) => {
+                const thumbnail = document.createElement("div");
+                thumbnail.classList.add("thumbnail");
 
-                    thumbnail.appendChild(img);
-                    thumbnail.appendChild(removeIcon);
-                    addedImagesContainer.appendChild(thumbnail);
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.alt = `Thumbnail ${idx + 1}`;
+
+                const removeIcon = document.createElement("span");
+                removeIcon.classList.add("remove-icon");
+                removeIcon.innerHTML = "×";
+                removeIcon.addEventListener("click", function () {
+                    const fileIndex = selectedImages.findIndex(f => f === file);
+                    if (fileIndex !== -1) {
+                        selectedImages[fileIndex] = null;
+                        const input = document.getElementById(`input${fileIndex + 1}`);
+                        input.value = '';
+                        const preview = document.getElementById(`preview${fileIndex + 1}`);
+                        preview.innerHTML = `<i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>`;
+                        preview.classList.add('empty');
+                        updateThumbnails();
+                    }
                 });
 
-                showImageUploadSuccess(1);
-            }
+                thumbnail.appendChild(img);
+                thumbnail.appendChild(removeIcon);
+                addedImagesContainer.appendChild(thumbnail);
+            });
+
+            showImageUploadSuccess(validImages.length);
         }
 
         function resetImagePreviews() {
@@ -1029,18 +1051,15 @@
                     input.value = '';
                 }
             }
-            
-            const addedImagesContainer = document.getElementById("addedImagesContainer");
-            addedImagesContainer.innerHTML = '<p style="color: #b9bec7; font-style: italic;">No images selected</p>';
-            
-            selectedImages.length = 0;
+            selectedImages.fill(null);
+            updateThumbnails();
         }
 
         function validateForm() {
             clearErrorMessages();
             const name = document.getElementsByName('productName')[0].value;
             const description = document.getElementById('descriptionid').value;
-            const brand = document.getElementsByName('brand')[0].value;
+            const brand =document.getElementsByName('brand')[0].value;
             const price = document.getElementsByName('regularPrice')[0].value;
             const salePrice = document.getElementsByName('salePrice')[0].value;
             const color = document.getElementsByName('color')[0].value;
@@ -1100,10 +1119,9 @@
                 isValid = false;
             }
 
-            if (selectedImages.length < 3) {
-                displayErrorMessage('images-error', 'Please select at least three images.');
+            if (selectedImages.filter(img => img !== null).length !== 3) {
+                displayErrorMessage('images-error', 'Please select exactly three images.');
                 isValid = false;
-                console.log(selectedImages.length, "selectedImages.length");
             }
 
             if (!isValid) {
@@ -1207,7 +1225,7 @@
             const dt = e.dataTransfer;
             const files = dt.files;
             
-            if (files.length > 0 && selectedImages.length < 3) {
+            if (files.length > 0 && selectedImages.filter(img => img !== null).length < 3) {
                 for (let i = 1; i <= 3; i++) {
                     const input = document.getElementById(`input${i}`);
                     if (!input.files || input.files.length === 0) {
@@ -1218,7 +1236,6 @@
                         const event = new Event('change', { bubbles: true });
                         input.dispatchEvent(event);
                         
-                        showImageUploadSuccess(1);
                         break;
                     }
                 }

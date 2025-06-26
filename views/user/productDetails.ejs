@@ -732,8 +732,8 @@
                             <img src="/Uploads/product-images/<%=product.productImage[2]%>" alt="product image">
                         </div>
                     </div>
-                    <div class="main-image">
-                        <img src="/Uploads/product-images/<%=product.productImage[0]%>" alt="Premium Running Shoe">
+                    <div class="main-image" id="productZoomContainer">
+                        <img id="mainProductImage" src="/Uploads/product-images/<%=product.productImage[0]%>" alt="Premium Running Shoe">
                     </div>
                 </div>
 
@@ -1111,6 +1111,54 @@
                     defaultSizeInput.nextElementSibling.classList.add("active");
                 }
             });
+
+
+             // Image zoom functionality
+   
+    document.addEventListener('DOMContentLoaded', function() {
+        const zoomContainer = document.getElementById('productZoomContainer');
+        const mainImage = document.getElementById('mainProductImage');
+        
+        if (zoomContainer && mainImage) {
+            let isZoomed = false;
+            let zoomLevel = 2; // How much to zoom in
+            
+            zoomContainer.addEventListener('click', function() {
+                isZoomed = !isZoomed;
+                if (isZoomed) {
+                    zoomContainer.style.overflow = 'hidden';
+                    mainImage.style.transform = `scale(${zoomLevel})`;
+                    mainImage.style.transformOrigin = 'center';
+                    mainImage.style.transition = 'transform 0.3s ease';
+                    mainImage.style.cursor = 'zoom-out';
+                } else {
+                    mainImage.style.transform = 'scale(1)';
+                    mainImage.style.cursor = 'zoom-in';
+                }
+            });
+            
+            zoomContainer.addEventListener('mousemove', function(e) {
+                if (isZoomed) {
+                    // Calculate relative position within container
+                    const rect = zoomContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Calculate percentage of position
+                    const xPercent = x / rect.width * 100;
+                    const yPercent = y / rect.height * 100;
+                    
+                    // Set transform origin based on mouse position
+                    mainImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                }
+            });
+            
+            // Set initial state
+            mainImage.style.cursor = 'zoom-in';
+        }
+    });
+
+
         </script>
 </body>
 

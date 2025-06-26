@@ -1093,27 +1093,24 @@
 </div>
        
 
-       <!-- Pagination -->
-            <div class="pagination">
-               
-                
-               
-                <% if (currentPage > 1) { %>
-                    <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-                <% } %>
-                <% for (let i = 1; i <= totalPages; i++) { %>
-                    <% if (i === currentPage) { %>
-                        <span class="current-page"><%= i %></span>
-                    <% } else { %>
-                        <a href="?page=<%= i %>"><%= i %></a>
-                    <% } %>
-                <% } %>
-                <% if (currentPage < totalPages) { %>
-                    <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-                <% } %>
-               
-            </div>
-
+      <!-- Pagination -->
+<% if (data && data.length > 0 && totalPages > 1) { %>
+<div class="pagination">
+    <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>">« Previous</a>
+    <% } %>
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+            <span class="current-page"><%= i %></span>
+        <% } else { %>
+            <a href="?page=<%= i %>&search=<%= encodeURIComponent(search) %>"><%= i %></a>
+        <% } %>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>">Next »</a>
+    <% } %>
+</div>
+<% } %>
         <script>
 function changeItemsPerPage(limit) {
     const urlParams = new URLSearchParams(window.location.search);
