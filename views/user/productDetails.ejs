@@ -797,16 +797,15 @@
                         </div>
 
                         <!-- Size Selection -->
-                        <div class="size-section">
-                            <h3>Size:</h3>
-                            <div class="size-options">
-                                <button class="size-option">7</button>
-                                <button class="size-option">8</button>
-                                <button class="size-option active">9</button>
-                                <button class="size-option">10</button>
-                                <button class="size-option">11</button>
-                            </div>
-                        </div>
+<div class="size-options">
+    <% sizes.forEach((size) => { %>
+        <label style="display: flex; align-items: center; gap: 5px;">
+            <input type="radio" name="size" value="<%= size %>"> <%= size %>
+        </label>
+    <% }); %>
+</div>
+
+
 
                         <!-- Color Selection -->
                         <div class="color-section">
@@ -1043,13 +1042,19 @@
                     })
 
                     // Thumbnail selection
-                    const thumbnails = document.querySelectorAll(".thumbnail")
-                    thumbnails.forEach((thumbnail) => {
-                        thumbnail.addEventListener("click", function () {
-                            thumbnails.forEach((t) => t.classList.remove("active"))
-                            this.classList.add("active")
-                        })
-                    })
+                  const thumbnails = document.querySelectorAll(".thumbnail");
+const mainImage = document.querySelector(".main-image img");
+
+thumbnails.forEach((thumbnail) => {
+    thumbnail.addEventListener("click", function () {
+        thumbnails.forEach((t) => t.classList.remove("active"));
+        this.classList.add("active");
+
+        const newSrc = this.querySelector("img").src;
+        mainImage.src = newSrc;
+    });
+});
+
 
                     // Quantity controls
                     const quantityInput = document.querySelector(".quantity-input")
@@ -1077,6 +1082,18 @@
                         this.reset()
                     })
                 })
+
+                const sizeInputs = document.querySelectorAll('input[name="sizes"]');
+
+sizeInputs.forEach((input) => {
+    input.addEventListener("change", function () {
+        if (this.checked) {
+            this.parentElement.classList.add("active");
+        } else {
+            this.parentElement.classList.remove("active");
+        }
+    });
+});
 
             </script>
 </body>

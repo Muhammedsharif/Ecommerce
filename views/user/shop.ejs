@@ -85,7 +85,7 @@
         .floating-elements img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: revert-layer;
         }
 
         .floating-element {
@@ -740,7 +740,7 @@
 
     <section class="hero-section" id="home">
         <div class="floating-elements">
-            <img src="/images/1920X800_Desktop_Banner.webp" alt="">
+            <img src="/images/close-up-futuristic-sneakers-showcase_23-2151005675.avif" alt="">
         </div>
         <!-- <div class="hero-content">
             <h1 class="hero-title">Step Into Style</h1>
@@ -772,6 +772,22 @@
                     </select>
                 </div>
 
+                <!-- Add Sort By dropdown here -->
+        <div class="filter-group">
+            <label for="sort" >Sort By</label>
+            <select 
+                id="sort" 
+                name="sort" 
+                class=""
+            >
+                <option value="default" <%= locals.query && query.sort === 'default' ? 'selected' : '' %>>Featured</option>
+                <option value="price_asc" <%= locals.query && query.sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+                <option value="price_desc" <%= locals.query && query.sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+                <option value="name_asc" <%= locals.query && query.sort === 'name_asc' ? 'selected' : '' %>>Name: A to Z</option>
+                <option value="name_desc" <%= locals.query && query.sort === 'name_desc' ? 'selected' : '' %>>Name: Z to A</option>
+            </select>
+        </div>
+
                 <div class="filter-group">
                     <label>Price Range (₹)</label>
                     <div class="price-inputs">
@@ -782,7 +798,7 @@
                     </div>
                 </div>
 
-                <div class="filter-group">
+                <!-- <div class="filter-group">
                     <label for="rating">Minimum Rating</label>
                     <select id="rating" name="rating">
                         <option value="0" <%=rating==0 ? 'selected' : '' %>>Any Rating</option>
@@ -790,7 +806,7 @@
                         <option value="4" <%=rating==4 ? 'selected' : '' %>>4+ Stars</option>
                         <option value="5" <%=rating==5 ? 'selected' : '' %>>5 Stars Only</option>
                     </select>
-                </div>
+                </div> -->
 
                 <button type="submit" class="filter-btn">Apply Filters</button>
                 <button type="button" class="clear-filters" onclick="clearFilters()">Clear All</button>
@@ -903,277 +919,223 @@
     <%- include("../partials/user/footer") %>
 
     <script>
-        let cartCount = 0;
-        let cartItems = [];
-        let wishlistCount = 0;
-        let wishlistItems = [];
-        let currentSearchQuery = '';
-        let currentFilters = {
-            category: "<%= selectedCategory || '' %>",
-            minPrice: "<%= minPrice || '' %>",
-            maxPrice: "<%= maxPrice || '' %>",
-            rating: "<%= rating || '0' %>"
-        };
+    let cartCount = 0;
+    let cartItems = [];
+    let wishlistCount = 0;
+    let wishlistItems = [];
+    let currentSearchQuery = '';
+    let currentFilters = {
+        category: "<%= selectedCategory || '' %>",
+        minPrice: "<%= minPrice || '' %>",
+        maxPrice: "<%= maxPrice || '' %>",
+       
+        sort: "<%= query && query.sort ? query.sort : 'default' %>"
+    };
 
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-            setTimeout(() => {
-                notification.style.transform = 'translateX(400px)';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
+    
+
+    function toggleFilter() {
+        const sidebar = document.getElementById('filterSidebar');
+        sidebar.classList.toggle('open');
+    }
+
+    function clearFilters() {
+        document.getElementById('categoryDropdown').value = '';
+        document.getElementById('min-price').value = '';
+        document.getElementById('max-price').value = '';
+       
+        document.getElementById('sort').value = 'default';
+        currentFilters = { category: '', minPrice: '', maxPrice: '', rating: '0', sort: 'default' };
+        currentSearchQuery = '';
+        document.getElementById('product-search').value = '';
+        fetchProducts('', 1, currentFilters);
+    }
+
+    async function fetchProducts(searchQuery = '', page = 1, filters = {}) {
+        try {
+            console.log('Fetching products with:', { searchQuery, page, filters });
+            const queryParams = new URLSearchParams({ page });
+            if (searchQuery) queryParams.append('search', searchQuery);
+            if (filters.category) queryParams.append('category', filters.category);
+            if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
+            if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
+            
+            if (filters.sort && filters.sort !== 'default') queryParams.append('sort', filters.sort);
+
+            const endpoint = searchQuery ? '/search' : '/filter';
+            const method = searchQuery ? 'POST' : 'GET';
+            const body = searchQuery ? JSON.stringify({ search: searchQuery }) : null;
+
+            console.log('Request URL:', `${endpoint}?${queryParams.toString()}`);
+            const response = await fetch(`${endpoint}?${queryParams.toString()}`, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body
+            });
+
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Response data:', data);
+            const productsGrid = document.querySelector('.products-grid');
+            const pagination = document.querySelector('.pagination');
+            const productsCount = document.querySelector('.products-count');
+
+            productsGrid.innerHTML = '';
+            pagination.innerHTML = '';
+
+            if (data.products.length === 0) {
+                productsGrid.innerHTML = '<p>No products found.</p>';
+                productsCount.innerHTML = '<strong>Products (0)</strong>';
+                showNotification('No products found.');
+                return;
+            }
+
+            if (data.user) {
+                const userInfo = document.querySelector('.user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = `Welcome, ${data.user.name || 'User'}`;
+                }
+            }
+
+            data.products.forEach(product => {
+                const productCard = `
+                    <div class="product-card">
+                        <div class="product-header">
+                            <button class="wishlist-btn" data-product-name="${product.productName}" data-product-price="${product.salePrice}">♡</button>
+                        </div>
+                        <div class="product-image">
+                            <a href="/productDetails?id=${product._id}">
+                                <img src="/Uploads/product-images/${product.productImage[0]}" alt="${product.productName}">
+                            </a>
+                        </div>
+                        <h3 class="product-name">
+                            <a href="/productDetails?id=${product._id}">${product.productName}</a>
+                        </h3>
+                        <p class="product-price">₹${product.salePrice.toLocaleString('en-IN')}
+                            <span><strike>₹${product.regularPrice.toLocaleString('en-IN')}</strike></span>
+                        </p>
+                        <div class="product-rating">
+                            ${'<span class="star">★</span>'.repeat(product.rating || 5)}
+                        </div>
+                        <button class="add-to-cart" data-product-name="${product.productName}" data-product-price="${product.salePrice}">Add to Cart</button>
+                    </div>
+                `;
+                productsGrid.insertAdjacentHTML('beforeend', productCard);
+            });
+
+            productsCount.innerHTML = `<strong>Products (${data.totalProducts || data.products.length})</strong>`;
+
+            if (data.totalPages > 1) {
+                if (data.currentPage > 1) {
+                    pagination.insertAdjacentHTML('beforeend', `<a href="#" class="page-link" data-page="${data.currentPage - 1}">← Prev</a>`);
+                }
+                for (let i = 1; i <= data.totalPages; i++) {
+                    const pageLink = `
+                        <a href="#" class="page-link ${i === data.currentPage ? 'active' : ''}" data-page="${i}">${i}</a>
+                    `;
+                    pagination.insertAdjacentHTML('beforeend', pageLink);
+                }
+                if (data.currentPage < data.totalPages) {
+                    pagination.insertAdjacentHTML('beforeend', `<a href="#" class="page-link" data-page="${data.currentPage + 1}">Next →</a>`);
+                }
+            }
+
+            // showNotification('Products updated!');
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            showNotification('Error fetching products.');
         }
+    }
 
-        function toggleFilter() {
-            const sidebar = document.getElementById('filterSidebar');
-            sidebar.classList.toggle('open');
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        // Filter form submission
+        document.getElementById('filterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            currentFilters = {
+                category: document.getElementById('categoryDropdown').value,
+                minPrice: document.getElementById('min-price').value || '',
+                maxPrice: document.getElementById('max-price').value || '',
+               
+                sort: document.getElementById('sort').value
+            };
+            console.log('Applied filters:', currentFilters);
+            currentSearchQuery = '';
+            document.getElementById('product-search').value = '';
+            await fetchProducts('', 1, currentFilters);
+        });
 
-        function clearFilters() {
+        // Search form submission
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            currentSearchQuery = document.getElementById('product-search').value.trim();
+            currentFilters = { category: '', minPrice: '', maxPrice: '', sort: document.getElementById('sort').value };
             document.getElementById('categoryDropdown').value = '';
             document.getElementById('min-price').value = '';
             document.getElementById('max-price').value = '';
-            document.getElementById('rating').value = '0';
-            currentFilters = { category: '', minPrice: '', maxPrice: '', rating: '0' };
-            fetchProducts('', 1, currentFilters);
-        }
+          
+            console.log('Search query:', currentSearchQuery);
+            await fetchProducts(currentSearchQuery, 1, currentFilters);
+        });
 
-        async function fetchProducts(searchQuery = '', page = 1, filters = {}) {
-            try {
-                console.log('Fetching products with:', { searchQuery, page, filters });
-                const queryParams = new URLSearchParams({ page });
-                if (searchQuery) queryParams.append('search', searchQuery);
-                if (filters.category) queryParams.append('category', filters.category);
-                if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
-                if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
-                if (filters.rating && filters.rating !== '0') queryParams.append('rating', filters.rating);
+        // Clear search
+        document.getElementById('clearSearch').addEventListener('click', async () => {
+            document.getElementById('product-search').value = '';
+            currentSearchQuery = '';
+            currentFilters.sort = document.getElementById('sort').value; // Preserve sort value
+            await fetchProducts('', 1, currentFilters);
+        });
 
-                const endpoint = filters.category || filters.minPrice || filters.maxPrice || (filters.rating && filters.rating !== '0') ? '/filter' : searchQuery ? '/search' : '/products';
-                const method = searchQuery ? 'POST' : 'GET';
-                const body = searchQuery ? JSON.stringify({ search: searchQuery }) : null;
-
-                console.log('Request URL:', `${endpoint}?${queryParams.toString()}`);
-                const response = await fetch(`${endpoint}?${queryParams.toString()}`, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: body
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Request failed with status ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('Response data:', data);
-                const productsGrid = document.querySelector('.products-grid');
-                const pagination = document.querySelector('.pagination');
-                const productsCount = document.querySelector('.products-count');
-
-                productsGrid.innerHTML = '';
-                pagination.innerHTML = '';
-
-                if (data.products.length === 0) {
-                    productsGrid.innerHTML = '<p>No products found.</p>';
-                    productsCount.innerHTML = '<strong>Products (0)</strong>';
-                    showNotification('No products found.');
-                    return;
-                }
-
-                if (data.user) {
-                    const userInfo = document.querySelector('.user-info');
-                    if (userInfo) {
-                        userInfo.innerHTML = `Welcome, ${data.user.name || 'User'}`;
-                    }
-                }
-
-                data.products.forEach(product => {
-                    const productCard = `
-                        <div class="product-card">
-                            <div class="product-header">
-                                <button class="wishlist-btn" data-product-name="${product.productName}" data-product-price="${product.salePrice}">♡</button>
-                            </div>
-                            <div class="product-image">
-                                <a href="/productDetails?id=${product._id}">
-                                    <img src="/Uploads/product-images/${product.productImage[0]}" alt="${product.productName}">
-                                </a>
-                            </div>
-                            <h3 class="product-name">
-                                <a href="/productDetails?id=${product._id}">${product.productName}</a>
-                            </h3>
-                            <p class="product-price">₹${product.salePrice.toLocaleString('en-IN')}
-                                <span><strike>₹${product.regularPrice.toLocaleString('en-IN')}</strike></span>
-                            </p>
-                            <div class="product-rating">
-                                ${'<span class="star">★</span>'.repeat(product.rating || 5)}
-                            </div>
-                            <button class="add-to-cart" data-product-name="${product.productName}" data-product-price="${product.salePrice}">Add to Cart</button>
-                        </div>
-                    `;
-                    productsGrid.insertAdjacentHTML('beforeend', productCard);
-                });
-
-                productsCount.innerHTML = `<strong>Products (${data.totalProducts || data.products.length})</strong>`;
-
-                if (data.totalPages > 1) {
-                    if (data.currentPage > 1) {
-                        pagination.insertAdjacentHTML('beforeend', `<a href="#" class="page-link" data-page="${data.currentPage - 1}">← Prev</a>`);
-                    }
-                    for (let i = 1; i <= data.totalPages; i++) {
-                        const pageLink = `
-                            <a href="#" class="page-link ${i === data.currentPage ? 'active' : ''}" data-page="${i}">${i}</a>
-                        `;
-                        pagination.insertAdjacentHTML('beforeend', pageLink);
-                    }
-                    if (data.currentPage < data.totalPages) {
-                        pagination.insertAdjacentHTML('beforeend', `<a href="#" class="page-link" data-page="${data.currentPage + 1}">Next →</a>`);
-                    }
-                }
-
-                showNotification('Products updated!');
-            } catch (error) {
-                console.error('Error fetching products:', error);
-                showNotification('Error fetching products.');
+        // Pagination click
+        document.querySelector('.pagination').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const link = e.target.closest('.page-link');
+            if (link) {
+                const page = parseInt(link.getAttribute('data-page'));
+                console.log('Navigating to page:', page);
+                await fetchProducts(currentSearchQuery, page, currentFilters);
             }
-        }
+        });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Filter form submission
-            document.getElementById('filterForm').addEventListener('submit', async (e) => {
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                currentFilters = {
-                    category: document.getElementById('categoryDropdown').value,
-                    minPrice: document.getElementById('min-price').value || '',
-                    maxPrice: document.getElementById('max-price').value || '',
-                    rating: document.getElementById('rating').value
-                };
-                console.log('Applied filters:', currentFilters);
-                currentSearchQuery = '';
-                document.getElementById('product-search').value = '';
-                await fetchProducts('', 1, currentFilters);
-            });
-
-            // Search form submission
-            document.getElementById('searchForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                currentSearchQuery = document.getElementById('product-search').value.trim();
-                currentFilters = { category: '', minPrice: '', maxPrice: '', rating: '0' };
-                document.getElementById('categoryDropdown').value = '';
-                document.getElementById('min-price').value = '';
-                document.getElementById('max-price').value = '';
-                document.getElementById('rating').value = '0';
-                console.log('Search query:', currentSearchQuery);
-                await fetchProducts(currentSearchQuery, 1, currentFilters);
-            });
-
-            // Clear search
-            document.getElementById('clearSearch').addEventListener('click', async () => {
-                document.getElementById('product-search').value = '';
-                currentSearchQuery = '';
-                await fetchProducts('', 1, currentFilters);
-            });
-
-            // Pagination click (using event delegation)
-            document.querySelector('.pagination').addEventListener('click', async (e) => {
-                e.preventDefault();
-                const link = e.target.closest('.page-link');
-                if (link) {
-                    const page = link.getAttribute('data-page');
-                    console.log('Navigating to page:', page);
-                    await fetchProducts(currentSearchQuery, page, currentFilters);
-                }
-            });
-
-            // Add to cart (using event delegation)
-            document.querySelector('.products-grid').addEventListener('click', (e) => {
-                const button = e.target.closest('.add-to-cart');
-                if (button) {
-                    const productName = button.getAttribute('data-product-name');
-                    const price = parseFloat(button.getAttribute('data-product-price'));
-                    cartCount++;
-                    cartItems.push({ name: productName, price: price });
-                    document.getElementById('cart-count').textContent = cartCount;
-                    const cartButton = document.querySelector('.cart-icon');
-                    if (cartButton) {
-                        cartButton.style.transform = 'scale(1.1)';
-                        setTimeout(() => {
-                            cartButton.style.transform = 'scale(1)';
-                        }, 200);
-                    }
-                    showNotification(`${productName} added to cart!`);
-                }
-            });
-
-            // Wishlist toggle (using event delegation)
-            document.querySelector('.products-grid').addEventListener('click', (e) => {
-                const button = e.target.closest('.wishlist-btn');
-                if (button) {
-                    const productName = button.getAttribute('data-product-name');
-                    const price = parseFloat(button.getAttribute('data-product-price'));
-                    const isActive = button.classList.contains('active');
-                    if (isActive) {
-                        button.classList.remove('active');
-                        button.textContent = '♡';
-                        wishlistItems = wishlistItems.filter(item => item.name !== productName);
-                        wishlistCount--;
-                        showNotification(`${productName} removed from wishlist!`);
-                    } else {
-                        button.classList.add('active');
-                        button.textContent = '♥';
-                        wishlistItems.push({ name: productName, price: price });
-                        wishlistCount++;
-                        showNotification(`${productName} added to wishlist!`);
-                    }
-                    document.getElementById('wishlist-count').textContent = wishlistCount;
-                    button.style.transform = 'scale(1.3)';
-                    setTimeout(() => {
-                        button.style.transform = 'scale(1)';
-                    }, 200);
-                }
-            });
-
-            // Smooth scroll for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
-            });
-
-            // Sticky sidebar logic
-            window.addEventListener('scroll', () => {
-                const sidebar = document.getElementById('filterSidebar');
-                const mainContent = document.querySelector('.main-content');
-                const footer = document.querySelector('footer');
-                const mainContentBottom = mainContent.getBoundingClientRect().bottom + window.scrollY;
-                const footerTop = footer.getBoundingClientRect().top + window.scrollY;
-
-                if (footerTop <= mainContentBottom) {
-                    sidebar.style.position = 'absolute';
-                    sidebar.style.bottom = '0';
-                    sidebar.style.top = 'auto';
-                } else {
-                    sidebar.style.position = 'sticky';
-                    sidebar.style.top = '120px';
-                    sidebar.style.bottom = 'auto';
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             });
         });
-    </script>
+
+        // Sticky sidebar logic
+        window.addEventListener('scroll', () => {
+            const sidebar = document.getElementById('filterSidebar');
+            const mainContent = document.querySelector('.main-content');
+            const footer = document.querySelector('footer');
+            const mainContentBottom = mainContent.getBoundingClientRect().bottom + window.scrollY;
+            const footerTop = footer.getBoundingClientRect().top + window.scrollY;
+
+            if (footerTop <= mainContentBottom) {
+                sidebar.style.position = 'absolute';
+                sidebar.style.bottom = '0';
+                sidebar.style.top = 'auto';
+            } else {
+                sidebar.style.position = 'sticky';
+                sidebar.style.top = '120px';
+                sidebar.style.bottom = 'auto';
+            }
+        });
+    });
+</script>
 </body>
 
 </html>

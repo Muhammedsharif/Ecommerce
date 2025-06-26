@@ -19,7 +19,7 @@ const variantSchema = new Schema(
     },
     varientquantity: {
       type: Number,
-      required: true
+       default: 0
     }
   });
 

@@ -29,7 +29,7 @@ router.post("/login",userController.login)
 router.get("/logout",userController.logout)
 
 //Home page & Shopping page
-router.get("/",userController.loadHomepage)
+router.get("/",userAuth,userController.loadHomepage)
 router.get("/shop",userAuth,userController.loadShoppingPage)
 router.get("/filter",userAuth,userController.filterProducts)
 router.post("/search",userAuth,userController.searchProduct)

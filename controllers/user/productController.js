@@ -22,6 +22,8 @@ const loadProductDetails = async (req,res)=>{
         _id: { $ne: product._id }  // exclude the current product
     }).limit(4);
 
+   const availableSizes = [...new Set(product.variant.map(v => v.size))];
+   console.log(availableSizes)
         res.render("productDetails",{
             user:userData,
             product:product,
@@ -29,7 +31,8 @@ const loadProductDetails = async (req,res)=>{
             color:product.color,
             similarProducts:similarProducts,
             totalOffer:totalOffer,
-            category:findCategory
+            category:findCategory,
+            sizes: availableSizes
         })
        
 

@@ -79,7 +79,8 @@
     if (user) {
       const userData = await User.findById(user);
       res.render("home", { user: userData, products: productData });
-    } else {
+    } 
+    else {
       res.render("home", { products: productData });
     }
   } catch (error) {
@@ -329,15 +330,24 @@
 const loadShoppingPage = async (req, res) => {
     try {
         const user = req.session.user;
-        const { page } = req.query;
+        const { page, sort } = req.query;
 
         const query = {
             isBlocked: false,
             quantity: { $gt: 0 },
         };
 
-        let findProducts = await Product.find(query).lean();
-        findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Define sort options
+        let sortOption = {};
+        switch (sort) {
+            case 'price_asc': sortOption = { salePrice: 1 }; break;
+            case 'price_desc': sortOption = { salePrice: -1 }; break;
+            case 'name_asc': sortOption = { productName: 1 }; break;
+            case 'name_desc': sortOption = { productName: -1 }; break;
+            default: sortOption = { createdAt: -1 };
+        }
+
+        let findProducts = await Product.find(query).sort(sortOption).lean();
 
         const categories = await Category.find({ isListed: true }).lean();
 
@@ -365,6 +375,7 @@ const loadShoppingPage = async (req, res) => {
             minPrice: '',
             maxPrice: '',
             rating: '0',
+            query: { sort: sort || 'default' }
         });
     } catch (error) {
         console.error('Error in loadShoppingPage:', error);
@@ -375,9 +386,9 @@ const loadShoppingPage = async (req, res) => {
 const filterProducts = async (req, res) => {
     try {
         const user = req.session.user;
-        const { category, minPrice, maxPrice, rating, page } = req.query;
+        const { category, minPrice, maxPrice, rating, page, sort } = req.query;
 
-        console.log('Filter request received with:', { category, minPrice, maxPrice, rating, page });
+        console.log('Filter request received with:', { category, minPrice, maxPrice, rating, page, sort });
 
         const query = {
             isBlocked: false,
@@ -385,7 +396,7 @@ const filterProducts = async (req, res) => {
         };
 
         // Category filter
-        if (category) {
+        if (category && category !== '') {
             const findCategory = await Category.findOne({ _id: category });
             if (findCategory) {
                 query.category = findCategory._id;
@@ -399,13 +410,22 @@ const filterProducts = async (req, res) => {
             if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
         }
 
-        // Rating filter (assuming Product schema has a rating field)
+        // Rating filter
         if (rating && rating !== '0') {
             query.rating = { $gte: parseInt(rating) };
         }
 
-        let findProducts = await Product.find(query).lean();
-        findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Define sort options
+        let sortOption = {};
+        switch (sort) {
+            case 'price_asc': sortOption = { salePrice: 1 }; break;
+            case 'price_desc': sortOption = { salePrice: -1 }; break;
+            case 'name_asc': sortOption = { productName: 1 }; break;
+            case 'name_desc': sortOption = { productName: -1 }; break;
+            default: sortOption = { createdAt: -1 };
+        }
+
+        let findProducts = await Product.find(query).sort(sortOption).lean();
 
         const categories = await Category.find({ isListed: true }).lean();
 
@@ -419,9 +439,9 @@ const filterProducts = async (req, res) => {
         let userData = null;
         if (user) {
             userData = await User.findOne({ _id: user }).lean();
-            if (userData) {
+            if (userData && category) {
                 const searchEntry = {
-                    category: category ? category : null,
+                    category: category,
                     searchedOn: new Date(),
                 };
                 await User.updateOne(
@@ -443,7 +463,8 @@ const filterProducts = async (req, res) => {
             minPrice: minPrice || '',
             maxPrice: maxPrice || '',
             rating: rating || '0',
-            totalProducts: findProducts.length
+            totalProducts: findProducts.length,
+            query: { sort: sort || 'default' }
         });
     } catch (error) {
         console.error('Error in filterProducts:', error);
@@ -455,33 +476,37 @@ const searchProduct = async (req, res) => {
     try {
         const user = req.session.user;
         const { search } = req.body;
+        const { page, sort } = req.query;
+
+        console.log('Search request received with:', { search, page, sort });
 
         const categories = await Category.find({ isListed: true }).lean();
         const categoryIds = categories.map(category => category._id.toString());
 
-        let searchResult = [];
-        if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
-            searchResult = req.session.filteredProducts.filter(product =>
-                product.productName.toLowerCase().includes(search.toLowerCase())
-            );
-        } else {
-            searchResult = await Product.find({
-                productName: { $regex: `.*${search}.*`, $options: 'i' },
-                isBlocked: false,
-                quantity: { $gt: 0 },
-                category: { $in: categoryIds },
-            }).lean();
+        // Define sort options
+        let sortOption = {};
+        switch (sort) {
+            case 'price_asc': sortOption = { salePrice: 1 }; break;
+            case 'price_desc': sortOption = { salePrice: -1 }; break;
+            case 'name_asc': sortOption = { productName: 1 }; break;
+            case 'name_desc': sortOption = { productName: -1 }; break;
+            default: sortOption = { createdAt: -1 };
         }
 
-        searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        let searchResult = await Product.find({
+            productName: { $regex: `.*${search}.*`, $options: 'i' },
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            category: { $in: categoryIds },
+        }).sort(sortOption).lean();
 
         const itemsPerPage = 9;
-        const currentPage = parseInt(req.query.page) || 1;
+        const currentPage = parseInt(page) || 1;
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const totalPages = Math.ceil(searchResult.length / itemsPerPage);
         const currentProducts = searchResult.slice(startIndex, endIndex);
-        const totalProducts = searchResult.length; // Add total product count
+        const totalProducts = searchResult.length;
 
         let userData = null;
         if (user) {
@@ -492,19 +517,26 @@ const searchProduct = async (req, res) => {
             );
         }
 
+        req.session.filteredProducts = currentProducts;
+
         res.status(200).json({
             user: userData,
             products: currentProducts,
+            categories: categories,
             totalPages,
             currentPage,
-            totalProducts
+            totalProducts,
+            selectedCategory: null,
+            minPrice: '',
+            maxPrice: '',
+            rating: '0',
+            query: { sort: sort || 'default' }
         });
     } catch (error) {
         console.error('Error in searchProduct:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 const getAllProducts = async (req, res) => {
     try {
         const user = req.session.user;
