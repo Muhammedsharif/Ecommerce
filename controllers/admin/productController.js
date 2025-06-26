@@ -264,6 +264,22 @@ images.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
             return res.status(400).json({ error: "Invalid category name" });
         }
 
+                let selectedSizes = req.body.sizes;
+if (!selectedSizes) {
+    selectedSizes = [];
+} else if (!Array.isArray(selectedSizes)) {
+    selectedSizes = [selectedSizes];
+}
+console.log("Selected sizes:", selectedSizes);
+
+// Create variant array
+const variantData = selectedSizes.map(size => ({
+  size,
+  varientPrice: product.regularPrice,
+  salePrice: product.salePrice,
+  varientquantity: product.quantity
+}));
+
         const updateFields = {
             productName: data.productName,
             description: data.description,
@@ -271,7 +287,8 @@ images.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
             quantity: data.quantity,
-            color: data.color
+            color: data.color,
+             variant: variantData, 
         };
 
         if (images.length > 0) {
