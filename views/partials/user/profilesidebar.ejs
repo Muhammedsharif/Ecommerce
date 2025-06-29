@@ -79,18 +79,39 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.75rem 0;
+            padding: 0.75rem 1rem;
             color: #495057;
             text-decoration: none;
             border-radius: 8px;
             transition: all 0.3s ease;
             margin-bottom: 0.5rem;
+            position: relative;
+            border-left: 3px solid transparent;
         }
 
-        .menu-item:hover, .menu-item.active {
+        .menu-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateX(5px);
+            border-left-color: #667eea;
+        }
+
+        .menu-item.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             transform: translateX(8px);
+            border-left-color: #764ba2;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .menu-item.active .menu-icon {
+            transform: scale(1.1);
+        }
+
+        .logout-item:hover {
+            background: rgba(231, 76, 60, 0.1) !important;
+            color: #e74c3c !important;
+            border-left-color: #e74c3c !important;
         }
 
         .menu-icon {
@@ -104,7 +125,49 @@
             border-radius: 12px;
             padding: 2rem;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-           
+        }
+
+        /* Loading state for menu items */
+        .menu-item.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+                left: 0;
+                height: auto;
+                margin-bottom: 1rem;
+            }
+
+            .menu-item {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+
+            .menu-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Animation for active state transition */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(8px);
+                opacity: 1;
+            }
+        }
+
+        .menu-item.active {
+            animation: slideIn 0.3s ease-out;
         }
     </style>
 </head>
@@ -125,19 +188,19 @@
 
             <div class="menu-section">
                 <h4>Account</h4>
-                <a href="#profile" class="menu-item">
+                <a href="/Profile" class="menu-item <%= (typeof page !== 'undefined' && page === 'profile') ? 'active' : '' %>" data-page="profile">
                     <span class="menu-icon">👤</span>
                     My Profile
                 </a>
-                <a href="#address" class="menu-item">
+                <a href="/address" class="menu-item <%= (typeof page !== 'undefined' && page === 'address') ? 'active' : '' %>" data-page="address">
                     <span class="menu-icon">📍</span>
                     My Address
                 </a>
-                <a href="#orders" class="menu-item">
+                <a href="/orders" class="menu-item <%= (typeof page !== 'undefined' && page === 'orders') ? 'active' : '' %>" data-page="orders">
                     <span class="menu-icon">📦</span>
                     My Orders
                 </a>
-                <a href="#wishlist" class="menu-item ">
+                <a href="/wishlist" class="menu-item <%= (typeof page !== 'undefined' && page === 'wishlist') ? 'active' : '' %>" data-page="wishlist">
                     <span class="menu-icon">♡</span>
                     My Wishlist
                 </a>
@@ -145,7 +208,7 @@
 
             <div class="menu-section">
                 <h4>Payments</h4>
-                <a href="#wallet" class="menu-item">
+                <a href="/wallet" class="menu-item <%= (typeof page !== 'undefined' && page === 'wallet') ? 'active' : '' %>" data-page="wallet">
                     <span class="menu-icon">💳</span>
                     My Wallet
                 </a>
@@ -153,21 +216,82 @@
 
             <div class="menu-section">
                 <h4>Settings</h4>
-                <a href="#password" class="menu-item">
+                <a href="/change-password" class="menu-item <%= (typeof page !== 'undefined' && page === 'password') ? 'active' : '' %>" data-page="password">
                     <span class="menu-icon">🔒</span>
                     Change Password
                 </a>
-                <a href="#referral" class="menu-item">
+                <a href="/referral" class="menu-item <%= (typeof page !== 'undefined' && page === 'referral') ? 'active' : '' %>" data-page="referral">
                     <span class="menu-icon">🎁</span>
                     Referral Code
                 </a>
-                <a href="#logout" class="menu-item" style="color: #e74c3c;">
+                <a href="/logout" class="menu-item" style="color: #e74c3c;">
                     <span class="menu-icon">🚪</span>
                     Log out
                 </a>
             </div>
             
         </aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuItems = document.querySelectorAll('.menu-item:not(.logout-item)');
+
+    // Add click handlers for navigation
+    menuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Don't prevent default - allow normal navigation
+
+            // Add loading state
+            const originalText = this.innerHTML;
+            this.style.opacity = '0.7';
+            this.style.pointerEvents = 'none';
+
+            // Store the clicked page for potential use
+            const page = this.getAttribute('data-page');
+            if (page) {
+                localStorage.setItem('lastVisitedPage', page);
+            }
+
+            // Reset after a short delay (in case navigation is slow)
+            setTimeout(() => {
+                this.style.opacity = '1';
+                this.style.pointerEvents = 'auto';
+            }, 2000);
+        });
+    });
+
+    // Add hover effects for better UX
+    menuItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('active')) {
+                this.style.transform = 'translateX(5px)';
+            }
+        });
+
+        item.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('active')) {
+                this.style.transform = 'translateX(0)';
+            }
+        });
+    });
+
+    // Handle logout confirmation
+    const logoutItem = document.querySelector('.logout-item');
+    if (logoutItem) {
+        logoutItem.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (confirm('Are you sure you want to log out?')) {
+                // Clear any stored page data
+                localStorage.removeItem('lastVisitedPage');
+                // Proceed with logout
+                window.location.href = this.getAttribute('href');
+            }
+        });
+    }
+});
+</script>
+
 
 </body>
 </html>

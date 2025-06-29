@@ -12,7 +12,8 @@ const loadWishlist = async(req,res)=>{
         res.render("wishlist",{
             user,
             wishlist:products,
-            products: products
+            products: products,
+            page: "wishlist",
         })
 
         

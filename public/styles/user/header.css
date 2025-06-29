@@ -90,10 +90,52 @@
             color: #111;
             border: none;
             background: transparent;
+            position: relative;
         }
 
         .nav-icon:hover {
             background-color: #f5f5f5;
+        }
+
+        /* Wishlist Badge Styles */
+        .wishlist-icon {
+            position: relative;
+        }
+
+        .wishlist-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Hide badge when count is 0 */
+        .wishlist-badge.hidden {
+            display: none;
         }
 
         .menu-toggle {
@@ -199,6 +241,14 @@
             .nav-icon {
                 font-size: 16px;
                 padding: 8px;
+            }
+
+            .wishlist-badge {
+                width: 16px;
+                height: 16px;
+                font-size: 10px;
+                top: -1px;
+                right: -1px;
             }
         }
 

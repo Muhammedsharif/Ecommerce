@@ -7,6 +7,7 @@ const passport = require('./config/passport');
 const db=require("./config/db")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
+const addWishlistCount = require('./middlewares/wishlistCount')
 db()
 
 
@@ -31,6 +32,9 @@ app.use((req,res,next)=>{
     res.set('cache-control','no-store')
     next()
 })
+
+// Add wishlist count to all views
+app.use(addWishlistCount)
 
 app.set("view engine", "ejs");
 app.set("views", [

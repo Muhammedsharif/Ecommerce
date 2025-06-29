@@ -50,6 +50,13 @@ router.post("/resend-forgot-otp",profileController.resendOtp)
 router.post("/reset-password",profileController.resetPassword)
 router.get("/Profile",userAuth,profileController.userProfile)
 
+// Additional Profile Pages
+router.get("/address",userAuth,profileController.loadAddress)
+router.get("/orders",userAuth,profileController.loadOrders)
+router.get("/wallet",userAuth,profileController.loadWallet)
+router.get("/change-password",userAuth,profileController.loadChangePassword)
+router.get("/referral",userAuth,profileController.loadReferral)
+
 
 //Whishlist Management
 router.get("/wishlist",userAuth,wishlistController.loadWishlist)

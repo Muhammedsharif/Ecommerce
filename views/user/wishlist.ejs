@@ -785,6 +785,10 @@
                 confirmButtonText:'Yes, remove it!'
             }).then((result)=>{
                 if(result.isConfirmed){
+                    // Update wishlist counter before redirect
+                    if (typeof window.decrementWishlistCounter === 'function') {
+                        window.decrementWishlistCounter();
+                    }
                     window.location.href = `removeFromWishlist?productId=${productId}`
                 }
             })

@@ -191,13 +191,131 @@ const userProfile = async (req,res) =>{
         }
          res.render("profile", {
             user: userData,
+            page: 'profile'
         });
-        
+
     } catch (error) {
 
         console.error("Error for profile data",error)
         res.redirect("/pageNotFound")
-        
+
+    }
+}
+
+// Placeholder controllers for additional profile pages
+const loadAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        // For now, render a simple page or redirect to profile with a message
+        res.render("profile", {
+            user: userData,
+            page: 'address',
+            message: 'Address management coming soon!'
+        });
+    } catch (error) {
+        console.error("Error loading address page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+const loadOrders = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("profile", {
+            user: userData,
+            page: 'orders',
+            message: 'Order history coming soon!'
+        });
+    } catch (error) {
+        console.error("Error loading orders page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+const loadWallet = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("profile", {
+            user: userData,
+            page: 'wallet',
+            message: 'Wallet management coming soon!'
+        });
+    } catch (error) {
+        console.error("Error loading wallet page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+const loadChangePassword = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("profile", {
+            user: userData,
+            page: 'password',
+            message: 'Change password functionality coming soon!'
+        });
+    } catch (error) {
+        console.error("Error loading change password page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+const loadReferral = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("profile", {
+            user: userData,
+            page: 'referral',
+            message: 'Referral program coming soon!'
+        });
+    } catch (error) {
+        console.error("Error loading referral page:", error);
+        res.redirect("/pageNotFound");
     }
 }
 
@@ -211,5 +329,9 @@ module.exports={
     loadResetPassword,
     resendOtp,
     resetPassword,
- 
+    loadAddress,
+    loadOrders,
+    loadWallet,
+    loadChangePassword,
+    loadReferral
 }

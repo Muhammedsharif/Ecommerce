@@ -1285,9 +1285,31 @@ function hideToast() {
                 if (response.action === 'added') {
                     btn.addClass('active');
                     showToast('Product added to wishlist', 'success');
+                    // Update wishlist counter
+                    if (typeof window.incrementWishlistCounter === 'function') {
+                        window.incrementWishlistCounter();
+                    } else {
+                        // Fallback: try again after a short delay
+                        setTimeout(() => {
+                            if (typeof window.incrementWishlistCounter === 'function') {
+                                window.incrementWishlistCounter();
+                            }
+                        }, 100);
+                    }
                 } else if (response.action === 'removed') {
                     btn.removeClass('active');
                     showToast('Product removed from wishlist', 'info');
+                    // Update wishlist counter
+                    if (typeof window.decrementWishlistCounter === 'function') {
+                        window.decrementWishlistCounter();
+                    } else {
+                        // Fallback: try again after a short delay
+                        setTimeout(() => {
+                            if (typeof window.decrementWishlistCounter === 'function') {
+                                window.decrementWishlistCounter();
+                            }
+                        }, 100);
+                    }
                 }
             } else {
                 showToast(response.message || 'Error processing wishlist request', 'error');

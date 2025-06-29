@@ -30,8 +30,11 @@
                
 
                 <!-- <input type="text" class="search-box" placeholder="Search"> -->
-             <a href="/wishlist">  <button class="nav-icon" title="Wishlist"  >
+             <a href="/wishlist">  <button class="nav-icon wishlist-icon" title="Wishlist" id="wishlistIcon">
                      <i class="fas fa-heart"></i>
+                     <% if (locals.wishlistCount && wishlistCount > 0) { %>
+                         <span class="wishlist-badge" id="wishlistBadge"><%= wishlistCount %></span>
+                     <% } %>
                 </button></a>
                 <button class="nav-icon" title="Cart" onclick="showCart()">
                     <i class="fas fa-shopping-cart"></i>
@@ -117,6 +120,47 @@
       document.getElementById("dropdownContent").style.display = "none";
     }
   });
+
+  // Wishlist counter functions
+  function updateWishlistCounter(count) {
+    const badge = document.getElementById('wishlistBadge');
+    const icon = document.getElementById('wishlistIcon');
+
+    if (count > 0) {
+      if (badge) {
+        badge.textContent = count;
+        badge.classList.remove('hidden');
+      } else {
+        // Create badge if it doesn't exist
+        const newBadge = document.createElement('span');
+        newBadge.className = 'wishlist-badge';
+        newBadge.id = 'wishlistBadge';
+        newBadge.textContent = count;
+        icon.appendChild(newBadge);
+      }
+    } else {
+      if (badge) {
+        badge.classList.add('hidden');
+      }
+    }
+  }
+
+  function incrementWishlistCounter() {
+    const badge = document.getElementById('wishlistBadge');
+    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+    updateWishlistCounter(currentCount + 1);
+  }
+
+  function decrementWishlistCounter() {
+    const badge = document.getElementById('wishlistBadge');
+    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+    updateWishlistCounter(Math.max(0, currentCount - 1));
+  }
+
+  // Make functions globally available
+  window.updateWishlistCounter = updateWishlistCounter;
+  window.incrementWishlistCounter = incrementWishlistCounter;
+  window.decrementWishlistCounter = decrementWishlistCounter;
 
 
 </script>

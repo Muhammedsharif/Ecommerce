@@ -445,8 +445,32 @@
 <%- include("../partials/user/profilesidebar") %>
         <main class="main-content">
             <div class="welcome-section">
-                <h1 class="welcome-title">Welcome back, User!</h1>
-                <p class="welcome-subtitle">Manage your profile and account settings</p>
+                <h1 class="welcome-title">
+                    <% if (page === 'profile') { %>
+                        Welcome back, User!
+                    <% } else if (page === 'address') { %>
+                        My Address
+                    <% } else if (page === 'orders') { %>
+                        My Orders
+                    <% } else if (page === 'wallet') { %>
+                        My Wallet
+                    <% } else if (page === 'password') { %>
+                        Change Password
+                    <% } else if (page === 'referral') { %>
+                        Referral Program
+                    <% } else { %>
+                        Profile
+                    <% } %>
+                </h1>
+                <p class="welcome-subtitle">
+                    <% if (page === 'profile') { %>
+                        Manage your profile and account settings
+                    <% } else if (typeof message !== 'undefined') { %>
+                        <%= message %>
+                    <% } else { %>
+                        Manage your account
+                    <% } %>
+                </p>
             </div>
 
             <div class="section">
@@ -622,6 +646,8 @@
                 }
             });
         });
+
+        
     </script>
 </body>
 </html>
