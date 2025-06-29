@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INOTONE - User Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <title>Elite Wear - My Wishlist</title>
     <style>
         * {
             margin: 0;
@@ -11,579 +13,613 @@
             box-sizing: border-box;
         }
 
-        html, body {
-    height: 100%;
-}
-
         body {
-              display: flex;
-    flex-direction: column;
-        }
-
-        .dashboard-container {
-             flex: 1;
-    display: flex;
-    flex-direction: row;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: #f8f9fa;
-            border-right: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0; /* Prevent sidebar from shrinking */
-        }
-
-        .user-card {
-            background: #007bff;
-            color: white;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 20px;
-            border-radius: 8px;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #0056b3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .user-name {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .nav-menu {
-            flex: 1;
-            padding: 0 20px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            margin-bottom: 4px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .nav-item.active {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .nav-item:hover {
-            background: #f5f5f5;
-        }
-
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logout-btn {
-            margin: 20px;
-            padding: 12px 16px;
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: background 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #f5f5f5;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-    background: white;
-    /* remove scroll and fixed height */
-    height: auto;
-    overflow: visible;
-        }
-
-        /* Content Area */
-        .content {
-            padding: 40px;
-            display: flex;
-            gap: 40px;
-            min-height: calc(100vh - 80px); /* Ensure content fills viewport */
-        }
-
-        .form-section {
-            flex: 1;
-            min-width: 0; /* Allow flex item to shrink */
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
             color: #333;
         }
 
+       
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            height: calc(100vh - 140px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 89px;
+            left: 2rem;
+            overflow-y: auto;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+        }
+
+        .menu-section h4 {
+            color: #6c757d;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(8px);
+        }
+
+        .menu-icon {
+            width: 20px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+           
+        }
+
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-weight: 500;
-            color: #555;
-            font-size: 14px;
+            color: #495057;
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ddd;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
             border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.2s;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background-color: #f8f9fa;
+            color: #495057;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #007bff;
+            border-color: #667eea;
+            background-color: white;
         }
 
-        .referral-section {
-            margin: 30px 0;
-        }
-
-        .referral-code {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 10px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-        }
-
-        .code-display {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            letter-spacing: 2px;
-        }
-
-        .copy-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: #218838;
-        }
-
-        .share-btn {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .share-btn:hover {
-            background: #138496;
-        }
-
-        .save-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 20px;
-        }
-
-        .save-btn:hover {
-            background: #0056b3;
-        }
-
-        /* Password Section */
-        .password-section {
-            margin-top: 40px;
-            border-top: 1px solid #eee;
-            padding-top: 40px;
-            padding-bottom: 40px; /* Add bottom padding */
-        }
-
-        .password-row {
-            display: flex;
-            gap: 20px;
-        }
-
-        .password-group {
-            flex: 1;
-        }
-
-        .password-input-container {
-            position: relative;
-        }
-
-        .password-toggle {
+        .edit-icon {
             position: absolute;
             right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
+            color: #6c757d;
             cursor: pointer;
-            color: #666;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
         }
 
-        .change-password-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 20px;
+        .edit-icon:hover {
+            color: #667eea;
+            background-color: #f0f2ff;
         }
 
-        .change-password-btn:hover {
-            background: #0056b3;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        /* Profile Image Section */
-        .profile-section {
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0; /* Prevent profile section from shrinking */
-        }
-
-        .profile-image-container {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 3px solid #e5e7eb;
-            position: relative;
-        }
-
-        .profile-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 48px;
+            margin: 0 auto 1rem;
+            font-size: 1.2rem;
         }
 
-        .choose-image-btn {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 10px 20px;
-            border-radius: 20px;
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .wishlist-items {
+            margin-top: 2rem;
+        }
+
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .wishlist-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ddd 0%, #f8f9fa 100%);
+            border-radius: 8px;
+            margin-right: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 2rem;
+        }
+
+        .action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.manage-address-btn,
+.change-password-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+/* Manage Address Button Style */
+.manage-address-btn {
+  background-color: #6c757d; /* grey */
+}
+
+/* Change Password Button Style */
+.change-password-btn {
+  background: linear-gradient(135deg, #4d5dfb, #59b0f6); /* bluish gradient */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Optional hover effect */
+.manage-address-btn:hover,
+.change-password-btn:hover {
+  opacity: 0.9;
+}
+
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .item-price {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
 
-        .choose-image-btn:hover {
-            background: #f5f5f5;
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
         }
 
-        /* Responsive Design */
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .cart-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .cart-btn:hover {
+            background: #218838;
+        }
+
         @media (max-width: 768px) {
-            body {
-                overflow: auto; /* Allow scrolling on mobile */
-            }
-            
-            .dashboard-container {
+            .container {
                 flex-direction: column;
-                height: auto;
-                min-height: 100vh;
+                padding: 1rem;
             }
             
             .sidebar {
                 width: 100%;
-                height: auto;
             }
             
-            .main-content {
-                height: auto;
-                overflow-y: visible;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
             
-            .content {
+            .wishlist-item {
                 flex-direction: column;
-                padding: 20px;
+                text-align: center;
             }
             
-            .profile-section {
-                width: 100%;
-                order: -1; /* Move profile to top on mobile */
+            .item-image {
+                margin-right: 0;
+                margin-bottom: 1rem;
             }
-            
-            .password-row {
-                flex-direction: column;
-            }
-        }
-
-        /* Ensure dashboard stays above any footer */
-        .dashboard-container {
-            position: relative;
-            z-index: 100;
-            background: white;
         }
     </style>
 </head>
 <body>
-    <%- include("../partials/user/header") %>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-card">
-                <div class="user-avatar"></div>
-                <div class="user-name"><%=user.name%></div>
+   
+ <%- include("../partials/user/header") %>
+    <div class="container">
+
+<%- include("../partials/user/profilesidebar") %>
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Welcome back, User!</h1>
+                <p class="welcome-subtitle">Manage your profile and account settings</p>
             </div>
-            
-            <nav class="nav-menu">
-                <div class="nav-item active">
-                    <div class="nav-icon">⚙️</div>
-                    <span>Account Overview</span>
-                </div>
-                <div class="nav-item">
-                    <div class="nav-icon">📦</div>
-                    <span>My Orders</span>
-                </div>
-                <div class="nav-item">
-                    <div class="nav-icon">📍</div>
-                    <span>Manage Addresses</span>
-                </div>
-                <div class="nav-item">
-                    <div class="nav-icon">💳</div>
-                    <span>Wallet</span>
-                </div>
-                <div class="nav-item">
-                    <div class="nav-icon">🎫</div>
-                    <span>Coupons</span>
-                </div>
-            </nav>
-            
-            <button class="logout-btn">
-                <div class="nav-icon">🚪</div>
-                <span>logout</span>
-            </button>
-        </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Content -->
-            <div class="content">
-                <div class="form-section">
-                    <h2 class="section-title">Account Settings</h2>
-                    
-                    <form>
-                        <div class="form-group">
-                            <label class="form-label">Full name</label>
-                            <input type="text" class="form-input" value="<%=user.name%>" placeholder="Enter your full name">
-                           
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-input" value="<%=user.email%>" placeholder="Enter your email">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" class="form-input" value="<%=user.phone%>" placeholder="Enter your phone number">
-                            
-                        </div>
-                        
-                        <!-- <div class="referral-section">
-                            <div class="referral-code">
-                                <span class="code-display">AF45DGH</span>
-                                <button type="button" class="copy-btn" onclick="copyReferralCode()">Copy Referral code</button>
-                                <button type="button" class="share-btn" onclick="shareReferralCode()">Share</button>
-                            </div>
-                        </div> -->
-                        
-                        <button type="button" class="save-btn" onclick="saveChanges()">Save Changes</button>
-                    </form>
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-icon">♡</div>
+                        Profile Details
+                    </div>
+                    <button class="edit-btn" onclick="toggleEdit()">
+                        <span id="edit-icon">✏️</span>
+                        <span id="edit-text">Edit Profile</span>
+                    </button>
+                </div>
 
-                    <div class="password-section">
-                        <h3 class="section-title">Change Password</h3>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Current Password</label>
-                            <div class="password-input-container">
-                                <input type="password" class="form-input" placeholder="Password" id="currentPassword">
-                                <button type="button" class="password-toggle" onclick="togglePassword('currentPassword')">👁️</button>
-                            </div>
-                        </div>
-                        
-                        <div class="password-row">
-                            <div class="password-group">
-                                <label class="form-label">New Password</label>
-                                <div class="password-input-container">
-                                    <input type="password" class="form-input" placeholder="Password" id="newPassword">
-                                    <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">👁️</button>
-                                </div>
-                            </div>
-                            
-                            <div class="password-group">
-                                <label class="form-label">Confirm Password</label>
-                                <div class="password-input-container">
-                                    <input type="password" class="form-input" placeholder="Password" id="confirmPassword">
-                                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button type="button" class="change-password-btn" onclick="changePassword()">Change Password</button>
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <div class="input-container">
+                        <input type="text" class="form-input" value="<%=user.name%>" readonly>
+                        <span class="edit-icon" onclick="editField(this)">✏️</span>
                     </div>
                 </div>
 
-                <div class="profile-section">
-                    <div class="profile-image-container">
-                        <div class="profile-image">👤</div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div class="input-container">
+                        <input type="email" class="form-input" value="<%=user.email%>" readonly>
+                        <span class="edit-icon" onclick="editField(this)">✏️</span>
                     </div>
-                    <button class="choose-image-btn" onclick="chooseImage()">Choose Image</button>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-container">
+                        <input type="text" class="form-input" value="<%=user.phone%>" readonly>
+                        <span class="edit-icon" onclick="editField(this)">✏️</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Member Since</label>
+                    <div class="input-container">
+                        <% 
+                         const createdDate = new Date(user.createdOn);
+                         const day = createdDate.getDate().toString().padStart(2, '0');
+                          const month = (createdDate.getMonth() + 1).toString().padStart(2, '0'); // +1 since Jan = 0
+                          const year = createdDate.getFullYear();
+                          const formattedDate = `${day}-${year}-${month}`;
+                          %>
+                        <input type="text" class="form-input" value="<%= formattedDate %>" readonly>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <div class="section-icon">📊</div>
+                    Account Stats
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">♡</div>
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Wishlist Items</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-number">₹0.00</div>
+                        <div class="stat-label">Wallet Balance</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎫</div>
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Available Coupons</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="manage-address-btn" onclick="manageAddresses()">
+                <i class="fas fa-map-marker-alt"></i> Manage Addresses
+                </button>
+                <button class="change-password-btn" onclick="changePassword()">
+                    🔒 Change Password
+                </button>
+            </div>
+        
+        </main>
     </div>
-<%- include("../partials/user/footer") %>
+
     <script>
-        function setActive(element) {
-            document.querySelectorAll('.nav-links a').forEach(link => {
-                link.style.color = '#333';
-            });
-            element.style.color = '#007bff';
-        }
-
-        function copyReferralCode() {
-            const code = 'AF45DGH';
-            navigator.clipboard.writeText(code).then(() => {
-                alert('Referral code copied to clipboard!');
-            });
-        }
-
-        function shareReferralCode() {
-            const code = 'AF45DGH';
-            if (navigator.share) {
-                navigator.share({
-                    title: 'My Referral Code',
-                    text: `Use my referral code: ${code}`,
-                    url: window.location.href
-                });
-            } else {
-                alert('Share feature not supported. Referral code: ' + code);
-            }
-        }
-
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
+        function toggleEdit() {
+            const inputs = document.querySelectorAll('.form-input');
+            const editBtn = document.getElementById('edit-text');
+            const editIcon = document.getElementById('edit-icon');
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                button.textContent = '👁️';
-            }
-        }
-
-        function saveChanges() {
-            alert('Account settings saved successfully!');
-        }
-
-        function changePassword() {
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                alert('Please fill in all password fields');
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                alert('New passwords do not match');
-                return;
-            }
-            
-            alert('Password changed successfully!');
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-        }
-
-        function chooseImage() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const profileImage = document.querySelector('.profile-image');
-                        profileImage.innerHTML = `<img src="${e.target.result}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">`;
-                    };
-                    reader.readAsDataURL(file);
+            inputs.forEach(input => {
+                if (input.value !== 'June 28, 2025') { // Don't edit member since field
+                    if (input.hasAttribute('readonly')) {
+                        input.removeAttribute('readonly');
+                        input.style.backgroundColor = 'white';
+                        editBtn.textContent = 'Save Changes';
+                        editIcon.textContent = '💾';
+                    } else {
+                        input.setAttribute('readonly', true);
+                        input.style.backgroundColor = '#f8f9fa';
+                        editBtn.textContent = 'Edit Wishlist';
+                        editIcon.textContent = '✏️';
+                    }
                 }
-            };
-            input.click();
+            });
         }
 
-        // Navigation functionality
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
+        function editField(editIcon) {
+            const input = editIcon.previousElementSibling;
+            if (input.value !== 'June 28, 2025') { // Don't edit member since field
+                if (input.hasAttribute('readonly')) {
+                    input.removeAttribute('readonly');
+                    input.style.backgroundColor = 'white';
+                    input.focus();
+                    editIcon.textContent = '💾';
+                    editIcon.style.color = '#28a745';
+                } else {
+                    input.setAttribute('readonly', true);
+                    input.style.backgroundColor = '#f8f9fa';
+                    input.blur();
+                    editIcon.textContent = '✏️';
+                    editIcon.style.color = '#6c757d';
+                }
+            }
+        }
+
+        // Add some interactive effects
+        document.querySelectorAll('.wishlist-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add functionality to remove wishlist items
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to remove this item from your wishlist?')) {
+                    this.closest('.wishlist-item').remove();
+                    // Update wishlist count
+                    const wishlistCount = document.querySelector('.stat-number');
+                    if (wishlistCount) {
+                        wishlistCount.textContent = '0';
+                    }
+                }
+            });
+        });
+
+        // Add functionality to add to cart
+        document.querySelectorAll('.cart-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemName = this.closest('.wishlist-item').querySelector('.item-name').textContent;
+                alert(`${itemName} has been added to your cart!`);
+                
+                // Update cart badge count
+                const cartBadge = document.querySelector('.nav-icons .badge');
+                if (cartBadge) {
+                    cartBadge.textContent = parseInt(cartBadge.textContent) + 1;
+                }
             });
         });
     </script>

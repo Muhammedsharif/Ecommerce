@@ -1,6 +1,8 @@
     const User = require("../../models/userSchema")
     const Category = require("../../models/categorySchema")
     const Product = require("../../models/productSchema")
+    const Wishlist = require("../../models/wishlistSchema")
+
     const env=require("dotenv").config()
     const nodemailer = require("nodemailer")
     const bcrypt = require("bcrypt")
@@ -31,7 +33,7 @@
     // Check if the user is blocked before setting the session
     if (user.isBlocked) {
       console.log("User is blocked:", user._id);
-      // Destroy the session to ensure the user isn't logged in
+      
       req.session.destroy((err) => {
         if (err) {
           console.error("Error destroying session:", err);
@@ -54,8 +56,8 @@
         console.error("Error destroying session:", err);
       }
       res.redirect("/login");
-    });
-  }
+   });
+  }
 };
 
 
@@ -72,7 +74,7 @@
       quantity: { $gt: 0 }
     });
 
-    productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+    productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     productData = productData.slice(0, 9);
 
 
@@ -153,7 +155,11 @@
             }
 
             const findUser = await User.findOne({email})
+
+
+
             if(findUser){
+              
                 return res.render("signup",{
                     message:"User with this email already exists",
                      name,
@@ -162,6 +168,7 @@
 
                 })
             }
+          
 
             const otp = generateOtp()
 
@@ -309,7 +316,7 @@
     const logout = async (req,res)=>{
         try {
 
-            req.session.destroy((err)=>{
+            delete req.session.user((err)=>{
                 if(err){
                     console.log("Session destruction error",err.message)
                     return res.redirect("/pageNotFound")
@@ -331,6 +338,7 @@ const loadShoppingPage = async (req, res) => {
     try {
         const user = req.session.user;
         const { page, sort } = req.query;
+        const userId = req.session.user;
 
         const query = {
             isBlocked: false,
@@ -350,6 +358,11 @@ const loadShoppingPage = async (req, res) => {
         let findProducts = await Product.find(query).sort(sortOption).lean();
 
         const categories = await Category.find({ isListed: true }).lean();
+
+        const userwish = await User.findById(userId);
+
+          const wishlistIds = userwish.wishlist.map(id => id.toString()); // Get only product IDs
+
 
         let itemsPerPage = 9;
         let currentPage = parseInt(page) || 1;
@@ -375,7 +388,8 @@ const loadShoppingPage = async (req, res) => {
             minPrice: '',
             maxPrice: '',
             rating: '0',
-            query: { sort: sort || 'default' }
+            query: { sort: sort || 'default' },
+            userWishlist: wishlistIds
         });
     } catch (error) {
         console.error('Error in loadShoppingPage:', error);
@@ -388,7 +402,7 @@ const filterProducts = async (req, res) => {
         const user = req.session.user;
         const { category, minPrice, maxPrice, rating, page, sort } = req.query;
 
-        console.log('Filter request received with:', { category, minPrice, maxPrice, rating, page, sort });
+       
 
         const query = {
             isBlocked: false,
@@ -411,9 +425,9 @@ const filterProducts = async (req, res) => {
         }
 
         // Rating filter
-        if (rating && rating !== '0') {
-            query.rating = { $gte: parseInt(rating) };
-        }
+        // if (rating && rating !== '0') {
+        //     query.rating = { $gte: parseInt(rating) };
+        // }
 
         // Define sort options
         let sortOption = {};
@@ -428,6 +442,12 @@ const filterProducts = async (req, res) => {
         let findProducts = await Product.find(query).sort(sortOption).lean();
 
         const categories = await Category.find({ isListed: true }).lean();
+
+        let userWishlist = [];
+        if (user) {
+            const userData = await User.findById(user).lean();
+            userWishlist = userData.wishlist.map(id => id.toString());
+        }
 
         let itemsPerPage = 9;
         let currentPage = parseInt(page) || 1;
@@ -464,6 +484,7 @@ const filterProducts = async (req, res) => {
             maxPrice: maxPrice || '',
             rating: rating || '0',
             totalProducts: findProducts.length,
+            userWishlist,
             query: { sort: sort || 'default' }
         });
     } catch (error) {
@@ -478,7 +499,6 @@ const searchProduct = async (req, res) => {
         const { search } = req.body;
         const { page, sort } = req.query;
 
-        console.log('Search request received with:', { search, page, sort });
 
         const categories = await Category.find({ isListed: true }).lean();
         const categoryIds = categories.map(category => category._id.toString());
@@ -517,6 +537,12 @@ const searchProduct = async (req, res) => {
             );
         }
 
+        let userWishlist = [];
+        if (user) {
+            const userData = await User.findById(user).lean();
+            userWishlist = userData.wishlist.map(id => id.toString());
+        }
+
         req.session.filteredProducts = currentProducts;
 
         res.status(200).json({
@@ -530,6 +556,7 @@ const searchProduct = async (req, res) => {
             minPrice: '',
             maxPrice: '',
             rating: '0',
+            userWishlist,
             query: { sort: sort || 'default' }
         });
     } catch (error) {
@@ -568,12 +595,19 @@ const getAllProducts = async (req, res) => {
 
         req.session.filteredProducts = null; // Clear filtered products
 
+        let userWishlist = [];
+        if (user) {
+            const userData = await User.findById(user).lean();
+            userWishlist = userData.wishlist.map(id => id.toString());
+        }
+
         res.status(200).json({
             user: userData,
             products: currentProducts,
             totalPages,
             currentPage,
-            totalProducts, // Include total product count
+            totalProducts,
+            userWishlist // Include total product count
         });
     } catch (error) {
         console.error('Error fetching all products:', error);
@@ -600,3 +634,8 @@ const getAllProducts = async (req, res) => {
         searchProduct,
         getAllProducts,
     }
+
+
+
+
+    

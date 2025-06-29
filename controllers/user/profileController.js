@@ -78,7 +78,7 @@ const forgotEmailValid = async (req,res) => {
 
         const {email} = req.body
         const findUser = await User.findOne({email:email})
-        console.log("hyy")
+        
         if(findUser){
             const otp = generateOtp()
             const emailSent = await sendVerificationEmail(email,otp)
@@ -165,6 +165,7 @@ const resetPassword = async (req,res) => {
             await User.updateOne({email:email},{$set:{password:passwordHash}})
             res.redirect("/login")
         }else{
+            
             res.render("reset-password",{message:"Passwords do not match"})
         }
         

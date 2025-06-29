@@ -4,6 +4,7 @@ const passport = require('passport');
 const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController")
 const productController=require("../controllers/user/productController")
+const wishlistController=require("../controllers/user/wishlistController")
 const { userAuth } = require("../middlewares/auth");
 
 
@@ -48,6 +49,13 @@ router.get("/reset-password",profileController.loadResetPassword)
 router.post("/resend-forgot-otp",profileController.resendOtp)
 router.post("/reset-password",profileController.resetPassword)
 router.get("/Profile",userAuth,profileController.userProfile)
+
+
+//Whishlist Management
+router.get("/wishlist",userAuth,wishlistController.loadWishlist)
+router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
+router.get('/removeFromWishlist',userAuth,wishlistController.removeProduct)
+
 
 
 

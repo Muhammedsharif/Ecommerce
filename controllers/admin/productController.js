@@ -37,7 +37,7 @@ const getAllProducts = async (req, res) => {
       .skip((page - 1) * limit)
       .populate("category")
       .exec()
-        
+
 
     // Count total matching documents
     const count = await Product.countDocuments(query);
@@ -121,14 +121,14 @@ const addProducts = async (req, res) => {
       }
 
       // 🟡 Handle selected sizes
-      console.log(req.body.sizes);
+      
       let selectedSizes = req.body.sizes;
       if (!selectedSizes) {
         selectedSizes = [];
       } else if (!Array.isArray(selectedSizes)) {
         selectedSizes = [selectedSizes];
       }
-      console.log("Selected sizes:", selectedSizes);
+      
 
       // Create variant array
       const variantData = selectedSizes.map((size) => ({
@@ -137,7 +137,7 @@ const addProducts = async (req, res) => {
         salePrice: products.salePrice,
         varientquantity: products.quantity,
       }));
-      console.log("from addProduct", products.color);
+   
       const newProduct = new Product({
         productName: products.productName,
         description: products.description,
@@ -195,7 +195,7 @@ const unblockProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   const productId = req.params.id;
   try {
-    // Instead of deleting, update isDeleted flag
+    
     const result = await Product.findByIdAndUpdate(productId, {
       isDeleted: true,
     });

@@ -30,9 +30,9 @@
                
 
                 <!-- <input type="text" class="search-box" placeholder="Search"> -->
-                <button class="nav-icon" title="Wishlist" onclick="showWishlist()" >
-                    <i class="fas fa-heart"></i>
-                </button>
+             <a href="/wishlist">  <button class="nav-icon" title="Wishlist"  >
+                     <i class="fas fa-heart"></i>
+                </button></a>
                 <button class="nav-icon" title="Cart" onclick="showCart()">
                     <i class="fas fa-shopping-cart"></i>
                 </button>
@@ -96,19 +96,19 @@
             alert(cartSummary);
         }
 
-        function showWishlist() {
-            if (wishlistItems.length === 0) {
-                showNotification('Your wishlist is empty!');
-                return;
-            }
+        // function showWishlist() {
+        //     if (wishlistItems.length === 0) {
+        //         showNotification('Your wishlist is empty!');
+        //         return;
+        //     }
             
-            let wishlistSummary = 'Wishlist Items:\n';
-            wishlistItems.forEach(item => {
-                wishlistSummary += `${item.name} - $${item.price}\n`;
-            });
+        //     let wishlistSummary = 'Wishlist Items:\n';
+        //     wishlistItems.forEach(item => {
+        //         wishlistSummary += `${item.name} - $${item.price}\n`;
+        //     });
             
-            alert(wishlistSummary);
-        }
+        //     alert(wishlistSummary);
+        // }
 
 
   // Close dropdown when clicking outside

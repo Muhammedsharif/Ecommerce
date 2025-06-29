@@ -7,7 +7,7 @@ const userAuth =  (req,res,next) =>{
             if(data && !data.isBlocked){
                 next();
             }else{
-                req.session.destroy()
+              delete req.session.user
                 res.redirect("/login")
             }
         })

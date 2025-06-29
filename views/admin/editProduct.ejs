@@ -663,7 +663,7 @@
                                     <i class="fas fa-list"></i> Category
                                 </label>
                                 <select class="form-control form-select" name="category">
-                                    <option value="">Select category</option>
+                                    <option value="<%=cat.name%>"><%=cat.name%></option>
                                     <%for(let i=0;i<cat.length;i++){%>
 
                                     <option value="<%=cat[i].name%>">

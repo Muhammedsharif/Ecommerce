@@ -1056,9 +1056,9 @@
                         <a href="/admin/editProduct?id=<%= data[i]._id %>" class="action-btn btn-edit">
                             <i class="fas fa-edit"></i>Edit
                         </a>
-                        <button onclick="deleteProduct('<%= data[i]._id %>')" class="action-btn btn-delete">
+                        <!-- <button onclick="deleteProduct('<%= data[i]._id %>')" class="action-btn btn-delete">
                             <i class="fas fa-trash"></i>Delete
-                        </button>
+                        </button> -->
                         <% if (data[i].isBlocked) { %>
                             <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="action-btn btn-unblock">
                                 <i class="fas fa-check"></i>Unblock

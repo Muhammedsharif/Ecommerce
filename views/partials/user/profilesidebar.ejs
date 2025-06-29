@@ -1,0 +1,173 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        
+     
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            height: calc(100vh - 140px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 89px;
+            left: 2rem;
+            overflow-y: auto;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+        }
+
+        .menu-section h4 {
+            color: #6c757d;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(8px);
+        }
+
+        .menu-icon {
+            width: 20px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+           
+        }
+    </style>
+</head>
+<body>
+    
+
+
+
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="profile-avatar">U</div>
+                <div class="profile-name"><%=user.name%></div>
+                <div class="status">
+                    <div class="status-dot"></div>
+                    Online
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h4>Account</h4>
+                <a href="#profile" class="menu-item">
+                    <span class="menu-icon">👤</span>
+                    My Profile
+                </a>
+                <a href="#address" class="menu-item">
+                    <span class="menu-icon">📍</span>
+                    My Address
+                </a>
+                <a href="#orders" class="menu-item">
+                    <span class="menu-icon">📦</span>
+                    My Orders
+                </a>
+                <a href="#wishlist" class="menu-item ">
+                    <span class="menu-icon">♡</span>
+                    My Wishlist
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <h4>Payments</h4>
+                <a href="#wallet" class="menu-item">
+                    <span class="menu-icon">💳</span>
+                    My Wallet
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <h4>Settings</h4>
+                <a href="#password" class="menu-item">
+                    <span class="menu-icon">🔒</span>
+                    Change Password
+                </a>
+                <a href="#referral" class="menu-item">
+                    <span class="menu-icon">🎁</span>
+                    Referral Code
+                </a>
+                <a href="#logout" class="menu-item" style="color: #e74c3c;">
+                    <span class="menu-icon">🚪</span>
+                    Log out
+                </a>
+            </div>
+            
+        </aside>
+
+</body>
+</html>
