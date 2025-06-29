@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
 
     <title>Elite Wear - My Wishlist</title>
     <style>
@@ -145,6 +146,29 @@
             margin-bottom: 1rem;
         }
 
+        .modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 400px;
+  border-radius: 10px;
+}
+.close {
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
         .section {
             margin-bottom: 3rem;
         }
@@ -155,6 +179,11 @@
             justify-content: space-between;
             margin-bottom: 2rem;
         }
+
+         .section-header a{
+            text-decoration: none;
+            color: white;
+         }
 
         .section-title {
             display: flex;
@@ -479,17 +508,18 @@
                         <div class="section-icon">♡</div>
                         Profile Details
                     </div>
-                    <button class="edit-btn" onclick="toggleEdit()">
+                    
+                  <a href="/change-password"> <button class="edit-btn">
                         <span id="edit-icon">✏️</span>
                         <span id="edit-text">Edit Profile</span>
-                    </button>
+                    </button></a> 
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
                     <div class="input-container">
                         <input type="text" class="form-input" value="<%=user.name%>" readonly>
-                        <span class="edit-icon" onclick="editField(this)">✏️</span>
+                      
                     </div>
                 </div>
 
@@ -497,15 +527,16 @@
                     <label class="form-label">Email Address</label>
                     <div class="input-container">
                         <input type="email" class="form-input" value="<%=user.email%>" readonly>
-                        <span class="edit-icon" onclick="editField(this)">✏️</span>
+                        
                     </div>
                 </div>
+                   
 
                 <div class="form-group">
                     <label class="form-label">Phone Number</label>
                     <div class="input-container">
                         <input type="text" class="form-input" value="<%=user.phone%>" readonly>
-                        <span class="edit-icon" onclick="editField(this)">✏️</span>
+                        
                     </div>
                 </div>
 
@@ -558,55 +589,16 @@
                 <button class="manage-address-btn" onclick="manageAddresses()">
                 <i class="fas fa-map-marker-alt"></i> Manage Addresses
                 </button>
-                <button class="change-password-btn" onclick="changePassword()">
-                    🔒 Change Password
-                </button>
+               
             </div>
         
         </main>
     </div>
 
-    <script>
-        function toggleEdit() {
-            const inputs = document.querySelectorAll('.form-input');
-            const editBtn = document.getElementById('edit-text');
-            const editIcon = document.getElementById('edit-icon');
-            
-            inputs.forEach(input => {
-                if (input.value !== 'June 28, 2025') { // Don't edit member since field
-                    if (input.hasAttribute('readonly')) {
-                        input.removeAttribute('readonly');
-                        input.style.backgroundColor = 'white';
-                        editBtn.textContent = 'Save Changes';
-                        editIcon.textContent = '💾';
-                    } else {
-                        input.setAttribute('readonly', true);
-                        input.style.backgroundColor = '#f8f9fa';
-                        editBtn.textContent = 'Edit Wishlist';
-                        editIcon.textContent = '✏️';
-                    }
-                }
-            });
-        }
 
-        function editField(editIcon) {
-            const input = editIcon.previousElementSibling;
-            if (input.value !== 'June 28, 2025') { // Don't edit member since field
-                if (input.hasAttribute('readonly')) {
-                    input.removeAttribute('readonly');
-                    input.style.backgroundColor = 'white';
-                    input.focus();
-                    editIcon.textContent = '💾';
-                    editIcon.style.color = '#28a745';
-                } else {
-                    input.setAttribute('readonly', true);
-                    input.style.backgroundColor = '#f8f9fa';
-                    input.blur();
-                    editIcon.textContent = '✏️';
-                    editIcon.style.color = '#6c757d';
-                }
-            }
-        }
+
+    <script>
+    
 
         // Add some interactive effects
         document.querySelectorAll('.wishlist-item').forEach(item => {

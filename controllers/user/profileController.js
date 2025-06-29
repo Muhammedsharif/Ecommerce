@@ -285,10 +285,9 @@ const loadChangePassword = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        res.render("profile", {
+        res.render("changePassword", {
             user: userData,
-            page: 'password',
-            message: 'Change password functionality coming soon!'
+            page: 'password'
         });
     } catch (error) {
         console.error("Error loading change password page:", error);
@@ -319,6 +318,232 @@ const loadReferral = async (req, res) => {
     }
 }
 
+// Email Change Functionality
+const sendEmailOTP = async (req, res) => {
+    try {
+        const { newEmail } = req.body;
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Please log in first' });
+        }
+
+        if (!newEmail) {
+            return res.status(400).json({ success: false, message: 'New email is required' });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newEmail)) {
+            return res.status(400).json({ success: false, message: 'Invalid email format' });
+        }
+
+        // Check if email already exists
+        const existingUser = await User.findOne({ email: newEmail });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'Email already in use' });
+        }
+
+        // Generate OTP
+        const otp = Math.floor(10000 + Math.random() * 90000).toString();
+
+        // Store OTP in session with expiration
+        req.session.emailChangeOTP = {
+            otp: otp,
+            newEmail: newEmail,
+            expires: Date.now() + 10 * 60 * 1000 // 10 minutes
+        };
+
+        // Send OTP email
+        const nodemailer = require('nodemailer');
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.NODEMAILER_EMAIL,
+            to: newEmail,
+            subject: 'Email Change Verification - 1NOTONE',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #333;">Email Change Verification</h2>
+                    <p>You have requested to change your email address on 1NOTONE.</p>
+                    <p>Your verification code is:</p>
+                    <div style="background: #f8f9fa; padding: 20px; text-align: center; margin: 20px 0;">
+                        <h1 style="color: #667eea; margin: 0; font-size: 2em;">${otp}</h1>
+                    </div>
+                    <p>This code will expire in 10 minutes.</p>
+                    <p>If you didn't request this change, please ignore this email.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log("changeEmail:",otp)
+        res.json({ success: true, message: 'OTP sent successfully' });
+
+    } catch (error) {
+        console.error('Error sending email OTP:', error);
+        res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    }
+}
+
+const loadVerifyEmailOTP = async (req, res) => {
+    try {
+        const { email } = req.query;
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        if (!email) {
+            return res.redirect("/change-password?error=Invalid email");
+        }
+
+        res.render("verifyEmailOtp", {
+            newEmail: email
+        });
+    } catch (error) {
+        console.error("Error loading verify email OTP page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+const verifyEmailOTP = async (req, res) => {
+    try {
+        const { otp, newEmail } = req.body;
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        // Check if OTP session exists
+        if (!req.session.emailChangeOTP) {
+            return res.render("verifyEmailOtp", {
+                newEmail: newEmail,
+                error: "OTP session expired. Please request a new OTP."
+            });
+        }
+
+        const { otp: sessionOTP, newEmail: sessionEmail, expires } = req.session.emailChangeOTP;
+
+        // Check if OTP expired
+        if (Date.now() > expires) {
+            delete req.session.emailChangeOTP;
+            return res.render("verifyEmailOtp", {
+                newEmail: newEmail,
+                error: "OTP has expired. Please request a new OTP."
+            });
+        }
+
+        // Check if email matches
+        if (sessionEmail !== newEmail) {
+            return res.render("verifyEmailOtp", {
+                newEmail: newEmail,
+                error: "Invalid email. Please try again."
+            });
+        }
+
+        // Verify OTP
+        if (otp !== sessionOTP) {
+            return res.render("verifyEmailOtp", {
+                newEmail: newEmail,
+                error: "Invalid OTP. Please check and try again."
+            });
+        }
+
+        // Update user email
+        await User.findByIdAndUpdate(userId, { email: newEmail });
+
+        // Clear OTP session
+        delete req.session.emailChangeOTP;
+
+        // Redirect to success page
+        res.redirect("/change-password?success=Email changed successfully!");
+
+    } catch (error) {
+        console.error("Error verifying email OTP:", error);
+        res.render("verifyEmailOtp", {
+            newEmail: req.body.newEmail,
+            error: "An error occurred. Please try again."
+        });
+    }
+}
+
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.redirect("/pageNotFound");
+        }
+
+        // Validate passwords
+        if (newPassword !== confirmPassword) {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "New password and confirm password do not match"
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "Password must be at least 6 characters long"
+            });
+        }
+
+        // Verify current password
+        const bcrypt = require('bcrypt');
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isCurrentPasswordValid) {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "Current password is incorrect"
+            });
+        }
+
+        // Hash new password
+        const saltRounds = 10;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password
+        await User.findByIdAndUpdate(userId, { password: hashedNewPassword });
+
+        res.render("changePassword", {
+            user: user,
+            page: 'password',
+            success: "Password changed successfully!"
+        });
+
+    } catch (error) {
+        console.error("Error changing password:", error);
+        const user = await User.findById(req.session.user);
+        res.render("changePassword", {
+            user: user,
+            page: 'password',
+            error: "An error occurred while changing password"
+        });
+    }
+}
+
 
 
 module.exports={
@@ -333,5 +558,9 @@ module.exports={
     loadOrders,
     loadWallet,
     loadChangePassword,
-    loadReferral
+    loadReferral,
+    sendEmailOTP,
+    loadVerifyEmailOTP,
+    verifyEmailOTP,
+    changePassword
 }

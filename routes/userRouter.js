@@ -55,7 +55,13 @@ router.get("/address",userAuth,profileController.loadAddress)
 router.get("/orders",userAuth,profileController.loadOrders)
 router.get("/wallet",userAuth,profileController.loadWallet)
 router.get("/change-password",userAuth,profileController.loadChangePassword)
+router.post("/change-password",userAuth,profileController.changePassword)
 router.get("/referral",userAuth,profileController.loadReferral)
+
+// Email Change Routes
+router.post("/send-email-otp",userAuth,profileController.sendEmailOTP)
+router.get("/verify-email-otp",userAuth,profileController.loadVerifyEmailOTP)
+router.post("/verify-email-otp",userAuth,profileController.verifyEmailOTP)
 
 
 //Whishlist Management

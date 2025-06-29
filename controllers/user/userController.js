@@ -77,9 +77,11 @@
     productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     productData = productData.slice(0, 9);
 
+    
 
     if (user) {
       const userData = await User.findById(user);
+
       res.render("home", { user: userData, products: productData });
     } 
     else {
