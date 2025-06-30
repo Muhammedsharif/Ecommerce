@@ -39,7 +39,11 @@
             },
             altPhone:{
                 type:String,
-                required:true
+                required:false
+            },
+            isDefault:{
+                type:Boolean,
+                default:false
             }
         }]
      

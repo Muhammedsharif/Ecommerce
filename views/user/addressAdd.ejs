@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Add New Address | 1NOTONE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: #fff;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #4285f4;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .icon-badge {
+            position: relative;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .badge.blue {
+            background: #4285f4;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #4285f4;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+               font-size: 1.75rem;
+    font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .form-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .location-icon {
+            width: 60px;
+            height: 60px;
+            background: #4285f4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            padding-left: 1rem;
+            border-left: 3px solid #4285f4;
+        }
+
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+             color: #ff4757; 
+            font-size: 1rem;
+        }
+
+        input-icon a{
+            color: #7b7979;
+            text-decoration: none;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        .form-input.error {
+            border-color: #ff4757;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-input.error {
+            border-color: #ff4757;
+            background-color: #fff5f5;
+        }
+
+        .form-input.error:focus {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+        }
+
+        .help-text {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid transparent;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert h5 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .alert ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .alert li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Checkbox Styles */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #007bff;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-weight: 500;
+            color: #495057;
+            cursor: pointer;
+            margin: 0;
+        }
+
+         .breadcrumb {
+            display: flex;
+            align-items: flex-start;
+           
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .breadcrumb a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #495057;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 8px;
+            color: #6c757d;
+        }
+
+        /* Address Type Selection */
+        .address-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .address-type {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .address-type:hover {
+            border-color: #4285f4;
+        }
+
+        .address-type.selected {
+            border-color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .address-type-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+
+        .address-type.selected .address-type-icon {
+            background: #333;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+        }
+
+        .address-type-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #4285f4;
+        }
+
+        /* Buttons */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3367d6;
+        }
+
+        /* Footer */
+        .footer {
+            background: #333;
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        .footer-section ul li a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 0 1rem;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .container {
+                padding: 0 1rem 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .address-types {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+     <%- include("../partials/user/header") %>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <nav class="breadcrumb">
+                    <a href="/" onclick="navigateHome()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="/profile" onclick="navigateAccount()">My Account</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="/address" onclick="navigateAccount()">My Address</a>
+                 
+                     <span class="breadcrumb-separator">/</span>
+                     <a href="#" onclick="navigateAccount()">Add New Address</a>
+                    <span class="breadcrumb-separator">/</span>
+                   
+                </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <div>
+                    <h1 class="form-title">Add New Address</h1>
+                    <p class="form-subtitle">Enter your delivery information</p>
+                </div>
+                <div class="location-icon"><i class="fas fa-map-marker-alt"></i></div>
+            </div>
+
+            <form method="POST" action="/addAddress">
+                <!-- Personal Information -->
+                <h2 class="section-header">Personal Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-container">
+                            <span class="input-icon"> <i class="fas fa-user"></i></span>
+                            <input type="text" name="name" id="name" class="form-input" placeholder="Full Name"
+                                   value="<%= locals.formData ? formData.name : '' %>" >
+                        </div>
+                        <div class="error-message" id="name-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-container">
+                            <span class="input-icon"><i class="fas fa-phone-alt"></i></span>
+                            <input type="tel" name="phone" id="phone" class="form-input" placeholder="Mobile Number"
+                                   value="<%= locals.formData ? formData.phone : '' %>" >
+                        </div>
+                        <div class="error-message" id="phone-error"></div>
+                    </div>
+                </div>
+
+                <!-- Address Details -->
+                <h2 class="section-header">Address Details</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-container">
+                            <span class="input-icon"> <i class="fas fa-city"></i></span>
+                            <input type="text" name="city" id="city" class="form-input" placeholder="City"
+                                   value="<%= locals.formData ? formData.city : '' %>" >
+                        </div>
+                        <div class="error-message" id="city-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-container">
+                            <span class="input-icon"> <i class="fas fa-map-marked-alt"></i></span>
+                            <input type="text" name="state" id="state" class="form-input" placeholder="State"
+                                   value="<%= locals.formData ? formData.state : '' %>" >
+                        </div>
+                        <div class="error-message" id="state-error"></div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-container">
+                            <span class="input-icon"><i class="fas fa-map-pin"></i></span>
+                            <input type="text" name="pincode" id="pincode" class="form-input" placeholder="Pin Code"
+                                   value="<%= locals.formData ? formData.pincode : '' %>" >
+                        </div>
+                        <div class="error-message" id="pincode-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-container">
+                            <span class="input-icon"> <i class="fas fa-landmark"></i></span>
+                            <input type="text" name="landmark" id="landmark" class="form-input" placeholder="Landmark"
+                                   value="<%= locals.formData ? formData.landmark : '' %>" >
+                        </div>
+                        <div class="error-message" id="landmark-error"></div>
+                    </div>
+                </div>
+
+                <!-- Address Type -->
+                <h2 class="section-header">Address Type</h2>
+                <div class="address-types">
+                    <div class="address-type <%= (locals.formData && formData.addressType === 'Home') ? 'selected' : '' %>" onclick="selectAddressType(this, 'Home')">
+                        <div class="address-type-icon"><i class="fas fa-home"></i></div>
+                        <div class="address-type-label">Home</div>
+                    </div>
+                    <div class="address-type <%= (locals.formData && formData.addressType === 'Work') ? 'selected' : '' %>" onclick="selectAddressType(this, 'Work')">
+                        <div class="address-type-icon"> <i class="fas fa-briefcase"></i></div>
+                        <div class="address-type-label">Work</div>
+                    </div>
+                    <div class="address-type <%= (locals.formData && formData.addressType === 'Other') ? 'selected' : '' %>" onclick="selectAddressType(this, 'Other')">
+                        <div class="address-type-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="address-type-label">Other</div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Hidden input for address type -->
+                <input type="hidden" name="addressType" id="addressType" value="<%= locals.formData ? formData.addressType : '' %>">
+                <div class="error-message" id="addressType-error"></div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">✕ Cancel</button>
+                    <button type="submit" class="btn btn-primary">✓ Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    
+     <%- include("../partials/user/footer") %>
+
+    <script>
+        function selectAddressType(element, type) {
+            // Remove selected class from all address types
+            document.querySelectorAll('.address-type').forEach(addressType => {
+                addressType.classList.remove('selected');
+            });
+
+            // Add selected class to clicked element
+            element.classList.add('selected');
+
+            // Set the hidden input value
+            document.getElementById('addressType').value = type;
+
+            // Clear address type error if any
+            clearFieldError('addressType');
+        }
+
+        // Function to show error for a specific field
+        function showFieldError(fieldName, message) {
+            const errorElement = document.getElementById(fieldName + '-error');
+            const inputElement = document.getElementById(fieldName);
+
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+
+            if (inputElement) {
+                inputElement.classList.add('error');
+            }
+        }
+
+        // Function to clear error for a specific field
+        function clearFieldError(fieldName) {
+            const errorElement = document.getElementById(fieldName + '-error');
+            const inputElement = document.getElementById(fieldName);
+
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.classList.remove('show');
+            }
+
+            if (inputElement) {
+                inputElement.classList.remove('error');
+            }
+        }
+
+        // Function to clear all errors
+        function clearAllErrors() {
+            const fields = ['name', 'phone', 'city', 'state', 'pincode', 'landmark', 'addressType'];
+            fields.forEach(field => clearFieldError(field));
+        }
+
+        // Individual field validation functions
+        function validateName(value) {
+            if (!value || value.trim().length === 0) {
+                return "Name is required";
+            }
+            if (value.trim().length < 2) {
+                return "Name must be at least 2 characters long";
+            }
+            if (value.trim().length > 50) {
+                return "Name must not exceed 50 characters";
+            }
+            if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+                return "Name can only contain letters and spaces";
+            }
+            return null;
+        }
+
+        function validatePhone(value) {
+            if (!value || value.trim().length === 0) {
+                return "Phone number is required";
+            }
+            if (!/^\d{10}$/.test(value.trim())) {
+                return "Phone number must be exactly 10 digits";
+            }
+            return null;
+        }
+
+       
+
+        function validateCity(value) {
+            if (!value || value.trim().length === 0) {
+                return "City is required";
+            }
+            if (value.trim().length < 2) {
+                return "City must be at least 2 characters long";
+            }
+            if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+                return "City can only contain letters and spaces";
+            }
+            return null;
+        }
+
+        function validateState(value) {
+            if (!value || value.trim().length === 0) {
+                return "State is required";
+            }
+            if (value.trim().length < 2) {
+                return "State must be at least 2 characters long";
+            }
+            if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+                return "State can only contain letters and spaces";
+            }
+            return null;
+        }
+
+        function validatePincode(value) {
+            if (!value || value.toString().trim().length === 0) {
+                return "Pincode is required";
+            }
+            if (!/^\d{6}$/.test(value.toString().trim())) {
+                return "Pincode must be exactly 6 digits";
+            }
+            return null;
+        }
+
+        function validateLandmark(value) {
+            if (!value || value.trim().length === 0) {
+                return "Landmark is required";
+            }
+            if (value.trim().length < 3) {
+                return "Landmark must be at least 3 characters long";
+            }
+            return null;
+        }
+
+        function validateAddressType(value) {
+            if (!value || value.trim().length === 0) {
+                return "Please select an address type";
+            }
+            const validTypes = ['Home', 'Work', 'Other'];
+            if (!validTypes.includes(value)) {
+                return "Address type must be Home, Work, or Other";
+            }
+            return null;
+        }
+
+        // Real-time validation on input change
+        function setupRealTimeValidation() {
+            const fields = [
+                { id: 'name', validator: validateName },
+                { id: 'phone', validator: validatePhone },
+             
+                { id: 'city', validator: validateCity },
+                { id: 'state', validator: validateState },
+                { id: 'pincode', validator: validatePincode },
+                { id: 'landmark', validator: validateLandmark }
+            ];
+
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.addEventListener('blur', function() {
+                        const error = field.validator(this.value);
+                        if (error) {
+                            showFieldError(field.id, error);
+                        } else {
+                            clearFieldError(field.id);
+                        }
+                    });
+
+                    element.addEventListener('input', function() {
+                        // Clear error on input if field was previously invalid
+                        if (this.classList.contains('error')) {
+                            const error = field.validator(this.value);
+                            if (!error) {
+                                clearFieldError(field.id);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            clearAllErrors();
+            let hasErrors = false;
+
+            // Validate all fields
+            const validations = [
+                { field: 'name', validator: validateName },
+                { field: 'phone', validator: validatePhone },
+                { field: 'city', validator: validateCity },
+                { field: 'state', validator: validateState },
+                { field: 'pincode', validator: validatePincode },
+                { field: 'landmark', validator: validateLandmark },
+                { field: 'addressType', validator: validateAddressType }
+            ];
+
+            validations.forEach(validation => {
+                const element = document.getElementById(validation.field);
+                const value = element ? element.value : '';
+                const error = validation.validator(value);
+
+                if (error) {
+                    showFieldError(validation.field, error);
+                    hasErrors = true;
+                }
+            });
+
+            if (hasErrors) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = document.querySelector('.error-message.show');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            // If all validations pass, show loading state
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+        });
+
+        // Function to display server-side errors
+        function displayServerErrors() {
+            '<% if (locals.fieldErrors) { %>'
+                const fieldErrors = '<%- JSON.stringify(fieldErrors) %>';
+                Object.keys(fieldErrors).forEach(field => {
+                    showFieldError(field, fieldErrors[field]);
+                });
+           '<% } %>'
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default address type if none selected
+            const selectedType = document.querySelector('.address-type.selected');
+            if (!selectedType) {
+                // Default to Home if no type is selected
+                const homeType = document.querySelector('.address-type');
+                if (homeType) {
+                    selectAddressType(homeType, 'Home');
+                }
+            }
+
+            // Setup real-time validation
+            setupRealTimeValidation();
+
+            // Display server-side validation errors if any
+            displayServerErrors();
+        });
+    </script>
+</body>
+</html>

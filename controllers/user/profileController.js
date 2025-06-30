@@ -1,4 +1,5 @@
 const User = require("../../models/userSchema")
+const Address = require("../../models/addressSchema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
@@ -186,12 +187,14 @@ const userProfile = async (req,res) =>{
         }
 
         const userData = await User.findById(userId);
+        const addressData = await Address.findOne({userId:userId})
         if (!userData) {
             return res.redirect("/pageNotFound"); // user illa
         }
          res.render("profile", {
             user: userData,
-            page: 'profile'
+            page: 'profile',
+            address: addressData
         });
 
     } catch (error) {
@@ -215,15 +218,440 @@ const loadAddress = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        // For now, render a simple page or redirect to profile with a message
-        res.render("profile", {
+        // Get user's addresses
+        const addressData = await Address.findOne({ userId: userId });
+        const addresses = addressData ? addressData.adress : [];
+
+        // Check for success message from URL parameters
+        const successMessage = req.query.success;
+
+        res.render("address", {
             user: userData,
             page: 'address',
-            message: 'Address management coming soon!'
+            addresses: addresses,
+            success: successMessage
         });
     } catch (error) {
         console.error("Error loading address page:", error);
         res.redirect("/pageNotFound");
+    }
+}
+
+const loadAddAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("addressAdd", {
+            user: userData,
+            page: 'address'
+        });
+    } catch (error) {
+        console.error("Error loading add address page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+// Address validation helper function
+const validateAddressData = (addressData) => {
+    const errors = [];
+
+    // Name validation
+    if (!addressData.name || addressData.name.trim().length === 0) {
+        errors.push("Name is required");
+    } else if (addressData.name.trim().length < 3) {
+        errors.push("Name must be at least 3 characters long");
+    } else if (addressData.name.trim().length > 50) {
+        errors.push("Name must not exceed 50 characters");
+    } else if (!/^[a-zA-Z\s]+$/.test(addressData.name.trim())) {
+        errors.push("Name can only contain letters and spaces");
+    }
+
+    // Address Type validation
+    if (!addressData.addressType || addressData.addressType.trim().length === 0) {
+        errors.push("Address type is required");
+    } else {
+        const validTypes = ['Home', 'Work', 'Other'];
+        if (!validTypes.includes(addressData.addressType)) {
+            errors.push("Address type must be Home, Work, or Other");
+        }
+    }
+
+    // City validation
+    if (!addressData.city || addressData.city.trim().length === 0) {
+        errors.push("City is required");
+    } else if (addressData.city.trim().length < 2) {
+        errors.push("City must be at least 2 characters long");
+    } else if (addressData.city.trim().length > 30) {
+        errors.push("City must not exceed 30 characters");
+    } else if (!/^[a-zA-Z\s]+$/.test(addressData.city.trim())) {
+        errors.push("City can only contain letters and spaces");
+    }
+
+    // Landmark validation
+    if (!addressData.landmark || addressData.landmark.trim().length === 0) {
+        errors.push("Landmark is required");
+    } else if (addressData.landmark.trim().length < 3) {
+        errors.push("Landmark must be at least 3 characters long");
+    } else if (addressData.landmark.trim().length > 100) {
+        errors.push("Landmark must not exceed 100 characters");
+    }
+
+    // State validation
+    if (!addressData.state || addressData.state.trim().length === 0) {
+        errors.push("State is required");
+    } else if (addressData.state.trim().length < 2) {
+        errors.push("State must be at least 2 characters long");
+    } else if (addressData.state.trim().length > 30) {
+        errors.push("State must not exceed 30 characters");
+    } else if (!/^[a-zA-Z\s]+$/.test(addressData.state.trim())) {
+        errors.push("State can only contain letters and spaces");
+    }
+
+    // Pincode validation
+    if (!addressData.pincode) {
+        errors.push("Pincode is required");
+    } else {
+        const pincodeStr = addressData.pincode.toString();
+        if (!/^\d{6}$/.test(pincodeStr)) {
+            errors.push("Pincode must be exactly 6 digits");
+        }
+    }
+
+    // Phone validation
+    if (!addressData.phone || addressData.phone.trim().length === 0) {
+        errors.push("Phone number is required");
+    } else {
+        const phoneStr = addressData.phone.trim();
+        if (!/^\d{10}$/.test(phoneStr)) {
+            errors.push("Phone number must be exactly 10 digits");
+        }
+    }
+
+   
+
+    return errors;
+}
+
+const addAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        // Extract and sanitize address data
+        const addressData = {
+            name: req.body.name ? req.body.name.trim() : '',
+            addressType: req.body.addressType ? req.body.addressType.trim() : '',
+            city: req.body.city ? req.body.city.trim() : '',
+            landmark: req.body.landmark ? req.body.landmark.trim() : '',
+            state: req.body.state ? req.body.state.trim() : '',
+            pincode: req.body.pincode,
+            phone: req.body.phone ? req.body.phone.trim() : '',
+            altPhone: req.body.altPhone ? req.body.altPhone.trim() : '',
+            isDefault: req.body.isDefault === 'on' || req.body.isDefault === 'true' || req.body.isDefault === true
+        };
+
+        // Validate address data
+        const validationErrors = validateAddressData(addressData);
+
+        if (validationErrors.length > 0) {
+            // Map errors to specific fields
+            const fieldErrors = {};
+            validationErrors.forEach(error => {
+                if (error.includes('Name')) {
+                    fieldErrors.name = error;
+                } else if (error.includes('Phone')) {
+                    fieldErrors.phone = error;
+                } else if (error.includes('City')) {
+                    fieldErrors.city = error;
+                } else if (error.includes('State')) {
+                    fieldErrors.state = error;
+                } else if (error.includes('Pincode')) {
+                    fieldErrors.pincode = error;
+                } else if (error.includes('Landmark')) {
+                    fieldErrors.landmark = error;
+                } else if (error.includes('Address type')) {
+                    fieldErrors.addressType = error;
+                }
+            });
+
+            return res.render("addressAdd", {
+                user: userData,
+                page: 'address',
+                errors: validationErrors,
+                fieldErrors: fieldErrors,
+                formData: addressData
+            });
+        }
+
+        // Check if user already has addresses
+        let userAddress = await Address.findOne({ userId: userId });
+
+        if (!userAddress) {
+            // First address - automatically make it default
+            addressData.isDefault = true;
+
+            // Create new address document
+            userAddress = new Address({
+                userId: userId,
+                adress: [addressData]
+            });
+        } else {
+            // Check if user already has 5 addresses (limit)
+            if (userAddress.adress.length >= 5) {
+                return res.render("addressAdd", {
+                    user: userData,
+                    page: 'address',
+                    errors: ["You can only have maximum 5 addresses"],
+                    fieldErrors: {},
+                    formData: addressData
+                });
+            }
+
+            // Handle default address logic
+            if (addressData.isDefault) {
+                // Set all existing addresses to non-default
+                userAddress.adress.forEach(address => {
+                    address.isDefault = false;
+                });
+            } else {
+                // If no address is currently default and this is not being set as default,
+                // check if user has any default address
+                const hasDefaultAddress = userAddress.adress.some(address => address.isDefault);
+                if (!hasDefaultAddress) {
+                    // Make this address default if no other default exists
+                    addressData.isDefault = true;
+                }
+            }
+
+            // Add new address to existing addresses
+            userAddress.adress.push(addressData);
+        }
+
+        // Save the address
+        await userAddress.save();
+
+        // Redirect to address page with success parameter
+        res.redirect("/address?added=true");
+
+    } catch (error) {
+        console.error("Error adding address:", error);
+
+        const userData = await User.findById(req.session.user);
+        res.render("addressAdd", {
+            user: userData,
+            page: 'address',
+            errors: ["An error occurred while adding the address. Please try again."],
+            fieldErrors: {},
+            formData: req.body
+        });
+    }
+}
+
+const setDefaultAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { addressId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
+        }
+
+        if (!addressId) {
+            return res.status(400).json({ success: false, message: "Address ID is required" });
+        }
+
+        // Find user's address document
+        const userAddress = await Address.findOne({ userId: userId });
+
+        if (!userAddress) {
+            return res.status(404).json({ success: false, message: "No addresses found for user" });
+        }
+
+        // Find the specific address to set as default
+        const targetAddress = userAddress.adress.id(addressId);
+
+        if (!targetAddress) {
+            return res.status(404).json({ success: false, message: "Address not found" });
+        }
+
+        // Set all addresses to non-default
+        userAddress.adress.forEach(address => {
+            address.isDefault = false;
+        });
+
+        // Set the target address as default
+        targetAddress.isDefault = true;
+
+        // Save the changes
+        await userAddress.save();
+
+        res.json({
+            success: true,
+            message: "Default address updated successfully",
+            defaultAddressId: addressId
+        });
+
+    } catch (error) {
+        console.error("Error setting default address:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while setting default address"
+        });
+    }
+}
+
+const loadeditAddress = async (req,res)=>{
+    try {
+
+        const addressId = req.query.id
+        const user = req.session.user
+        const currAddress = await Address.findOne({
+            
+            "adress._id":addressId
+        })
+
+        if(!currAddress){
+            console.log("currAddress")
+            return res.redirect("/pageNotFound")
+            
+
+        }
+
+        const addressData = currAddress.adress.find((item)=>{
+            return item._id.toString()===addressId.toString();
+        })
+
+        if(!addressData){
+            return res.redirect("/pageNotFound")
+        }
+
+        res.render("editAddress",{address:addressData,user:user})
+        
+    } catch (error) {
+
+        console.error("Error in edit address",error)
+        res.redirect("/pageNotFound")        
+    }
+}
+
+const editAddress = async (req,res)=>{
+    try {
+
+        const data = req.body
+        console.log("req.body",data)
+        const addressId = req.query.id
+        const user = req.session.user
+        const findAddress = await Address.findOne({"adress._id":addressId})
+        if(!findAddress){
+            res.redirect("/pageNotFound")
+        }
+
+        await Address.updateOne(
+            {"adress._id":addressId},
+            {$set:{
+                "adress.$":{
+                    _id:addressId,
+                    name:data.name,
+                    addressType:data.addressType,
+                    city:data.city,
+                    landmark:data.landmark,
+                    state:data.state,
+                    pincode:data.pincode,
+                    phone:data.phone,
+                    isDefault:data.isDefault
+                }
+            }}
+        )
+
+        res.redirect('/address?updated=true')
+        
+    } catch (error) {
+
+        console.error("Error in edit address",error)
+        res.redirect("/pageNotFound")        
+    }
+}
+
+const deleteAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const addressId = req.query.id;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
+        }
+
+        if (!addressId) {
+            return res.status(400).json({ success: false, message: "Address ID is required" });
+        }
+
+        // Find user's address document
+        const userAddress = await Address.findOne({ userId: userId });
+
+        if (!userAddress) {
+            return res.status(404).json({ success: false, message: "No addresses found for user" });
+        }
+
+        // Find the specific address to delete
+        const targetAddress = userAddress.adress.id(addressId);
+
+        if (!targetAddress) {
+            return res.status(404).json({ success: false, message: "Address not found" });
+        }
+
+        // Check if this is the only address
+        if (userAddress.adress.length === 1) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot delete the only address. You must have at least one address."
+            });
+        }
+
+        // Check if deleting the default address
+        const wasDefault = targetAddress.isDefault;
+
+        // Remove the address
+        await Address.updateOne(
+            { "adress._id": addressId },
+            { $pull: { adress: { _id: addressId } } }
+        );
+
+        // If we deleted the default address, set another address as default
+        if (wasDefault) {
+            const updatedUserAddress = await Address.findOne({ userId: userId });
+            if (updatedUserAddress && updatedUserAddress.adress.length > 0) {
+                // Set the first remaining address as default
+                updatedUserAddress.adress[0].isDefault = true;
+                await updatedUserAddress.save();
+            }
+        }
+
+        res.json({
+            success: true,
+            message: "Address deleted successfully"
+        });
+
+    } catch (error) {
+        console.error("Error in delete address:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while deleting the address"
+        });
     }
 }
 
@@ -500,16 +928,16 @@ const changePassword = async (req, res) => {
             });
         }
 
-        if (newPassword.length < 6) {
+        if (newPassword.length < 8) {
             return res.render("changePassword", {
                 user: user,
                 page: 'password',
-                error: "Password must be at least 6 characters long"
+                error: "Password must be at least 8 characters long"
             });
         }
 
         // Verify current password
-        const bcrypt = require('bcrypt');
+        
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
         if (!isCurrentPasswordValid) {
@@ -555,6 +983,12 @@ module.exports={
     resendOtp,
     resetPassword,
     loadAddress,
+    loadAddAddress,
+    addAddress,
+    setDefaultAddress,
+    loadeditAddress,
+    editAddress,
+    deleteAddress,
     loadOrders,
     loadWallet,
     loadChangePassword,

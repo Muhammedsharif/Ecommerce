@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Wear - Shopping Cart</title>
+    <title>Shopping Cart - 1NOTONE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,126 +14,62 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background-color: #f8f9fa;
             color: #333;
         }
 
-        .header {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
+        
 
-        .logo {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .nav {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav a:hover {
-            color: #667eea;
-        }
-
-        .header-icons {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .cart-icon {
-            position: relative;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #667eea;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
+        .cart-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .cart-title {
-            text-align: center;
-            font-size: 3rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 3rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .cart-content {
+            padding: 0 2rem;
             display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 3rem;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
         }
 
         .cart-items {
             background: white;
-            border-radius: 20px;
+            border-radius: 10px;
             padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .cart-title {
+            font-size: 1.5rem;
+            font-weight: bold;
         }
 
         .empty-cart-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
+            background: none;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 0.9rem;
+            transition: all 0.3s;
         }
 
         .empty-cart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            background: #ef4444;
+            color: white;
         }
 
         .cart-item {
             display: flex;
-            align-items: center;
+            gap: 1rem;
             padding: 1.5rem 0;
-            border-bottom: 1px solid #eee;
-            gap: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: relative;
         }
 
         .cart-item:last-child {
@@ -140,17 +77,11 @@
         }
 
         .item-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .item-image img {
-            width: 100%;
-            height: 100%;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
+            border-radius: 8px;
+            background: #f3f4f6;
         }
 
         .item-details {
@@ -158,357 +89,456 @@
         }
 
         .item-name {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #333;
             margin-bottom: 0.5rem;
+            color: #333;
         }
 
         .item-specs {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1rem;
-            color: #666;
+            margin-bottom: 0.5rem;
+            color: #6b7280;
+            font-size: 0.9rem;
         }
 
         .item-price {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #667eea;
+            color: #ef4444;
         }
 
         .quantity-controls {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
+            margin: 1rem 0;
         }
 
         .qty-btn {
-            width: 35px;
-            height: 35px;
-            border: 2px solid #667eea;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #d1d5db;
             background: white;
-            border-radius: 50%;
+            border-radius: 5px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-            color: #667eea;
             transition: all 0.3s;
         }
 
         .qty-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.1);
+            background: #f3f4f6;
         }
 
         .qty-input {
             width: 60px;
             text-align: center;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            padding: 0.5rem;
-            font-weight: bold;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 0.3rem;
+            font-size: 1rem;
         }
 
         .remove-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 20px;
+            background: none;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            margin-left: 1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 0.8rem;
+            transition: all 0.3s;
         }
 
         .remove-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            background: #ef4444;
+            color: white;
         }
 
         .cart-summary {
             background: white;
-            border-radius: 20px;
+            border-radius: 10px;
             padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             height: fit-content;
             position: sticky;
             top: 2rem;
         }
 
         .summary-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             margin-bottom: 1.5rem;
             text-align: center;
-            color: #333;
         }
 
-        .summary-row {
+        .summary-line {
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 1px solid #e5e7eb;
         }
 
-        .summary-row:last-of-type {
-            font-size: 1.3rem;
+        .summary-line:last-of-type {
+            border-bottom: 2px solid #6366f1;
             font-weight: bold;
-            color: #667eea;
-            border-bottom: none;
-            margin-bottom: 2rem;
+            font-size: 1.2rem;
         }
 
-        .checkout-info {
-            background: #f8f9ff;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            color: #666;
-            font-size: 0.9rem;
-            text-align: center;
+        .subtotal {
+            font-size: 1.5rem;
+            color: #ef4444;
         }
 
         .checkout-btn {
             width: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: #6366f1;
             color: white;
             border: none;
             padding: 1rem;
-            border-radius: 15px;
+            border-radius: 8px;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 1.5rem 0;
+            transition: background 0.3s;
         }
 
         .checkout-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            background: #5856eb;
         }
 
-        .continue-btn {
+        .continue-shopping {
             width: 100%;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            padding: 1rem;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            background: none;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .continue-btn:hover {
-            background: #667eea;
+        .continue-shopping:hover {
+            background: #ef4444;
             color: white;
-            transform: translateY(-2px);
+        }
+
+        .shipping-note {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+
+        .selected-item {
+            border-left: 4px solid #06b6d4;
+            padding-left: 1rem;
+            margin-left: -1rem;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-cart i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
-            .cart-content {
+            .cart-container {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .cart-items, .cart-summary {
+                padding: 1rem;
             }
             
             .cart-item {
                 flex-direction: column;
-                text-align: center;
+                gap: 0.5rem;
             }
             
-            .quantity-controls {
-                justify-content: center;
+            .item-image {
+                width: 100%;
+                height: 200px;
             }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">ELITE WEAR</div>
-        <nav class="nav">
-            <a href="#home">HOME</a>
-            <a href="#shop">SHOP</a>
-            <a href="#about">ABOUT</a>
-            <a href="#contact">CONTACT</a>
-        </nav>
-        <div class="header-icons">
-            <div class="cart-icon">
-                🛒
-                <span class="cart-badge" id="cartBadge">3</span>
+    <!-- Header -->
+   
+ <%- include("../partials/user/header") %>
+    <!-- Cart Container -->
+    <div class="cart-container">
+        <!-- Cart Items -->
+        <div class="cart-items">
+            <div class="cart-header">
+                <h2 class="cart-title">Shopping Cart</h2>
+                <button class="empty-cart-btn" onclick="emptyCart()">
+                    <i class="fas fa-trash"></i> Empty my Cart
+                </button>
             </div>
-            <div style="color: white;">👤</div>
-        </div>
-    </header>
 
-    <div class="container">
-        <h1 class="cart-title">YOUR SHOPPING CART</h1>
-        
-        <div class="cart-content">
-            <div class="cart-items">
-                <button class="empty-cart-btn" onclick="emptyCart()">🗑️ Empty my Cart</button>
-                
-                <div class="cart-item">
-                    <div class="item-image">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='%23f8d7da' width='200' height='200'/%3E%3Cpath fill='%23721c24' d='M50 50h100v120H50z'/%3E%3Cpath fill='%23fff' d='M60 60h80v40H60z'/%3E%3C/svg%3E" alt="Signature Twill Paisley Effect Shirt">
+            <!-- Cart Item 1 -->
+            <div class="cart-item" data-item-id="1">
+                <img src="https://via.placeholder.com/80x80/8B4513/FFFFFF?text=Shirt" alt="Solid Merino Wool Shirt" class="item-image">
+                <div class="item-details">
+                    <h3 class="item-name">Solid Merino Wool Shirt</h3>
+                    <div class="item-specs">
+                        <span>Size: S</span>
+                        <span>Color: Brown</span>
                     </div>
-                    <div class="item-details">
-                        <div class="item-name">Signature Twill Paisley Effect Shirt</div>
-                        <div class="item-specs">
-                            <span>Size: S</span>
-                            <span>Color: Black</span>
-                        </div>
-                        <div class="item-price">₹3612.00</div>
-                    </div>
+                    <div class="item-price">₹17220.00</div>
+                    
                     <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(1, -1)">−</button>
-                        <input type="number" class="qty-input" value="1" id="qty1" readonly>
+                        <button class="qty-btn" onclick="updateQuantity(1, -1)">-</button>
+                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(1, this.value)">
                         <button class="qty-btn" onclick="updateQuantity(1, 1)">+</button>
-                        <button class="remove-btn" onclick="removeItem(1)">❌ Remove</button>
                     </div>
+                    
+                    <button class="remove-btn" onclick="removeItem(1)">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
                 </div>
+            </div>
 
-                <div class="cart-item">
-                    <div class="item-image">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='%23f8d7da' width='200' height='200'/%3E%3Cpath fill='%23721c24' d='M50 50h100v120H50z'/%3E%3Cpath fill='%23fff' d='M60 60h80v40H60z'/%3E%3C/svg%3E" alt="Signature Twill Paisley Effect Shirt">
+            <!-- Cart Item 2 -->
+            <div class="cart-item" data-item-id="2">
+                <img src="https://via.placeholder.com/80x80/8B4513/FFFFFF?text=Shirt" alt="Solid Merino Wool Shirt" class="item-image">
+                <div class="item-details">
+                    <h3 class="item-name">Solid Merino Wool Shirt</h3>
+                    <div class="item-specs">
+                        <span>Size: M</span>
+                        <span>Color: Brown</span>
                     </div>
-                    <div class="item-details">
-                        <div class="item-name">Signature Twill Paisley Effect Shirt</div>
-                        <div class="item-specs">
-                            <span>Size: M</span>
-                            <span>Color: Black</span>
-                        </div>
-                        <div class="item-price">₹3696.00</div>
-                    </div>
+                    <div class="item-price">₹18040.00</div>
+                    
                     <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(2, -1)">−</button>
-                        <input type="number" class="qty-input" value="2" id="qty2" readonly>
+                        <button class="qty-btn" onclick="updateQuantity(2, -1)">-</button>
+                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(2, this.value)">
                         <button class="qty-btn" onclick="updateQuantity(2, 1)">+</button>
-                        <button class="remove-btn" onclick="removeItem(2)">❌ Remove</button>
                     </div>
+                    
+                    <button class="remove-btn" onclick="removeItem(2)">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
                 </div>
             </div>
 
-            <div class="cart-summary">
-                <div class="summary-title">SUBTOTAL</div>
-                <div class="summary-row">
-                    <span>Subtotal:</span>
-                    <span id="subtotal">₹11004.00</span>
+            <!-- Cart Item 3 - Selected -->
+            <div class="cart-item selected-item" data-item-id="3">
+                <img src="https://via.placeholder.com/80x80/708090/FFFFFF?text=Shirt" alt="Filo di Scozia Shirt" class="item-image">
+                <div class="item-details">
+                    <h3 class="item-name">Filo di Scozia Shirt</h3>
+                    <div class="item-specs">
+                        <span>Size: L</span>
+                        <span>Color: Gray</span>
+                    </div>
+                    <div class="item-price">₹2394.00</div>
+                    
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity(3, -1)">-</button>
+                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(3, this.value)">
+                        <button class="qty-btn" onclick="updateQuantity(3, 1)">+</button>
+                    </div>
+                    
+                    <button class="remove-btn" onclick="removeItem(3)">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
                 </div>
-                <div class="summary-row">
-                    <span>Total:</span>
-                    <span id="total">₹11004.00</span>
-                </div>
-                
-                <div class="checkout-info">
-                    ℹ️ Shipping, taxes, and discount codes calculated at checkout.
-                </div>
-                
-                <button class="checkout-btn" onclick="proceedToCheckout()">
-                    🔒 Proceed to checkout
-                </button>
-                <button class="continue-btn" onclick="continueShopping()">
-                    ← Continue Shopping
-                </button>
             </div>
+
+            <!-- Cart Item 4 -->
+            <div class="cart-item" data-item-id="4">
+                <img src="https://via.placeholder.com/80x80/FFC0CB/000000?text=Shirt" alt="Signature Twill Paisley Effect Shirt" class="item-image">
+                <div class="item-details">
+                    <h3 class="item-name">Signature Twill Paisley Effect Shirt</h3>
+                    <div class="item-specs">
+                        <span>Size: S</span>
+                        <span>Color: Black</span>
+                    </div>
+                    <div class="item-price">₹3612.00</div>
+                    
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity(4, -1)">-</button>
+                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(4, this.value)">
+                        <button class="qty-btn" onclick="updateQuantity(4, 1)">+</button>
+                    </div>
+                    
+                    <button class="remove-btn" onclick="removeItem(4)">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cart Item 5 -->
+            <div class="cart-item" data-item-id="5">
+                <img src="https://via.placeholder.com/80x80/FFC0CB/000000?text=Shirt" alt="Signature Twill Paisley Effect Shirt" class="item-image">
+                <div class="item-details">
+                    <h3 class="item-name">Signature Twill Paisley Effect Shirt</h3>
+                    <div class="item-specs">
+                        <span>Size: M</span>
+                        <span>Color: Black</span>
+                    </div>
+                    <div class="item-price">₹3696.00</div>
+                    
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity(5, -1)">-</button>
+                        <input type="number" value="3" min="1" class="qty-input" onchange="setQuantity(5, this.value)">
+                        <button class="qty-btn" onclick="updateQuantity(5, 1)">+</button>
+                    </div>
+                    
+                    <button class="remove-btn" onclick="removeItem(5)">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="cart-summary">
+            <h3 class="summary-title">Order Summary</h3>
+            
+            <div class="summary-line">
+                <span>SUBTOTAL</span>
+                <span class="subtotal">₹56134.00</span>
+            </div>
+            
+            <p class="shipping-note">
+                <i class="fas fa-info-circle"></i>
+                Shipping, taxes, and discount codes calculated at checkout.
+            </p>
+            
+            <button class="checkout-btn" onclick="proceedToCheckout()">
+                <i class="fas fa-lock"></i> Proceed to checkout
+            </button>
+            
+            <button class="continue-shopping" onclick="continueShopping()">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+            </button>
         </div>
     </div>
 
     <script>
-        let cartItems = {
-            1: { name: "Signature Twill Paisley Effect Shirt (S)", price: 3612, quantity: 1 },
-            2: { name: "Signature Twill Paisley Effect Shirt (M)", price: 3696, quantity: 2 }
-        };
+        // Sample data for demo purposes
+        let cartItems = [
+            { id: 1, name: 'Solid Merino Wool Shirt', size: 'S', color: 'Brown', price: 17220.00, quantity: 1 },
+            { id: 2, name: 'Solid Merino Wool Shirt', size: 'M', color: 'Brown', price: 18040.00, quantity: 1 },
+            { id: 3, name: 'Filo di Scozia Shirt', size: 'L', color: 'Gray', price: 2394.00, quantity: 1 },
+            { id: 4, name: 'Signature Twill Paisley Effect Shirt', size: 'S', color: 'Black', price: 3612.00, quantity: 1 },
+            { id: 5, name: 'Signature Twill Paisley Effect Shirt', size: 'M', color: 'Black', price: 3696.00, quantity: 3 }
+        ];
 
+        // Update quantity
         function updateQuantity(itemId, change) {
-            const qtyInput = document.getElementById(`qty${itemId}`);
-            let currentQty = parseInt(qtyInput.value);
-            let newQty = currentQty + change;
-            
-            if (newQty < 1) newQty = 1;
-            if (newQty > 10) newQty = 10;
-            
-            qtyInput.value = newQty;
-            cartItems[itemId].quantity = newQty;
-            
-            updateCartSummary();
-            updateCartBadge();
+            const item = cartItems.find(item => item.id === itemId);
+            if (item) {
+                item.quantity = Math.max(1, item.quantity + change);
+                updateUI();
+            }
         }
 
+        // Set specific quantity
+        function setQuantity(itemId, quantity) {
+            const item = cartItems.find(item => item.id === itemId);
+            if (item && quantity >= 1) {
+                item.quantity = parseInt(quantity);
+                updateUI();
+            }
+        }
+
+        // Remove item
         function removeItem(itemId) {
-            const itemElement = document.querySelector(`.cart-item:nth-of-type(${itemId})`);
-            if (itemElement) {
-                itemElement.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => {
-                    itemElement.remove();
-                    delete cartItems[itemId];
-                    updateCartSummary();
-                    updateCartBadge();
-                }, 300);
+            if (confirm('Are you sure you want to remove this item?')) {
+                cartItems = cartItems.filter(item => item.id !== itemId);
+                updateUI();
             }
         }
 
-        function updateCartSummary() {
-            let subtotal = 0;
-            for (let itemId in cartItems) {
-                subtotal += cartItems[itemId].price * cartItems[itemId].quantity;
-            }
-            
-            document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
-            document.getElementById('total').textContent = `₹${subtotal.toFixed(2)}`;
-        }
-
-        function updateCartBadge() {
-            let totalItems = 0;
-            for (let itemId in cartItems) {
-                totalItems += cartItems[itemId].quantity;
-            }
-            document.getElementById('cartBadge').textContent = totalItems;
-        }
-
+        // Empty cart
         function emptyCart() {
             if (confirm('Are you sure you want to empty your cart?')) {
-                const cartItemsContainer = document.querySelector('.cart-items');
-                const items = cartItemsContainer.querySelectorAll('.cart-item');
-                
-                items.forEach(item => {
-                    item.style.animation = 'fadeOut 0.3s ease-out';
-                    setTimeout(() => item.remove(), 300);
-                });
-                
-                cartItems = {};
-                setTimeout(() => {
-                    updateCartSummary();
-                    updateCartBadge();
-                }, 300);
+                cartItems = [];
+                updateUI();
             }
         }
 
+        // Update UI
+        function updateUI() {
+            // Update quantity inputs
+            cartItems.forEach(item => {
+                const input = document.querySelector(`[data-item-id="${item.id}"] .qty-input`);
+                if (input) {
+                    input.value = item.quantity;
+                }
+            });
+
+            // Calculate and update subtotal
+            const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+            document.querySelector('.subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+
+            // Update cart badge
+            const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+            document.querySelector('.nav-icons .badge').textContent = totalItems;
+
+            // If cart is empty, show empty message
+            if (cartItems.length === 0) {
+                document.querySelector('.cart-items').innerHTML = `
+                    <div class="cart-header">
+                        <h2 class="cart-title">Shopping Cart</h2>
+                        <button class="empty-cart-btn" onclick="emptyCart()">
+                            <i class="fas fa-trash"></i> Empty my Cart
+                        </button>
+                    </div>
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some items to get started!</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Proceed to checkout
         function proceedToCheckout() {
             alert('Proceeding to checkout...');
+            // window.location.href = '/checkout';
         }
 
+        // Continue shopping
         function continueShopping() {
-            alert('Redirecting to shop...');
+            alert('Continuing shopping...');
+            // window.location.href = '/shop';
         }
 
-        // CSS Animation for remove effect
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; transform: translateX(0); }
-                to { opacity: 0; transform: translateX(-100%); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Initialize cart summary
-        updateCartSummary();
+        // Add smooth animations on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.cart-item');
+            items.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.transition = 'all 0.5s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
     </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController")
 const productController=require("../controllers/user/productController")
 const wishlistController=require("../controllers/user/wishlistController")
+const cartController=require("../controllers/user/cartController")
 const { userAuth } = require("../middlewares/auth");
 
 
@@ -51,7 +52,7 @@ router.post("/reset-password",profileController.resetPassword)
 router.get("/Profile",userAuth,profileController.userProfile)
 
 // Additional Profile Pages
-router.get("/address",userAuth,profileController.loadAddress)
+
 router.get("/orders",userAuth,profileController.loadOrders)
 router.get("/wallet",userAuth,profileController.loadWallet)
 router.get("/change-password",userAuth,profileController.loadChangePassword)
@@ -63,12 +64,23 @@ router.post("/send-email-otp",userAuth,profileController.sendEmailOTP)
 router.get("/verify-email-otp",userAuth,profileController.loadVerifyEmailOTP)
 router.post("/verify-email-otp",userAuth,profileController.verifyEmailOTP)
 
+//Address Management
+router.get("/address",userAuth,profileController.loadAddress)
+router.get("/addAddress",userAuth,profileController.loadAddAddress)
+router.post("/addAddress",userAuth,profileController.addAddress)
+router.post("/setDefaultAddress",userAuth,profileController.setDefaultAddress)
+router.get("/editAddress",userAuth,profileController.loadeditAddress)
+router.post("/editAddress",userAuth,profileController.editAddress)
+router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 
 //Whishlist Management
 router.get("/wishlist",userAuth,wishlistController.loadWishlist)
 router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
 router.get('/removeFromWishlist',userAuth,wishlistController.removeProduct)
 
+
+//Cart Management
+router.get("/cart",userAuth,cartController.loadCart)
 
 
 

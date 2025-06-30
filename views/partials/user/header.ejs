@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nike - Just Do It</title>
+    <title>1NOTONE - Just Do It</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -36,9 +36,10 @@
                          <span class="wishlist-badge" id="wishlistBadge"><%= wishlistCount %></span>
                      <% } %>
                 </button></a>
-                <button class="nav-icon" title="Cart" onclick="showCart()">
+                <a href="/cart"><button class="nav-icon" title="Cart" >
                     <i class="fas fa-shopping-cart"></i>
-                </button>
+                    
+                </button></a>
 
                 
                     
@@ -82,22 +83,22 @@
     dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
   }
 
-      function showCart() {
-            if (cartItems.length === 0) {
-                showNotification('Your cart is empty!');
-                return;
-            }
+      // function showCart() {
+      //       if (cartItems.length === 0) {
+      //           showNotification('Your cart is empty!');
+      //           return;
+      //       }
             
-            let cartSummary = 'Cart Items:\n';
-            let total = 0;
-            cartItems.forEach(item => {
-                cartSummary += `${item.name} - $${item.price}\n`;
-                total += item.price;
-            });
-            cartSummary += `\nTotal: $${total.toFixed(2)}`;
+      //       let cartSummary = 'Cart Items:\n';
+      //       let total = 0;
+      //       cartItems.forEach(item => {
+      //           cartSummary += `${item.name} - $${item.price}\n`;
+      //           total += item.price;
+      //       });
+      //       cartSummary += `\nTotal: $${total.toFixed(2)}`;
             
-            alert(cartSummary);
-        }
+      //       alert(cartSummary);
+      //   }
 
         // function showWishlist() {
         //     if (wishlistItems.length === 0) {
