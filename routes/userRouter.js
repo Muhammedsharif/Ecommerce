@@ -94,6 +94,9 @@ router.post("/remove-from-cart",userAuth,cartController.removeFromCart)
 router.post("/empty-cart",userAuth,cartController.emptyCart)
 router.post("/move-to-cart-from-wishlist",userAuth,cartController.moveToCartFromWishlist)
 
+//Wallet Management
+router.get("/wallet",userAuth,profileController.loadWallet)
+
 
 
 

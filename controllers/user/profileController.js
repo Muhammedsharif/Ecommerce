@@ -690,7 +690,7 @@ const loadWallet = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        res.render("profile", {
+        res.render("wallet", {
             user: userData,
             page: 'wallet',
             message: 'Wallet management coming soon!'

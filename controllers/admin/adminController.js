@@ -13,11 +13,12 @@ const loadLogin = async (req, res) => {
 
     const error = req.query.message;
 const email = req.query.email;
+const password = req.query.password;1
     if(req.session.admin){
         return res.redirect("/admin/dashboard");
     }
  
-    res.render("adminlogin",{  error, email })
+    res.render("adminlogin",{  error, email,password })
 }
 
 const login = async (req, res) => {

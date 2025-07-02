@@ -12,7 +12,6 @@
     
     <style>
         /* Complete CSS for the Add Product Page */
-
 * {
     margin: 0;
     padding: 0;
@@ -104,58 +103,6 @@ body {
 .breadcrumb-item i {
     font-size: 13px;
     margin-right: 4px;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .breadcrumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.15);
-    }
-    
-    .breadcrumb-item a {
-        color: rgba(255, 255, 255, 0.85);
-    }
-    
-    .breadcrumb-item a:hover {
-        color: #ffffff;
-        background: rgba(255, 255, 255, 0.15);
-    }
-    
-    .breadcrumb-item.active {
-        color: rgba(255, 255, 255, 0.6);
-    }
-    
-    .breadcrumb-separator {
-        color: rgba(255, 255, 255, 0.5);
-    }
-}
-
-/* Alternative style variations for gradient backgrounds */
-.breadcrumb-nav.glass .breadcrumb {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.breadcrumb-nav.minimal .breadcrumb {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    backdrop-filter: none;
-    padding: 8px 0;
-}
-
-.breadcrumb-nav.minimal .breadcrumb-item a:hover {
-    background: rgba(255, 255, 255, 0.15);
-    text-decoration: none;
-}
-
-.breadcrumb-nav.solid .breadcrumb {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header {
@@ -339,6 +286,84 @@ body {
 .textarea-control {
     min-height: 120px;
     resize: vertical;
+}
+
+/* Product Variants Section */
+.product-variants-section {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 30px;
+    border: 1px solid #e5e7eb;
+}
+
+.product-variants-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.product-variants-header h3 {
+    color: #374151;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.product-variants-header p {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.variants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.variant-item {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.variant-item h4 {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.variant-field {
+    margin-bottom: 15px;
+}
+
+.variant-field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.variant-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.variant-field input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .image-upload-section {
@@ -652,7 +677,6 @@ img[src*="data:"] {
     .breadcrumb-item i {
         font-size: 12px;
     }
-
     .form-body {
         padding: 20px;
     }
@@ -668,7 +692,6 @@ img[src*="data:"] {
     .header h1 {
         font-size: 2rem;
     }
-
     .checkbox-group {
         gap: 8px;
     }
@@ -682,6 +705,10 @@ img[src*="data:"] {
     .checkbox-group span {
         font-size: 13px;
     }
+
+    .variants-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
@@ -693,7 +720,6 @@ img[src*="data:"] {
     .breadcrumb-separator {
         margin: 0 4px;
     }
-
     .checkbox-group {
         gap: 6px;
     }
@@ -730,6 +756,7 @@ img[src*="data:"] {
                 </li>
             </ol>
         </nav>
+
         <div class="header">
             <h1><i class="fas fa-plus-circle"></i> Add New Product</h1>
             <p>Create and manage your product inventory with ease</p>
@@ -776,22 +803,15 @@ img[src*="data:"] {
                                 <label class="form-label">
                                     <i class="fas fa-dollar-sign"></i> Regular Price
                                 </label>
-                                <input placeholder="0.00"  name="regularPrice" type="text" class="form-control">
+                                <input placeholder="0.00" name="regularPrice" type="text" class="form-control">
                                 <div id="regularPrice-error" class="error-message"></div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">
-                                    <i class="fas fa-percent"></i> Sale Price
+                                    <i class="fas fa-gift"></i> Product Offer (%)
                                 </label>
-                                <input placeholder="0.00"  name="salePrice" type="text" class="form-control">
-                                <div id="salePrice-error" class="error-message"></div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-cubes"></i> Quantity
-                                </label>
-                                <input placeholder="0" name="quantity" type="text" class="form-control">
-                                <div id="quantity-error" class="error-message"></div>
+                                <input placeholder="0" name="productOffer" type="number" min="0" max="100" class="form-control">
+                                <div id="productOffer-error" class="error-message"></div>
                             </div>
                         </div>
 
@@ -818,36 +838,48 @@ img[src*="data:"] {
                                 <div id="category-error" class="error-message"></div>
                             </div>
                         </div>
+
                         <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-ruler-combined"></i> Available Sizes
-                        </label>
-                        <div class="checkbox-group">
-  <label>
-    <input type="checkbox" name="sizes" value="6">
-    <span>Size 6</span>
-  </label>
-  <label>
-    <input type="checkbox" name="sizes" value="7">
-    <span>Size 7</span>
-  </label>
-  <label>
-    <input type="checkbox" name="sizes" value="8">
-    <span>Size 8</span>
-  </label>
-  <label>
-    <input type="checkbox" name="sizes" value="9">
-    <span>Size 9</span>
-  </label>
-  <label>
-    <input type="checkbox" name="sizes" value="10">
-    <span>Size 10</span>
-  </label>
-</div>
-                        <div id="sizes-error" class="error-message"></div>
-                    </div>
+                            <label class="form-label">
+                                <i class="fas fa-ruler-combined"></i> Available Sizes
+                            </label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="sizes" value="6" onchange="toggleSizeVariant('6', this.checked)">
+                                    <span>Size 6</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="sizes" value="7" onchange="toggleSizeVariant('7', this.checked)">
+                                    <span>Size 7</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="sizes" value="8" onchange="toggleSizeVariant('8', this.checked)">
+                                    <span>Size 8</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="sizes" value="9" onchange="toggleSizeVariant('9', this.checked)">
+                                    <span>Size 9</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="sizes" value="10" onchange="toggleSizeVariant('10', this.checked)">
+                                    <span>Size 10</span>
+                                </label>
+                            </div>
+                            <div id="sizes-error" class="error-message"></div>
+                        </div>
                     </div>
 
+                    <!-- Product Variants Section -->
+                    <div class="product-variants-section" id="productVariantsSection" style="display: none;">
+                        <div class="product-variants-header">
+                            <h3><i class="fas fa-layer-group"></i> Product Variants</h3>
+                            <p>Enter price and quantity for each size. Leave empty for unavailable sizes.</p>
+                        </div>
+                        <div class="variants-grid" id="variantsGrid">
+                            <!-- Size variants will be dynamically added here -->
+                        </div>
+                        <div id="variants-error" class="error-message"></div>
+                    </div>
 
                     <div class="image-upload-section">
                         <div class="image-upload-header">
@@ -871,7 +903,7 @@ img[src*="data:"] {
                                     </label>
                                 </div>
                                 <div id="cropperContainer1" class="image-cropper" style="display:none;">
-                                    <img src="" id="croppedImg1" alt="">
+                                    <img src="/placeholder.svg" id="croppedImg1" alt="">
                                     <button type="button" id="saveButton1" class="crop-button">
                                         <i class="fas fa-crop"></i> Crop & Save
                                     </button>
@@ -889,7 +921,7 @@ img[src*="data:"] {
                                     </label>
                                 </div>
                                 <div id="cropperContainer2" class="image-cropper" style="display:none;">
-                                    <img src="" id="croppedImg2" alt="">
+                                    <img src="/placeholder.svg" id="croppedImg2" alt="">
                                     <button type="button" id="saveButton2" class="crop-button">
                                         <i class="fas fa-crop"></i> Crop & Save
                                     </button>
@@ -907,7 +939,7 @@ img[src*="data:"] {
                                     </label>
                                 </div>
                                 <div id="cropperContainer3" class="image-cropper" style="display:none;">
-                                    <img src="" id="croppedImg3" alt="">
+                                    <img src="/placeholder.svg" id="croppedImg3" alt="">
                                     <button type="button" id="saveButton3" class="crop-button">
                                         <i class="fas fa-crop"></i> Crop & Save
                                     </button>
@@ -930,7 +962,79 @@ img[src*="data:"] {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
         const croppers = {};
-        const selectedImages = new Array(3).fill(null); // Array to store one image per input (index 0, 1, 2)
+        const selectedImages = new Array(3).fill(null);
+        const selectedSizes = [];
+        const sizeVariants = {};
+
+        // Toggle size variant section
+        function toggleSizeVariant(size, isChecked) {
+            if (isChecked) {
+                selectedSizes.push(size);
+                addSizeVariant(size);
+            } else {
+                const index = selectedSizes.indexOf(size);
+                if (index > -1) {
+                    selectedSizes.splice(index, 1);
+                }
+                removeSizeVariant(size);
+                delete sizeVariants[size];
+            }
+            updateVariantsSection();
+        }
+
+        // Add size variant
+        function addSizeVariant(size) {
+            sizeVariants[size] = { price: '', quantity: '' };
+        }
+
+        // Remove size variant
+        function removeSizeVariant(size) {
+            const variantElement = document.getElementById(`variant-${size}`);
+            if (variantElement) {
+                variantElement.remove();
+            }
+        }
+
+        // Update variants section visibility and content
+        function updateVariantsSection() {
+            const variantsSection = document.getElementById('productVariantsSection');
+            const variantsGrid = document.getElementById('variantsGrid');
+            
+            if (selectedSizes.length > 0) {
+                variantsSection.style.display = 'block';
+                variantsGrid.innerHTML = '';
+                
+                selectedSizes.forEach(size => {
+                    const variantHTML = `
+                        <div class="variant-item" id="variant-${size}">
+                            <h4>Size ${size}</h4>
+                            <div class="variant-field">
+                                <label>Price</label>
+                                <input type="text" placeholder="0.00" name="variant_price_${size}" 
+                                       onchange="updateSizeVariant('${size}', 'price', this.value)">
+                                <div id="variant-price-${size}-error" class="error-message"></div>
+                            </div>
+                            <div class="variant-field">
+                                <label>Quantity</label>
+                                <input type="number" placeholder="0" name="variant_quantity_${size}" min="0"
+                                       onchange="updateSizeVariant('${size}', 'quantity', this.value)">
+                                <div id="variant-quantity-${size}-error" class="error-message"></div>
+                            </div>
+                        </div>
+                    `;
+                    variantsGrid.innerHTML += variantHTML;
+                });
+            } else {
+                variantsSection.style.display = 'none';
+            }
+        }
+
+        // Update size variant data
+        function updateSizeVariant(size, field, value) {
+            if (sizeVariants[size]) {
+                sizeVariants[size][field] = value;
+            }
+        }
 
         async function validateAndSubmit() {
             if (validateForm()) {
@@ -951,8 +1055,12 @@ img[src*="data:"] {
                 try {
                     const form = document.getElementById('productForm');
                     const formData = new FormData(form);
+                    
+                    // Add size variants data
+                    formData.append('sizeVariants', JSON.stringify(sizeVariants));
+                    
                     // Ensure only the selected images are included
-                    formData.delete('images'); // Remove existing images
+                    formData.delete('images');
                     selectedImages.forEach((file, index) => {
                         if (file) {
                             formData.append('images', file, file.name);
@@ -965,7 +1073,6 @@ img[src*="data:"] {
                     });
 
                     const data = await response.json();
-
                     if (response.ok) {
                         await Swal.fire({
                             title: 'Success!',
@@ -1102,7 +1209,6 @@ img[src*="data:"] {
 
         function handleFileSelect(event, index) {
             const files = event.target.files;
-
             if (files.length > 0) {
                 const file = files[0];
                 selectedImages[index] = file;
@@ -1115,6 +1221,7 @@ img[src*="data:"] {
             addedImagesContainer.innerHTML = "";
 
             const validImages = selectedImages.filter(img => img !== null);
+
             if (validImages.length === 0) {
                 addedImagesContainer.innerHTML = '<p style="color: #b9bec7; font-style: italic;">No images selected</p>';
                 return;
@@ -1170,15 +1277,15 @@ img[src*="data:"] {
 
         function validateForm() {
             clearErrorMessages();
+
             const name = document.getElementsByName('productName')[0].value;
             const description = document.getElementById('descriptionid').value;
-            const brand =document.getElementsByName('brand')[0].value;
+            const brand = document.getElementsByName('brand')[0].value;
             const price = document.getElementsByName('regularPrice')[0].value;
-            const salePrice = document.getElementsByName('salePrice')[0].value;
             const color = document.getElementsByName('color')[0].value;
             const category = document.getElementsByName('category')[0].value;
-            const quantity = document.getElementsByName('quantity')[0].value;
             const sizes = document.querySelectorAll('input[name="sizes"]:checked');
+
             let isValid = true;
 
             if (!name || name.trim() === "") {
@@ -1192,28 +1299,13 @@ img[src*="data:"] {
             if (!description || description.trim() === "") {
                 displayErrorMessage('description-error', 'Please enter a product description.');
                 isValid = false;
-            } else if (!/^[a-zA-Z0-9\s.,'"’“”\-()\/:!&?—]+$/.test(description.trim())) {
+            } else if (!/^[a-zA-Z0-9\s.,'"'""\-()\/:!&?—]+$/.test(description.trim())) {
                 displayErrorMessage('description-error', 'Product description should contain only valid characters.');
-                isValid = false;
-            }
-
-            if (!quantity || parseInt(quantity) < 0 || !/^\d+$/.test(quantity)) {
-                displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
                 isValid = false;
             }
 
             if (!price || !/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) <= 0) {
                 displayErrorMessage('regularPrice-error', 'Please enter a valid positive price.');
-                isValid = false;
-            }
-
-            if (!salePrice || !/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
-                displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                isValid = false;
-            }
-
-            if (parseFloat(price) <= parseFloat(salePrice)) {
-                displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
                 isValid = false;
             }
 
@@ -1231,6 +1323,22 @@ img[src*="data:"] {
                 displayErrorMessage('sizes-error', 'Please select at least one size.');
                 isValid = false;
             }
+
+            // Validate size variants
+            selectedSizes.forEach(size => {
+                const priceInput = document.getElementsByName(`variant_price_${size}`)[0];
+                const quantityInput = document.getElementsByName(`variant_quantity_${size}`)[0];
+                
+                if (!priceInput.value || !/^\d+(\.\d{1,2})?$/.test(priceInput.value) || parseFloat(priceInput.value) <= 0) {
+                    displayErrorMessage(`variant-price-${size}-error`, 'Please enter a valid price.');
+                    isValid = false;
+                }
+                
+                if (!quantityInput.value || !/^\d+$/.test(quantityInput.value) || parseInt(quantityInput.value) < 0) {
+                    displayErrorMessage(`variant-quantity-${size}-error`, 'Please enter a valid quantity.');
+                    isValid = false;
+                }
+            });
 
             if (selectedImages.filter(img => img !== null).length !== 3) {
                 displayErrorMessage('images-error', 'Please select exactly three images.');
@@ -1265,6 +1373,19 @@ img[src*="data:"] {
             });
         }
 
+        function showImageUploadSuccess(count) {
+            Swal.fire({
+                title: 'Image Uploaded!',
+                text: `${count} image${count > 1 ? 's' : ''} uploaded successfully`,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+
+        // Enhanced interactions
         document.addEventListener('DOMContentLoaded', function() {
             const formControls = document.querySelectorAll('.form-control');
             formControls.forEach(control => {
@@ -1291,18 +1412,7 @@ img[src*="data:"] {
             });
         });
 
-        function showImageUploadSuccess(count) {
-            Swal.fire({
-                title: 'Image Uploaded!',
-                text: `${count} image${count > 1 ? 's' : ''} uploaded successfully`,
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        }
-
+        // Drag and drop functionality
         const imageUploadSection = document.querySelector('.image-upload-section');
         
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -1355,6 +1465,7 @@ img[src*="data:"] {
             }
         }
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

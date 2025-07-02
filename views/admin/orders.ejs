@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - 1NOTONE Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Admin Layout Structure */
+        
+    
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        /* Top Header */
+      
+
+        /* Content Container */
+        .content-container {
+            padding: 30px;
+            max-width: none;
+            width: 100%;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-container {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 14px;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-item a {
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #6b7280;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 8px;
+            color: #6b7280;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px 30px;
+            color: white;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .card-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-filter {
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 150px;
+        }
+
+        .status-filter:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .notification-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            width: 100%;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .orders-table thead {
+            background: #f9fafb;
+        }
+
+        .orders-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .orders-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
+        .orders-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .orders-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .orders-table tbody tr.hidden {
+            display: none;
+        }
+
+        /* Customer Info Styles */
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .customer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .customer-details h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 2px 0;
+        }
+
+        .customer-details p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Order ID Styles */
+        .order-id {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        /* Date Styles */
+        .order-date {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        /* Items Styles */
+        .order-items {
+            color: #1f2937;
+        }
+
+        .items-count {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .items-qty {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        /* Amount Styles */
+        .order-amount {
+            font-weight: 700;
+            color: #059669;
+            font-size: 14px;
+        }
+
+        /* Payment Styles */
+        .payment-method {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        /* Status Styles */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-returned {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .status-delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-cancelled {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .view-btn {
+            background: #1f2937;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #111827;
+        }
+
+        .status-btn {
+            background: #6b7280;
+            color: white;
+        }
+
+        .status-btn:hover {
+            background: #4b5563;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            display: none;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #d1d5db;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .content-container {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                max-width: none;
+            }
+
+            .filter-section {
+                justify-content: space-between;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .orders-table {
+                min-width: 800px;
+            }
+
+            .customer-info {
+                min-width: 180px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                min-width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/admin/header") %>
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        
+
+        <!-- Main Content -->
+        <main class="main-content">
+             
+
+            <!-- Content Container -->
+            <div class="content-container">
+                <!-- Breadcrumb Navigation -->
+                <div class="breadcrumb-container">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/admin/dashboard">
+                                    <i class="fas fa-home"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-separator">/</li>
+                            <li class="breadcrumb-item active">
+                                Order Management
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <!-- Main Card -->
+                <div class="main-card">
+                    <div class="card-header">
+                        <h2>Order Management</h2>
+                        <p>View, manage, and track all customer orders in one place</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Search and Filter Section -->
+                        <div class="search-filter-section">
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="search-input" placeholder="Search by Order ID, Customer" id="searchInput">
+                            </div>
+                            
+                            <div class="filter-section">
+                                <select class="status-filter" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="returned">Returned</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                
+                                <button class="notification-btn" onclick="showNotifications()">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge">3</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Orders Table -->
+                        <div class="table-container">
+                            <table class="orders-table" id="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th>Amount</th>
+                                        <th>Payment</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTableBody">
+                                    <!-- Static Order Data -->
+                                    <tr data-order-id="ORD-20250702-9323" data-customer="Abhinand S" data-status="returned">
+                                        <td>
+                                            <div class="order-id">ORD-20250702-9323</div>
+                                        </td>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">A</div>
+                                                <div class="customer-details">
+                                                    <h4>Abhinand S</h4>
+                                                    <p>abhinandshaji2002@gmail.com</p>
+                                                    <p>9539064676</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-date">
+                                                7/2/2025<br>
+                                                12:42:14 PM
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-items">
+                                                <div class="items-count">1 item(s)</div>
+                                                <div class="items-qty">Qty: 1</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-amount">₹0.00</div>
+                                        </td>
+                                        <td>
+                                            <div class="payment-method">Online Payment</div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-returned">RETURNED</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn view-btn" onclick="viewOrder('ORD-20250702-9323')">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn status-btn" onclick="updateStatus('ORD-20250702-9323')">
+                                                    <i class="fas fa-edit"></i> Status
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr data-order-id="ORD-20250701-3533" data-customer="Abhinand S" data-status="pending">
+                                        <td>
+                                            <div class="order-id">ORD-20250701-3533</div>
+                                        </td>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">A</div>
+                                                <div class="customer-details">
+                                                    <h4>Abhinand S</h4>
+                                                    <p>N/A</p>
+                                                    <p>9539064676</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-date">
+                                                7/1/2025<br>
+                                                9:22:56 PM
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-items">
+                                                <div class="items-count">3 item(s)</div>
+                                                <div class="items-qty">Qty: 3</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-amount">₹10350.49</div>
+                                        </td>
+                                        <td>
+                                            <div class="payment-method">Online Payment</div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-pending">PENDING</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn view-btn" onclick="viewOrder('ORD-20250701-3533')">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn status-btn" onclick="updateStatus('ORD-20250701-3533')">
+                                                    <i class="fas fa-edit"></i> Status
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr data-order-id="ORD-20250701-5494" data-customer="Abhinand S" data-status="pending">
+                                        <td>
+                                            <div class="order-id">ORD-20250701-5494</div>
+                                        </td>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">A</div>
+                                                <div class="customer-details">
+                                                    <h4>Abhinand S</h4>
+                                                    <p>N/A</p>
+                                                    <p>9539064676</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-date">
+                                                7/1/2025<br>
+                                                9:12:00 PM
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-items">
+                                                <div class="items-count">3 item(s)</div>
+                                                <div class="items-qty">Qty: 3</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-amount">₹10350.49</div>
+                                        </td>
+                                        <td>
+                                            <div class="payment-method">Online Payment</div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-pending">PENDING</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn view-btn" onclick="viewOrder('ORD-20250701-5494')">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn status-btn" onclick="updateStatus('ORD-20250701-5494')">
+                                                    <i class="fas fa-edit"></i> Status
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr data-order-id="ORD-20250630-1234" data-customer="John Doe" data-status="delivered">
+                                        <td>
+                                            <div class="order-id">ORD-20250630-1234</div>
+                                        </td>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">J</div>
+                                                <div class="customer-details">
+                                                    <h4>John Doe</h4>
+                                                    <p>john.doe@example.com</p>
+                                                    <p>9876543210</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-date">
+                                                6/30/2025<br>
+                                                3:15:22 PM
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-items">
+                                                <div class="items-count">2 item(s)</div>
+                                                <div class="items-qty">Qty: 2</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-amount">₹5500.00</div>
+                                        </td>
+                                        <td>
+                                            <div class="payment-method">Online Payment</div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-delivered">DELIVERED</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn view-btn" onclick="viewOrder('ORD-20250630-1234')">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn status-btn" onclick="updateStatus('ORD-20250630-1234')">
+                                                    <i class="fas fa-edit"></i> Status
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr data-order-id="ORD-20250629-5678" data-customer="Sarah Wilson" data-status="processing">
+                                        <td>
+                                            <div class="order-id">ORD-20250629-5678</div>
+                                        </td>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">S</div>
+                                                <div class="customer-details">
+                                                    <h4>Sarah Wilson</h4>
+                                                    <p>sarah.wilson@example.com</p>
+                                                    <p>8765432109</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-date">
+                                                6/29/2025<br>
+                                                11:30:45 AM
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-items">
+                                                <div class="items-count">1 item(s)</div>
+                                                <div class="items-qty">Qty: 1</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="order-amount">₹2750.00</div>
+                                        </td>
+                                        <td>
+                                            <div class="payment-method">Online Payment</div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-processing">PROCESSING</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn view-btn" onclick="viewOrder('ORD-20250629-5678')">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn status-btn" onclick="updateStatus('ORD-20250629-5678')">
+                                                    <i class="fas fa-edit"></i> Status
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Empty State (hidden by default) -->
+                            <div class="empty-state" id="emptyState">
+                                <i class="fas fa-inbox"></i>
+                                <h3>No orders found</h3>
+                                <p>No orders match your current search criteria.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Handle search functionality
+        document.getElementById('searchInput').addEventListener('input', function(event) {
+            const searchTerm = event.target.value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            filterOrders(searchTerm, statusFilter);
+        });
+
+        // Handle status filter
+        document.getElementById('statusFilter').addEventListener('change', function(event) {
+            const statusFilter = event.target.value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filterOrders(searchTerm, statusFilter);
+        });
+
+        // Filter orders function
+        function filterOrders(searchTerm, statusFilter) {
+            const rows = document.querySelectorAll('#ordersTableBody tr');
+            const emptyState = document.getElementById('emptyState');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const orderId = row.getAttribute('data-order-id') || '';
+                const customer = row.getAttribute('data-customer') || '';
+                const status = row.getAttribute('data-status') || '';
+
+                const matchesSearch = 
+                    orderId.toLowerCase().includes(searchTerm) ||
+                    customer.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = !statusFilter || status === statusFilter;
+
+                if (matchesSearch && matchesStatus) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+
+        // View order details
+        function viewOrder(orderId) {
+            // Get order data from the row
+            const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+            if (row) {
+                const customerName = row.querySelector('.customer-details h4').textContent;
+                const customerEmail = row.querySelector('.customer-details p:first-of-type').textContent;
+                const customerPhone = row.querySelector('.customer-details p:last-of-type').textContent;
+                const orderDate = row.querySelector('.order-date').textContent.trim();
+                const items = row.querySelector('.items-count').textContent;
+                const amount = row.querySelector('.order-amount').textContent;
+                const payment = row.querySelector('.payment-method').textContent;
+                const status = row.querySelector('.status-badge').textContent;
+
+                Swal.fire({
+                    title: `Order Details - ${orderId}`,
+                    html: `
+                        <div style="text-align: left; padding: 20px;">
+                            <h4>Customer Information</h4>
+                            <p><strong>Name:</strong> ${customerName}</p>
+                            <p><strong>Email:</strong> ${customerEmail}</p>
+                            <p><strong>Phone:</strong> ${customerPhone}</p>
+                            <hr>
+                            <h4>Order Information</h4>
+                            <p><strong>Date:</strong> ${orderDate}</p>
+                            <p><strong>Items:</strong> ${items}</p>
+                            <p><strong>Amount:</strong> ${amount}</p>
+                            <p><strong>Payment:</strong> ${payment}</p>
+                            <p><strong>Status:</strong> ${status}</p>
+                        </div>
+                    `,
+                    width: 600,
+                    confirmButtonText: 'Close',
+                    confirmButtonColor: '#3b82f6'
+                });
+            }
+        }
+
+        // Update order status
+        function updateStatus(orderId) {
+            const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+            if (row) {
+                const currentStatus = row.getAttribute('data-status');
+                
+                Swal.fire({
+                    title: 'Update Order Status',
+                    text: `Current status: ${currentStatus.toUpperCase()}`,
+                    input: 'select',
+                    inputOptions: {
+                        'pending': 'Pending',
+                        'processing': 'Processing',
+                        'delivered': 'Delivered',
+                        'returned': 'Returned',
+                        'cancelled': 'Cancelled'
+                    },
+                    inputValue: currentStatus,
+                    showCancelButton: true,
+                    confirmButtonText: 'Update Status',
+                    confirmButtonColor: '#3b82f6',
+                    cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                    if (result.isConfirmed && result.value !== currentStatus) {
+                        // Update the status in the DOM
+                        row.setAttribute('data-status', result.value);
+                        const statusBadge = row.querySelector('.status-badge');
+                        statusBadge.className = `status-badge status-${result.value}`;
+                        statusBadge.textContent = result.value.toUpperCase();
+                        
+                        Swal.fire({
+                            title: 'Status Updated!',
+                            text: `Order ${orderId} status has been updated to ${result.value.toUpperCase()}`,
+                            icon: 'success',
+                            confirmButtonColor: '#10b981'
+                        });
+                    }
+                });
+            }
+        }
+
+        // Show notifications
+        function showNotifications() {
+            Swal.fire({
+                title: 'Notifications',
+                html: `
+                    <div style="text-align: left;">
+                        <div style="padding: 10px; border-left: 4px solid #f59e0b; margin-bottom: 10px; background: #fef3c7;">
+                            <strong>New Order:</strong> ORD-20250702-9323 requires attention
+                        </div>
+                        <div style="padding: 10px; border-left: 4px solid #ef4444; margin-bottom: 10px; background: #fecaca;">
+                            <strong>Return Request:</strong> Customer requested return for order ORD-20250701-3533
+                        </div>
+                        <div style="padding: 10px; border-left: 4px solid #3b82f6; background: #dbeafe;">
+                            <strong>Payment Pending:</strong> 2 orders have pending payments
+                        </div>
+                    </div>
+                `,
+                width: 500,
+                confirmButtonText: 'Mark as Read',
+                confirmButtonColor: '#3b82f6'
+            }).then(() => {
+                // Reset notification badge
+                document.querySelector('.notification-badge').textContent = '0';
+                document.querySelector('.notification-badge').style.display = 'none';
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('adminSidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (window.innerWidth <= 1024 && 
+                !sidebar.contains(event.target) && 
+                !menuToggle.contains(event.target) && 
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
