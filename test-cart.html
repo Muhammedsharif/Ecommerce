@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Cart</title>
+</head>
+<body>
+    <h1>Test Cart Functionality</h1>
+    <p>If you can see this, the HTML file is loading correctly.</p>
+    <button onclick="testCart()">Test Cart Route</button>
+    <button onclick="testAddToCart()">Test Add to Cart</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCart() {
+            try {
+                const response = await fetch('/test-cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ test: 'data' })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Test cart response:', data);
+            } catch (error) {
+                console.error('Test cart error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+
+        async function testAddToCart() {
+            try {
+                const response = await fetch('/add-to-cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId: 'test123' })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Add to cart response:', data);
+            } catch (error) {
+                console.error('Add to cart error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

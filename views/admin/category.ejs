@@ -122,9 +122,9 @@
                                     Listed
                                 </span>
                                 <%}else{%>
-                                <span class="status-badge status-listed">
-                                    <i class="fas fa-check-circle"></i>
-                                    UnListed
+                                <span class="status-badge status-unlisted">
+                                    <i class="fas fa-times-circle"></i>
+                                    Unlisted
                                 </span>
                                 <%}%>
 
@@ -132,15 +132,15 @@
                             <td>
                                 <%if(category.isListed){%>
                                 <div class="action-buttons">
-                                    <a href="/admin/listCategory?id=<%=category._id%>" class="btn btn-unlist">
+                                    <button onclick="confirmUnlist('<%=category._id%>', '<%=category.name%>')" class="btn btn-unlist">
                                         <i class="fas fa-eye-slash"></i>
                                         Unlist
-                                    </a>
+                                    </button>
                                     <%}else{%>
-                                    <a href="/admin/unlistCategory?id=<%=category._id%>" class="btn btn-list">
+                                    <button onclick="confirmList('<%=category._id%>', '<%=category.name%>')" class="btn btn-list">
                                         <i class="fas fa-eye"></i>
                                         List
-                                    </a>
+                                    </button>
                                     <%}%>
                                 </div>
                             </td>
@@ -304,6 +304,145 @@
                             confirmButtonColor: '#ef4444'
                         });
                     });
+                }
+            });
+        }
+
+        // Confirm Unlist Category Function
+        function confirmUnlist(categoryId, categoryName) {
+            Swal.fire({
+                title: 'Unlist Category?',
+                text: `Are you sure you want to unlist the category "${categoryName}"? It will be hidden from users but not deleted.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, unlist it!',
+                cancelButtonText: 'Cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/listCategory?id=${categoryId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Update the UI without page refresh
+                            updateCategoryStatus(categoryId, false);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Unlisted!',
+                                text: data.message || 'Category has been unlisted successfully.',
+                                confirmButtonColor: '#667eea',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            throw new Error(data.message || 'Failed to unlist category');
+                        }
+                    } catch (error) {
+                        console.error('Error unlisting category:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: error.message || 'Failed to unlist category. Please try again.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                }
+            });
+        }
+
+        // Confirm List Category Function
+        function confirmList(categoryId, categoryName) {
+            Swal.fire({
+                title: 'List Category?',
+                text: `Are you sure you want to list the category "${categoryName}"? It will be visible to users again.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, list it!',
+                cancelButtonText: 'Cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/unlistCategory?id=${categoryId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Update the UI without page refresh
+                            updateCategoryStatus(categoryId, true);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Listed!',
+                                text: data.message || 'Category has been listed successfully.',
+                                confirmButtonColor: '#667eea',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            throw new Error(data.message || 'Failed to list category');
+                        }
+                    } catch (error) {
+                        console.error('Error listing category:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: error.message || 'Failed to list category. Please try again.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                }
+            });
+        }
+
+        // Function to update category status in the UI without page refresh
+        function updateCategoryStatus(categoryId, isListed) {
+            // Find the table row for this category
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const editButton = row.querySelector(`a[href*="editCategory?id=${categoryId}"]`);
+                if (editButton) {
+                    // Update status badge
+                    const statusCell = row.cells[4]; // Status column
+                    const statusBadge = statusCell.querySelector('.status-badge');
+
+                    if (isListed) {
+                        statusBadge.className = 'status-badge status-listed';
+                        statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Listed';
+                    } else {
+                        statusBadge.className = 'status-badge status-unlisted';
+                        statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Unlisted';
+                    }
+
+                    // Update list/unlist button
+                    const actionCell = row.cells[5]; // List/Unlist column
+                    const actionButton = actionCell.querySelector('button');
+
+                    if (isListed) {
+                        actionButton.className = 'btn btn-unlist';
+                        actionButton.onclick = () => confirmUnlist(categoryId, row.cells[0].textContent.trim());
+                        actionButton.innerHTML = '<i class="fas fa-eye-slash"></i> Unlist';
+                    } else {
+                        actionButton.className = 'btn btn-list';
+                        actionButton.onclick = () => confirmList(categoryId, row.cells[0].textContent.trim());
+                        actionButton.innerHTML = '<i class="fas fa-eye"></i> List';
+                    }
                 }
             });
         }

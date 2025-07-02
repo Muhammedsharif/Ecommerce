@@ -911,7 +911,9 @@
                                     <span class="star">★</span>
                                     <% } %>
                             </div>
-                            <button class="add-to-cart" onclick="addToCart('<%=products._id%>')">Add to Cart</button>
+                            <a href="/productDetails?id=<%=products[i]._id%>">
+                <button class="add-to-cart" >View Product</button></a>
+          
                         </div>
                         <% } %>
                 </div>
@@ -1195,8 +1197,82 @@
 
 
 
+                // Toast notification function
+                function showToast(message, type = 'success') {
+                    // Remove existing toasts
+                    const existingToasts = document.querySelectorAll('.toast-notification');
+                    existingToasts.forEach(toast => toast.remove());
+
+                    const toast = document.createElement('div');
+                    toast.className = `toast-notification toast-${type}`;
+                    toast.innerHTML = `
+                        <div class="toast-content">
+                            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                            <span>${message}</span>
+                        </div>
+                    `;
+
+                    // Add toast styles
+                    toast.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        z-index: 10000;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-weight: 500;
+                        animation: slideInRight 0.3s ease-out;
+                        max-width: 350px;
+                    `;
+
+                    document.body.appendChild(toast);
+
+                    // Auto remove after 3 seconds
+                    setTimeout(() => {
+                        toast.style.animation = 'slideOutRight 0.3s ease-in';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 3000);
+                }
+
+                // Add CSS animations for toast
+                if (!document.getElementById('toast-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'toast-styles';
+                    style.textContent = `
+                        @keyframes slideInRight {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOutRight {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                        .toast-content {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
                 async function addToCart(productId) {
                     try {
+                        // Get product name from button data attribute
+                        const button = event.target;
+                        const productName = button.getAttribute('data-product-name') || 'Product';
+
+                        // Disable button temporarily
+                        button.disabled = true;
+                        const originalText = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
                         const response = await fetch("/add-to-cart", {
                             method: "POST",
                             headers: {
@@ -1205,15 +1281,45 @@
                             body: JSON.stringify({ productId })
                         });
 
-                        if (response.ok) {
-                            window.location.href = "/cart"; // Redirect after success
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showToast(`${productName} added to cart successfully!`, 'success');
+
+                            // Update cart counter
+                            if (window.updateCartCounter) {
+                                window.updateCartCounter(data.cartCount);
+                            }
+
+                            // Change button text temporarily
+                            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+                            button.style.background = '#28a745';
+
+                            setTimeout(() => {
+                                button.innerHTML = originalText;
+                                button.style.background = '';
+                                button.disabled = false;
+                            }, 2000);
                         } else {
-                            const data = await response.json();
-                            alert(data.message || "Failed to add to cart");
+                            showToast(data.message || "Failed to add to cart", 'error');
+                            button.innerHTML = originalText;
+                            button.disabled = false;
+
+                            // If authentication error, redirect to login
+                            if (response.status === 401 && data.redirectTo) {
+                                setTimeout(() => {
+                                    window.location.href = data.redirectTo;
+                                }, 1500);
+                            }
                         }
                     } catch (error) {
                         console.error("Error:", error);
-                        alert("Something went wrong");
+                        showToast("Something went wrong. Please try again.", 'error');
+
+                        // Reset button
+                        const button = event.target;
+                        button.innerHTML = 'Add to Cart';
+                        button.disabled = false;
                     }
                 }
 

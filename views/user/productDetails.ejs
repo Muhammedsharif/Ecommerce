@@ -823,7 +823,7 @@
  
                     <!-- Action Buttons -->
                     <div class="button-group">
-                        <button class="btn btn-primary">
+                        <button class="btn btn-primary" id="addToCartBtn" onclick="addToCart('<%=product._id%>', '<%=product.productName%>')">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
@@ -833,7 +833,7 @@
                         <button class="btn btn-secondary">⚡ Buy Now</button>
                     </div>
 
-                    <button class="btn btn-ghost">
+                    <button class="btn btn-ghost" onclick="addToWishlist('<%=product._id%>')">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -1234,6 +1234,170 @@
 
 
 
+
+  // Add to Cart functionality
+  async function addToCart(productId, productName) {
+    try {
+        const button = document.getElementById('addToCartBtn');
+        const quantityInput = document.querySelector('.quantity-input');
+        const quantity = parseInt(quantityInput.value) || 1;
+
+        // Get selected size
+        const selectedSizeElement = document.querySelector('input[name="size"]:checked');
+        const selectedSize = selectedSizeElement ? selectedSizeElement.value : 'N/A';
+
+        // Get selected color (from the product color)
+        const selectedColor = "<%=color%>";
+
+        // Disable button temporarily
+        button.disabled = true;
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+        // Make multiple requests for the selected quantity
+        let successCount = 0;
+        let errorMessage = '';
+        let lastCartCount = 0;
+
+        for (let i = 0; i < quantity; i++) {
+            try {
+                const response = await fetch("/add-to-cart", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        size: selectedSize,
+                        color: selectedColor
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successCount++;
+                    lastCartCount = data.cartCount;
+                } else {
+                    errorMessage = data.message || "Failed to add to cart";
+                    break;
+                }
+            } catch (error) {
+                errorMessage = "Failed to add to cart. Please try again.";
+                break;
+            }
+        }
+
+        if (successCount > 0) {
+            const message = successCount === quantity
+                ? `${quantity} ${productName}${quantity > 1 ? 's' : ''} added to cart successfully!`
+                : `${successCount} of ${quantity} ${productName}${quantity > 1 ? 's' : ''} added to cart.`;
+
+            showToast(message, 'success');
+
+            // Update cart counter
+            if (window.updateCartCounter) {
+                window.updateCartCounter(lastCartCount);
+            }
+
+            // Change button text temporarily
+            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+            button.style.background = '#28a745';
+
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = '';
+                button.disabled = false;
+            }, 2000);
+        } else {
+            showToast(errorMessage || "Failed to add to cart", 'error');
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        showToast('Failed to add to cart. Please try again.', 'error');
+
+        const button = document.getElementById('addToCartBtn');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+    }
+  }
+
+  // Add to Wishlist functionality
+  function addToWishlist(productId) {
+    if (!productId) {
+        showToast('Invalid product ID', 'error');
+        return;
+    }
+
+    $.ajax({
+        url: '/addToWishlist',
+        method: 'POST',
+        data: { productId: productId },
+        success: (response) => {
+            if (response.success) {
+                showToast(response.message || 'Product added to wishlist!', 'success');
+            } else {
+                showToast(response.message || 'Failed to add to wishlist', 'error');
+            }
+        },
+        error: (xhr, status, error) => {
+            console.error('Error adding to wishlist:', error);
+            showToast('Failed to add to wishlist. Please try again.', 'error');
+        }
+    });
+  }
+
+  // Toast notification function
+  function showToast(message, type = 'info') {
+    // Create toast if it doesn't exist
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 300px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+    }
+
+    const emoji = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️'
+    };
+
+    const borderColor = {
+        success: '#28a745',
+        error: '#dc3545',
+        info: '#007bff'
+    };
+
+    toast.innerHTML = `
+        <span style="font-size: 18px;">${emoji[type]}</span>
+        <span style="color: #333; font-weight: 500;">${message}</span>
+    `;
+    toast.style.borderLeft = `5px solid ${borderColor[type]}`;
+    toast.style.transform = 'translateX(0)';
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(100%)';
+    }, 3000);
+  }
 
         </script>
 </body>

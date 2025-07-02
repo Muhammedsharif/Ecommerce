@@ -67,24 +67,28 @@
     const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
-    const categories = await Category.find({ isListed: true });
+
+    // Get products with basic filters - same as shop page
     let productData = await Product.find({
       isBlocked: false,
-      category: { $in: categories.map(category => category._id) },
+      isDeleted: false,
       quantity: { $gt: 0 }
     });
 
+    console.log('Products found:', productData.length);
     productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     productData = productData.slice(0, 9);
+    console.log('Products after slice:', productData.length);
 
     
 
     if (user) {
       const userData = await User.findById(user);
-
+      console.log('Rendering home with user:', userData?.name, 'Products:', productData.length);
       res.render("home", { user: userData, products: productData });
-    } 
+    }
     else {
+      console.log('Rendering home without user, Products:', productData.length);
       res.render("home", { products: productData });
     }
   } catch (error) {

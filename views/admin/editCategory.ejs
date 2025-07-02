@@ -39,11 +39,20 @@
                 <p>Update category information</p>
             </div>
 
+            <!-- Error Message Display -->
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-danger" id="errorAlert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <%= error %>
+                </div>
+            <% } %>
+
             <form id="editCategoryForm" method="post" action="/admin/editCategory/<%=category._id%>">
                 <div class="form-group">
                     <label for="categoryName">Category Name *</label>
                     <input type="text" id="categoryName" name="categoryName" value="<%=category.name%>" required
                         placeholder="Enter category name...">
+                    <div class="error-message" id="categoryNameError"></div>
                 </div>
 
                 <div class="form-group">
@@ -52,10 +61,92 @@
                         placeholder="Enter category description..."><%=category.description%></textarea>
                 </div>
 
-
                 <div class="button-group">
                     <button type="button" class="btn-secondary" onclick="cancelEdit()">Cancel</button>
-                    <button type="submit" class="btn-primary">Update Category</button>
+                    <button type="submit" class="btn-primary" id="updateBtn">Update Category</button>
                 </div>
             </form>
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                // Handle form submission with AJAX
+                document.getElementById('editCategoryForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const updateBtn = document.getElementById('updateBtn');
+                    const originalText = updateBtn.textContent;
+
+                    // Clear previous error messages
+                    document.getElementById('categoryNameError').textContent = '';
+                    const errorAlert = document.getElementById('errorAlert');
+                    if (errorAlert) {
+                        errorAlert.style.display = 'none';
+                    }
+
+                    // Show loading state
+                    updateBtn.disabled = true;
+                    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+                    try {
+                        const response = await fetch(this.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                categoryName: formData.get('categoryName'),
+                                description: formData.get('categoryDescription')
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Show success message and redirect
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: data.message || 'Category updated successfully',
+                                confirmButtonColor: '#667eea'
+                            }).then(() => {
+                                window.location.href = '/admin/category';
+                            });
+                        } else {
+                            // Show error message
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: data.error || 'Failed to update category',
+                                confirmButtonColor: '#ef4444'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Something went wrong. Please try again.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    } finally {
+                        // Reset button state
+                        updateBtn.disabled = false;
+                        updateBtn.textContent = originalText;
+                    }
+                });
+
+                function cancelEdit() {
+                    window.location.href = '/admin/category';
+                }
+
+                // Auto-hide error alert after 5 seconds
+                const errorAlert = document.getElementById('errorAlert');
+                if (errorAlert) {
+                    setTimeout(() => {
+                        errorAlert.style.display = 'none';
+                    }, 5000);
+                }
+            </script>
         </div>

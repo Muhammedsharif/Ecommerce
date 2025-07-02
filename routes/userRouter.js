@@ -81,6 +81,18 @@ router.get('/removeFromWishlist',userAuth,wishlistController.removeProduct)
 
 //Cart Management
 router.get("/cart",userAuth,cartController.loadCart)
+router.post("/addToCart",cartController.addToCart)
+router.post("/add-to-cart",cartController.addToCart)
+router.get("/cart-count",cartController.getCartCount)
+// Test route
+router.post("/test-cart", (req, res) => {
+    console.log("TEST ROUTE HIT:", req.body);
+    res.json({ success: true, message: "Test route works", body: req.body });
+})
+router.post("/update-cart-quantity",userAuth,cartController.updateCartQuantity)
+router.post("/remove-from-cart",userAuth,cartController.removeFromCart)
+router.post("/empty-cart",userAuth,cartController.emptyCart)
+router.post("/move-to-cart-from-wishlist",userAuth,cartController.moveToCartFromWishlist)
 
 
 

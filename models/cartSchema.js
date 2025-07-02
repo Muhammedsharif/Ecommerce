@@ -25,6 +25,14 @@
                 type:Number,
                 required:true
             },
+            size:{
+                type:String,
+                default:"N/A"
+            },
+            color:{
+                type:String,
+                default:"N/A"
+            },
             status:{
                 type:String,
                 default:"Placed"

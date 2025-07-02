@@ -14,7 +14,6 @@ const categoryInfo = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const categoryData = await Category.find({
-            isListed: true, 
             $or: [
                 { name: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 // { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
@@ -77,74 +76,168 @@ const addCategory = async (req,res) =>{
 
 const getListCategory = async (req, res) => {
     try {
-        
-        let id = req.query.id
-        await Category.updateOne({_id:id},{$set:{isListed:false}})
-        res.redirect("/admin/category")
-    } catch (error) {
+        let id = req.query.id;
 
-        res.redirect("/pageerror")
-        
+        // This function is called when "Unlist" button is clicked
+        // It should set isListed to false (soft delete/unlist)
+        const category = await Category.findById(id);
+        if (!category) {
+            if (req.headers.accept?.includes('application/json')) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Category not found"
+                });
+            }
+            return res.redirect("/admin/category");
+        }
+
+        await Category.updateOne({_id: id}, {$set: {isListed: false}});
+
+        // If it's an AJAX request, return JSON response
+        if (req.headers.accept?.includes('application/json')) {
+            return res.json({
+                success: true,
+                message: "Category unlisted successfully",
+                categoryId: id,
+                isListed: false
+            });
+        }
+
+        res.redirect("/admin/category");
+    } catch (error) {
+        console.error("Error unlisting category:", error);
+        if (req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        }
+        res.redirect("/pageerror");
     }
 }
 
 const getUnlistCategory = async (req, res) => {
-    
     try {
-        let id = req.query.id
-        await Category.updateOne({_id:id},{$set:{isListed:true}})
-        res.redirect("/admin/category")
+        let id = req.query.id;
+
+        // This function is called when "List" button is clicked
+        // It should set isListed to true (restore/list)
+        const category = await Category.findById(id);
+        if (!category) {
+            if (req.headers.accept?.includes('application/json')) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Category not found"
+                });
+            }
+            return res.redirect("/admin/category");
+        }
+
+        await Category.updateOne({_id: id}, {$set: {isListed: true}});
+
+        // If it's an AJAX request, return JSON response
+        if (req.headers.accept?.includes('application/json')) {
+            return res.json({
+                success: true,
+                message: "Category listed successfully",
+                categoryId: id,
+                isListed: true
+            });
+        }
+
+        res.redirect("/admin/category");
     } catch (error) {
-
-        res.redirect("/pageerror")
-        
+        console.error("Error listing category:", error);
+        if (req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        }
+        res.redirect("/pageerror");
     }
-
 }
 
 
 const geteditCategory = async (req,res) =>{
     try {
-        
+        const id = req.query.id;
+        const error = req.query.error;
+        const category = await Category.findOne({_id:id});
 
-        const id = req.query.id
-        const category = await Category.findOne({_id:id})
-        res.render("editCategory",{category:category})
-        
+        if (!category) {
+            return res.redirect("/admin/category");
+        }
+
+        res.render("editCategory", {
+            category: category,
+            error: error || null
+        });
+
     } catch (error) {
-
-        res.redirect("/pageerror")
-        
+        console.error("Error loading edit category page:", error);
+        res.redirect("/pageerror");
     }
 }
 
 
 const editCategory = async (req, res) => {
     try {
-
         const id = req.params.id
-        const {categoryName,description} = req.body;
-        const existingCategory = await Category.findOne({name:categoryName})
+        const {categoryName, description} = req.body;
+
+        // Check if another category with the same name exists (excluding current category)
+        const existingCategory = await Category.findOne({
+            name: { $regex: new RegExp('^' + categoryName + '$', 'i') },
+            _id: { $ne: id }
+        });
 
         if(existingCategory){
-            return res.status(400).json({error:"category exists please choose another name"})
+            // If it's an AJAX request, return JSON
+            if (req.headers['content-type'] === 'application/json' || req.headers.accept?.includes('application/json')) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Category with this name already exists. Please choose another name."
+                });
+            }
+            // For regular form submission, redirect with error message
+            return res.redirect(`/admin/editCategory?id=${id}&error=Category with this name already exists`);
         }
 
-        const updateCategory = await Category.findByIdAndUpdate(id ,{
-            name:categoryName,
-            description:description
-        },{new:true})
+        const updateCategory = await Category.findByIdAndUpdate(id, {
+            name: categoryName.trim(),
+            description: description
+        }, {new: true});
 
         if(updateCategory){
-            res.redirect("/admin/category")
-        }else {
-            res.status(404).json({error:"Category not found"})
+            // If it's an AJAX request, return JSON success
+            if (req.headers['content-type'] === 'application/json' || req.headers.accept?.includes('application/json')) {
+                return res.json({
+                    success: true,
+                    message: "Category updated successfully"
+                });
+            }
+            // For regular form submission, redirect to category list
+            res.redirect("/admin/category");
+        } else {
+            if (req.headers['content-type'] === 'application/json' || req.headers.accept?.includes('application/json')) {
+                return res.status(404).json({
+                    success: false,
+                    error: "Category not found"
+                });
+            }
+            res.redirect(`/admin/editCategory?id=${id}&error=Category not found`);
         }
-        
-    } catch (error) {
 
-        res.status(500).json({error:"Internal server error"})
-        
+    } catch (error) {
+        console.error("Error updating category:", error);
+        if (req.headers['content-type'] === 'application/json' || req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({
+                success: false,
+                error: "Internal server error"
+            });
+        }
+        res.redirect(`/admin/editCategory?id=${req.params.id}&error=Internal server error`);
     }
 }
 

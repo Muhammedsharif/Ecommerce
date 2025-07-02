@@ -30,6 +30,7 @@ app.use(passport.session())
 
 app.use((req,res,next)=>{
     res.set('cache-control','no-store')
+
     next()
 })
 

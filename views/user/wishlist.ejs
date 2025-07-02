@@ -573,6 +573,54 @@
             transform: scale(0.8);
             transition: all 0.3s ease;
         }
+
+        /* Empty wishlist styles */
+        .empty-wishlist {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin: 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #e74c3c;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-wishlist h3 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .empty-wishlist p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .shop-now-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .shop-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -616,7 +664,7 @@
                 <!-- Product 1 -->
                    <%if(wishlist.length>0){%>
                  <%for (let product of wishlist){%>
-                <div class="product-card" data-item="1">
+                <div class="product-card" data-item="1" data-product-id="<%= product._id %>">
                   
                         
                     <div class="product-image">
@@ -632,13 +680,13 @@
                         <div class="product-price">₹<%=product.salePrice%></div>
                         <div class="size-selector">
                             <label>Select Size:</label>
-                            <select>
-                                <option>Choose a size</option>
-                                <option>6</option>
-                                <option>7</option>
-                                <option>8</option>
-                                <option>9</option>
-                                <option>10</option>
+                            <select class="size-select" data-product-id="<%=product._id%>">
+                                <option value="">Choose a size</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
                             </select>
                         </div>
                         <div class="product-actions">
@@ -680,26 +728,175 @@
 
         
 
-        function addToCart(button) {
-            const productCard = button.closest('.product-card');
-            const productTitle = productCard.querySelector('.product-title').textContent;
-            const sizeSelect = productCard.querySelector('select');
-            
-            if (sizeSelect.value === 'Choose a size') {
-                alert('Please select a size first!');
-                return;
-            }
-            
-            button.innerHTML = '<i class="fas fa-check"></i><span>Added!</span>';
-            button.style.background = '#10b981';
-            
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.toast-notification');
+            existingToasts.forEach(toast => toast.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            // Add toast styles
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease-out;
+                max-width: 350px;
+            `;
+
+            document.body.appendChild(toast);
+
+            // Auto remove after 3 seconds
             setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS animations for toast
+        if (!document.getElementById('toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'toast-styles';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+                .toast-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        async function addToCart(button) {
+            try {
+                const productCard = button.closest('.product-card');
+                const productTitle = productCard.querySelector('.product-title').textContent;
+
+                // Get product ID from the card
+                const productId = productCard.getAttribute('data-product-id');
+                if (!productId) {
+                    showToast('Product ID not found', 'error');
+                    return;
+                }
+
+                // Get selected size
+                const sizeSelect = productCard.querySelector('.size-select');
+                const selectedSize = sizeSelect.value;
+
+                // Check if size is selected
+                if (!selectedSize) {
+                    showToast('Please select a size before adding to cart', 'error');
+                    sizeSelect.focus();
+                    return;
+                }
+
+                // Disable button temporarily
+                button.disabled = true;
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Moving...</span>';
+
+                const response = await fetch('/move-to-cart-from-wishlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        productId,
+                        size: selectedSize,
+                        color: 'Default' // You can add color selection later if needed
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show success message
+                    showToast(data.message, 'success');
+
+                    // Update cart counter
+                    if (window.updateCartCounter) {
+                        window.updateCartCounter(data.cartCount);
+                    }
+
+                    // Remove product card from wishlist with animation
+                    productCard.style.transition = 'all 0.3s ease';
+                    productCard.style.transform = 'translateX(100%)';
+                    productCard.style.opacity = '0';
+
+                    setTimeout(() => {
+                        productCard.remove();
+
+                        // Update wishlist count
+                        if (window.decrementWishlistCounter) {
+                            window.decrementWishlistCounter();
+                        }
+
+                        // Check if wishlist is empty
+                        const remainingCards = document.querySelectorAll('.product-card');
+                        if (remainingCards.length === 0) {
+                            showEmptyWishlist();
+                        }
+                    }, 300);
+
+                } else {
+                    showToast(data.message || 'Failed to move to cart', 'error');
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }
+
+            } catch (error) {
+                console.error('Error moving to cart:', error);
+                showToast('Something went wrong. Please try again.', 'error');
+
+                // Reset button
                 button.innerHTML = '<i class="fas fa-shopping-cart"></i><span>Add to Cart</span>';
-                button.style.background = '';
-            }, 2000);
-            
-            // Show success message
-            showToast(`${productTitle} added to cart!`);
+                button.disabled = false;
+            }
+        }
+
+        function showEmptyWishlist() {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.innerHTML = `
+                    <div class="empty-wishlist">
+                        <div class="empty-icon">
+                            <i class="fas fa-heart-broken"></i>
+                        </div>
+                        <h3>Your wishlist is empty</h3>
+                        <p>Start adding products you love to your wishlist!</p>
+                        <a href="/shop" class="shop-now-btn">
+                            <i class="fas fa-shopping-bag"></i>
+                            Shop Now
+                        </a>
+                    </div>
+                `;
+            }
         }
 
         function emptyWishlist() {

@@ -65,11 +65,12 @@
         }
 
         .cart-item {
-            display: flex;
-            gap: 1rem;
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 1.5rem;
             padding: 1.5rem 0;
             border-bottom: 1px solid #e5e7eb;
-            position: relative;
+            align-items: center;
         }
 
         .cart-item:last-child {
@@ -77,15 +78,25 @@
         }
 
         .item-image {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
             border-radius: 8px;
             background: #f3f4f6;
         }
 
         .item-details {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1rem;
+            min-width: 200px;
         }
 
         .item-name {
@@ -113,49 +124,59 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin: 1rem 0;
         }
 
         .qty-btn {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border: 1px solid #d1d5db;
             background: white;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            font-weight: 600;
         }
 
         .qty-btn:hover {
             background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .qty-input {
             width: 60px;
+            height: 32px;
             text-align: center;
             border: 1px solid #d1d5db;
-            border-radius: 5px;
+            border-radius: 6px;
             padding: 0.3rem;
             font-size: 1rem;
+            font-weight: 600;
         }
 
         .remove-btn {
-            background: none;
-            border: 2px solid #ef4444;
-            color: #ef4444;
-            padding: 0.3rem 0.8rem;
-            border-radius: 5px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .remove-btn:hover {
-            background: #ef4444;
-            color: white;
+            background: #dc2626;
         }
 
         .cart-summary {
@@ -268,20 +289,66 @@
             }
             
             .cart-item {
-                flex-direction: column;
-                gap: 0.5rem;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                text-align: center;
             }
-            
+
             .item-image {
                 width: 100%;
                 height: 200px;
+                justify-self: center;
             }
+
+            .item-actions {
+                align-items: center;
+                min-width: auto;
+            }
+        }
+
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+            min-width: 300px;
+        }
+
+        .toast-notification.toast-error {
+            background: #dc3545;
+        }
+
+        .toast-notification.toast-success {
+            background: #28a745;
+        }
+
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast-content i {
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
     <!-- Header -->
-   
+
  <%- include("../partials/user/header") %>
     <!-- Cart Container -->
     <div class="cart-container">
@@ -294,120 +361,40 @@
                 </button>
             </div>
 
-            <!-- Cart Item 1 -->
-            <div class="cart-item" data-item-id="1">
-                <img src="https://via.placeholder.com/80x80/8B4513/FFFFFF?text=Shirt" alt="Solid Merino Wool Shirt" class="item-image">
-                <div class="item-details">
-                    <h3 class="item-name">Solid Merino Wool Shirt</h3>
-                    <div class="item-specs">
-                        <span>Size: S</span>
-                        <span>Color: Brown</span>
+            <!-- Dynamic Cart Items -->
+            <% if (cartItems && cartItems.length > 0) { %>
+                <% cartItems.forEach((item, index) => { %>
+                    <div class="cart-item" data-item-id="<%= item._id %>">
+                        <img src="/uploads/product-images/<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="item-image">
+                        <div class="item-details">
+                            <h3 class="item-name"><%= item.productId.productName %></h3>
+                            <div class="item-specs">
+                                <span>Size: <%= item.size || 'N/A' %></span>
+                                <span>Color: <%= item.color || 'N/A' %></span>
+                            </div>
+                            <div class="item-price">₹<%= item.price.toFixed(2) %></div>
+                        </div>
+                        <div class="item-actions">
+                            <div class="quantity-controls">
+                                <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', -1)" <%= item.quantity <= 1 ? 'disabled' : '' %>>-</button>
+                                <input type="number" value="<%= item.quantity %>" min="1" max="10" class="qty-input" onchange="setQuantity('<%= item._id %>', this.value)">
+                                <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', 1)" <%= item.quantity >= 10 ? 'disabled' : '' %>>+</button>
+                            </div>
+                            <button class="remove-btn" onclick="removeItem('<%= item._id %>')">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
                     </div>
-                    <div class="item-price">₹17220.00</div>
-                    
-                    <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(1, -1)">-</button>
-                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(1, this.value)">
-                        <button class="qty-btn" onclick="updateQuantity(1, 1)">+</button>
-                    </div>
-                    
-                    <button class="remove-btn" onclick="removeItem(1)">
-                        <i class="fas fa-times"></i> Remove
-                    </button>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Add some items to get started!</p>
+                    <a href="/shop" class="continue-shopping" style="display: inline-block; text-decoration: none; margin-top: 1rem;">Continue Shopping</a>
                 </div>
-            </div>
-
-            <!-- Cart Item 2 -->
-            <div class="cart-item" data-item-id="2">
-                <img src="https://via.placeholder.com/80x80/8B4513/FFFFFF?text=Shirt" alt="Solid Merino Wool Shirt" class="item-image">
-                <div class="item-details">
-                    <h3 class="item-name">Solid Merino Wool Shirt</h3>
-                    <div class="item-specs">
-                        <span>Size: M</span>
-                        <span>Color: Brown</span>
-                    </div>
-                    <div class="item-price">₹18040.00</div>
-                    
-                    <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(2, -1)">-</button>
-                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(2, this.value)">
-                        <button class="qty-btn" onclick="updateQuantity(2, 1)">+</button>
-                    </div>
-                    
-                    <button class="remove-btn" onclick="removeItem(2)">
-                        <i class="fas fa-times"></i> Remove
-                    </button>
-                </div>
-            </div>
-
-            <!-- Cart Item 3 - Selected -->
-            <div class="cart-item selected-item" data-item-id="3">
-                <img src="https://via.placeholder.com/80x80/708090/FFFFFF?text=Shirt" alt="Filo di Scozia Shirt" class="item-image">
-                <div class="item-details">
-                    <h3 class="item-name">Filo di Scozia Shirt</h3>
-                    <div class="item-specs">
-                        <span>Size: L</span>
-                        <span>Color: Gray</span>
-                    </div>
-                    <div class="item-price">₹2394.00</div>
-                    
-                    <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(3, -1)">-</button>
-                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(3, this.value)">
-                        <button class="qty-btn" onclick="updateQuantity(3, 1)">+</button>
-                    </div>
-                    
-                    <button class="remove-btn" onclick="removeItem(3)">
-                        <i class="fas fa-times"></i> Remove
-                    </button>
-                </div>
-            </div>
-
-            <!-- Cart Item 4 -->
-            <div class="cart-item" data-item-id="4">
-                <img src="https://via.placeholder.com/80x80/FFC0CB/000000?text=Shirt" alt="Signature Twill Paisley Effect Shirt" class="item-image">
-                <div class="item-details">
-                    <h3 class="item-name">Signature Twill Paisley Effect Shirt</h3>
-                    <div class="item-specs">
-                        <span>Size: S</span>
-                        <span>Color: Black</span>
-                    </div>
-                    <div class="item-price">₹3612.00</div>
-                    
-                    <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(4, -1)">-</button>
-                        <input type="number" value="1" min="1" class="qty-input" onchange="setQuantity(4, this.value)">
-                        <button class="qty-btn" onclick="updateQuantity(4, 1)">+</button>
-                    </div>
-                    
-                    <button class="remove-btn" onclick="removeItem(4)">
-                        <i class="fas fa-times"></i> Remove
-                    </button>
-                </div>
-            </div>
-
-            <!-- Cart Item 5 -->
-            <div class="cart-item" data-item-id="5">
-                <img src="https://via.placeholder.com/80x80/FFC0CB/000000?text=Shirt" alt="Signature Twill Paisley Effect Shirt" class="item-image">
-                <div class="item-details">
-                    <h3 class="item-name">Signature Twill Paisley Effect Shirt</h3>
-                    <div class="item-specs">
-                        <span>Size: M</span>
-                        <span>Color: Black</span>
-                    </div>
-                    <div class="item-price">₹3696.00</div>
-                    
-                    <div class="quantity-controls">
-                        <button class="qty-btn" onclick="updateQuantity(5, -1)">-</button>
-                        <input type="number" value="3" min="1" class="qty-input" onchange="setQuantity(5, this.value)">
-                        <button class="qty-btn" onclick="updateQuantity(5, 1)">+</button>
-                    </div>
-                    
-                    <button class="remove-btn" onclick="removeItem(5)">
-                        <i class="fas fa-times"></i> Remove
-                    </button>
-                </div>
-            </div>
+            <% } %>
+          
         </div>
 
         <!-- Cart Summary -->
@@ -416,7 +403,7 @@
             
             <div class="summary-line">
                 <span>SUBTOTAL</span>
-                <span class="subtotal">₹56134.00</span>
+                <span class="subtotal">₹<%= cart && cart.items ? cart.items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) : '0.00' %></span>
             </div>
             
             <p class="shipping-note">
@@ -435,56 +422,241 @@
     </div>
 
     <script>
-        // Sample data for demo purposes
+        // Real cart data from backend
         let cartItems = [
-            { id: 1, name: 'Solid Merino Wool Shirt', size: 'S', color: 'Brown', price: 17220.00, quantity: 1 },
-            { id: 2, name: 'Solid Merino Wool Shirt', size: 'M', color: 'Brown', price: 18040.00, quantity: 1 },
-            { id: 3, name: 'Filo di Scozia Shirt', size: 'L', color: 'Gray', price: 2394.00, quantity: 1 },
-            { id: 4, name: 'Signature Twill Paisley Effect Shirt', size: 'S', color: 'Black', price: 3612.00, quantity: 1 },
-            { id: 5, name: 'Signature Twill Paisley Effect Shirt', size: 'M', color: 'Black', price: 3696.00, quantity: 3 }
+            <% if (cartItems && cartItems.length > 0) { %>
+                <% cartItems.forEach((item, index) => { %>
+                    {
+                        id: '<%= item._id %>',
+                        name: '<%= item.productId.productName %>',
+                        size: '<%= item.size || "N/A" %>',
+                        color: '<%= item.color || "N/A" %>',
+                        price: <%= item.price %>,
+                        quantity: <%= item.quantity %>,
+                        productId: '<%= item.productId._id %>'
+                    }<%= index < cartItems.length - 1 ? ',' : '' %>
+                <% }) %>
+            <% } %>
         ];
 
         // Update quantity
-        function updateQuantity(itemId, change) {
+        async function updateQuantity(itemId, change) {
             const item = cartItems.find(item => item.id === itemId);
             if (item) {
-                item.quantity = Math.max(1, item.quantity + change);
-                updateUI();
+                const newQuantity = item.quantity + change;
+
+                // Validate quantity limits
+                if (newQuantity < 1) {
+                    showToast('Quantity cannot be less than 1', 'error');
+                    return;
+                }
+
+                if (newQuantity > 10) {
+                    showToast('Cannot add more than 10 items of the same product', 'error');
+                    return;
+                }
+
+                await updateCartQuantity(itemId, newQuantity);
             }
         }
 
         // Set specific quantity
-        function setQuantity(itemId, quantity) {
-            const item = cartItems.find(item => item.id === itemId);
-            if (item && quantity >= 1) {
-                item.quantity = parseInt(quantity);
-                updateUI();
+        async function setQuantity(itemId, quantity) {
+            const newQuantity = parseInt(quantity);
+
+            // Validate quantity
+            if (isNaN(newQuantity) || newQuantity < 1) {
+                showToast('Quantity must be at least 1', 'error');
+                // Reset to current quantity
+                const item = cartItems.find(item => item.id === itemId);
+                if (item) {
+                    const input = document.querySelector(`[data-item-id="${itemId}"] .qty-input`);
+                    if (input) input.value = item.quantity;
+                }
+                return;
+            }
+
+            if (newQuantity > 10) {
+                showToast('Cannot add more than 10 items of the same product', 'error');
+                // Reset to current quantity
+                const item = cartItems.find(item => item.id === itemId);
+                if (item) {
+                    const input = document.querySelector(`[data-item-id="${itemId}"] .qty-input`);
+                    if (input) input.value = item.quantity;
+                }
+                return;
+            }
+
+            await updateCartQuantity(itemId, newQuantity);
+        }
+
+        // Update cart quantity via API
+        async function updateCartQuantity(itemId, quantity) {
+            try {
+                const response = await fetch('/update-cart-quantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ itemId, quantity })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    // Update local data
+                    const item = cartItems.find(item => item.id === itemId);
+                    if (item) {
+                        item.quantity = quantity;
+                        updateUI();
+                    }
+                    showToast('Cart updated successfully', 'success');
+                } else {
+                    showToast(data.message || 'Failed to update cart', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating cart:', error);
+                showToast('Something went wrong', 'error');
             }
         }
 
         // Remove item
-        function removeItem(itemId) {
+        async function removeItem(itemId) {
             if (confirm('Are you sure you want to remove this item?')) {
-                cartItems = cartItems.filter(item => item.id !== itemId);
-                updateUI();
+                try {
+                    const response = await fetch('/remove-from-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ itemId })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        // Remove from local array
+                        cartItems = cartItems.filter(item => item.id !== itemId);
+
+                        // Remove from DOM with animation
+                        const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
+                        if (cartItem) {
+                            cartItem.style.transition = 'all 0.3s ease';
+                            cartItem.style.transform = 'translateX(-100%)';
+                            cartItem.style.opacity = '0';
+
+                            setTimeout(() => {
+                                cartItem.remove();
+                                updateUI();
+                            }, 300);
+                        }
+
+                        showToast('Item removed from cart', 'success');
+
+                        // Update cart counter in header
+                        const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+                        const cartBadge = document.querySelector('.nav-icons .badge');
+                        if (cartBadge) {
+                            cartBadge.textContent = totalItems;
+                        }
+
+                        // Reload page if cart is empty
+                        if (cartItems.length === 0) {
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                    } else {
+                        showToast(data.message || 'Failed to remove item', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error removing item:', error);
+                    showToast('Something went wrong', 'error');
+                }
             }
         }
 
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.toast-notification');
+            existingToasts.forEach(toast => toast.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
         // Empty cart
-        function emptyCart() {
+        async function emptyCart() {
             if (confirm('Are you sure you want to empty your cart?')) {
-                cartItems = [];
-                updateUI();
+                try {
+                    const response = await fetch('/empty-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        cartItems = [];
+                        showToast('Cart emptied successfully', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showToast(data.message || 'Failed to empty cart', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error emptying cart:', error);
+                    showToast('Something went wrong', 'error');
+                }
             }
         }
 
         // Update UI
         function updateUI() {
-            // Update quantity inputs
+            // Update quantity inputs and button states
             cartItems.forEach(item => {
-                const input = document.querySelector(`[data-item-id="${item.id}"] .qty-input`);
-                if (input) {
-                    input.value = item.quantity;
+                const cartItem = document.querySelector(`[data-item-id="${item.id}"]`);
+                if (cartItem) {
+                    const input = cartItem.querySelector('.qty-input');
+                    const decreaseBtn = cartItem.querySelector('.qty-btn:first-child');
+                    const increaseBtn = cartItem.querySelector('.qty-btn:last-child');
+
+                    if (input) {
+                        input.value = item.quantity;
+                    }
+
+                    // Update button states
+                    if (decreaseBtn) {
+                        decreaseBtn.disabled = item.quantity <= 1;
+                    }
+
+                    if (increaseBtn) {
+                        increaseBtn.disabled = item.quantity >= 10;
+                    }
                 }
             });
 
@@ -539,6 +711,7 @@
                 }, index * 100);
             });
         });
+        
     </script>
 </body>
 </html>
