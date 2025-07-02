@@ -1,5 +1,6 @@
 const User = require("../../models/userSchema")
 const Address = require("../../models/addressSchema")
+const Order = require("../../models/orderSchema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
@@ -667,10 +668,19 @@ const loadOrders = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        res.render("profile", {
+        // Get user's orders with populated product details
+        const orders = await Order.find({ userId: userId })
+            .populate({
+                path: 'orderedItems.product',
+                select: 'productName productImage salePrice'
+            })
+            .sort({ createdOn: -1 });
+
+        res.render("orders", {
             user: userData,
-            page: 'orders',
-            message: 'Order history coming soon!'
+            orders: orders,
+            success: req.query.success,
+            error: req.query.error
         });
     } catch (error) {
         console.error("Error loading orders page:", error);
@@ -887,14 +897,33 @@ const verifyEmailOTP = async (req, res) => {
             });
         }
 
-        // Update user email
-        await User.findByIdAndUpdate(userId, { email: newEmail });
+        // Check if this is a profile update with pending changes
+        if (req.session.pendingProfileUpdate) {
+            const pendingUpdate = req.session.pendingProfileUpdate;
 
-        // Clear OTP session
-        delete req.session.emailChangeOTP;
+            // Update all profile fields including email
+            await User.findByIdAndUpdate(userId, {
+                name: pendingUpdate.name,
+                phone: pendingUpdate.phone,
+                email: newEmail,
+                profileImage: pendingUpdate.profileImage
+            });
 
-        // Redirect to success page
-        res.redirect("/change-password?success=Email changed successfully!");
+            // Clear pending update from session
+            delete req.session.pendingProfileUpdate;
+            delete req.session.emailChangeOTP;
+
+            res.redirect("/Profile?success=" + encodeURIComponent("Profile updated successfully"));
+        } else {
+            // Regular email change from password page
+            await User.findByIdAndUpdate(userId, { email: newEmail });
+
+            // Clear OTP session
+            delete req.session.emailChangeOTP;
+
+            // Redirect to success page
+            res.redirect("/change-password?success=Email changed successfully!");
+        }
 
     } catch (error) {
         console.error("Error verifying email OTP:", error);
@@ -974,6 +1003,170 @@ const changePassword = async (req, res) => {
 
 
 
+// Load Edit Profile Page
+const loadEditProfile = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("editProfile", {
+            user: userData,
+            errors: null,
+            success: req.query.success,
+            error: req.query.error
+        });
+    } catch (error) {
+        console.error("Error loading edit profile page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+// Update Profile
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { name, phone } = req.body;
+        const errors = {};
+
+        // Validation
+        if (!name || name.trim().length < 2) {
+            errors.name = "Name must be at least 2 characters long";
+        }
+
+        if (phone && phone.trim() !== '') {
+            const cleanPhone = phone.replace(/\D/g, '');
+            if (cleanPhone.length !== 10) {
+                errors.phone = "Phone number must be 10 digits";
+            }
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.redirect("/pageNotFound");
+        }
+
+        if (Object.keys(errors).length > 0) {
+            return res.render("editProfile", {
+                user: user,
+                errors: errors,
+                success: null,
+                error: null
+            });
+        }
+
+        // Handle profile image upload
+        let profileImageName = user.profileImage;
+        if (req.file) {
+            profileImageName = req.file.filename;
+        }
+
+        // Update profile
+        const updateData = {
+            name: name.trim(),
+            profileImage: profileImageName
+        };
+
+        // Only update phone if it's provided and not empty
+        if (phone && phone.trim() !== '') {
+            updateData.phone = phone.trim();
+        }
+
+        await User.findByIdAndUpdate(userId, updateData);
+
+        res.redirect("/Profile?success=" + encodeURIComponent("Profile updated successfully"));
+
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        const user = await User.findById(req.session.user);
+        res.render("editProfile", {
+            user: user,
+            errors: null,
+            success: null,
+            error: "An error occurred while updating profile"
+        });
+    }
+}
+
+// Load Order Details
+const loadOrderDetails = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId } = req.params;
+
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId })
+            .populate({
+                path: 'orderedItems.product',
+                select: 'productName productImage salePrice'
+            });
+
+        if (!order) {
+            return res.redirect("/orders?error=" + encodeURIComponent("Order not found"));
+        }
+
+        res.render("orderDetails", {
+            user: userData,
+            order: order,
+            success: req.query.success,
+            error: req.query.error
+        });
+
+    } catch (error) {
+        console.error("Error loading order details:", error);
+        res.redirect("/orders?error=" + encodeURIComponent("Failed to load order details"));
+    }
+}
+
+// Cancel Order
+const cancelOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Check if order can be cancelled
+        if (order.status === 'Delivered' || order.status === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: "This order cannot be cancelled"
+            });
+        }
+
+        // Update order status to cancelled
+        await Order.findByIdAndUpdate(orderId, { status: 'Cancelled' });
+
+        res.json({ success: true, message: "Order cancelled successfully" });
+
+    } catch (error) {
+        console.error("Error cancelling order:", error);
+        res.status(500).json({ success: false, message: "Failed to cancel order" });
+    }
+}
+
 module.exports={
     userProfile,
     loadForgotPassword,
@@ -990,11 +1183,15 @@ module.exports={
     editAddress,
     deleteAddress,
     loadOrders,
+    loadOrderDetails,
     loadWallet,
     loadChangePassword,
     loadReferral,
     sendEmailOTP,
     loadVerifyEmailOTP,
     verifyEmailOTP,
-    changePassword
+    changePassword,
+    loadEditProfile,
+    updateProfile,
+    cancelOrder
 }

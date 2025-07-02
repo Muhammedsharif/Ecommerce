@@ -77,6 +77,31 @@
             border-bottom: none;
         }
 
+        .cart-item.unavailable {
+            opacity: 0.7;
+            background-color: #f9f9f9;
+            border-left: 3px solid #dc2626;
+        }
+
+        .cart-item.unavailable .item-image {
+            filter: grayscale(50%);
+        }
+
+        .unavailable-badge {
+            display: inline-block;
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .unavailable-badge i {
+            margin-right: 0.25rem;
+        }
+
         .item-image {
             width: 100px;
             height: 100px;
@@ -364,10 +389,18 @@
             <!-- Dynamic Cart Items -->
             <% if (cartItems && cartItems.length > 0) { %>
                 <% cartItems.forEach((item, index) => { %>
-                    <div class="cart-item" data-item-id="<%= item._id %>">
+                    <div class="cart-item <%= !item.isAvailable ? 'unavailable' : '' %>" data-item-id="<%= item._id %>">
                         <img src="/uploads/product-images/<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="item-image">
                         <div class="item-details">
-                            <h3 class="item-name"><%= item.productId.productName %></h3>
+                            <h3 class="item-name">
+                                <%= item.productId.productName %>
+                                <% if (!item.isAvailable) { %>
+                                    <span class="unavailable-badge">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <%= item.unavailableReason %>
+                                    </span>
+                                <% } %>
+                            </h3>
                             <div class="item-specs">
                                 <span>Size: <%= item.size || 'N/A' %></span>
                                 <span>Color: <%= item.color || 'N/A' %></span>
@@ -376,9 +409,12 @@
                         </div>
                         <div class="item-actions">
                             <div class="quantity-controls">
-                                <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', -1)" <%= item.quantity <= 1 ? 'disabled' : '' %>>-</button>
-                                <input type="number" value="<%= item.quantity %>" min="1" max="10" class="qty-input" onchange="setQuantity('<%= item._id %>', this.value)">
-                                <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', 1)" <%= item.quantity >= 10 ? 'disabled' : '' %>>+</button>
+                                <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', -1)"
+                                        <%= item.quantity <= 1 ? 'disabled' : '' %>>-</button>
+                                <input type="number" value="<%= item.quantity %>" min="1" max="10" class="qty-input"
+                                       onchange="setQuantity('<%= item._id %>', this.value)">
+                                <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', 1)"
+                                        <%= item.quantity >= 10 ? 'disabled' : '' %>>+</button>
                             </div>
                             <button class="remove-btn" onclick="removeItem('<%= item._id %>')">
                                 <i class="fas fa-times"></i> Remove
@@ -433,7 +469,10 @@
                         color: '<%= item.color || "N/A" %>',
                         price: <%= item.price %>,
                         quantity: <%= item.quantity %>,
-                        productId: '<%= item.productId._id %>'
+                        productId: '<%= item.productId._id %>',
+                        isAvailable: <%= item.isAvailable ? 'true' : 'false' %>,
+                        unavailableReason: '<%= item.unavailableReason || "" %>',
+                        maxStock: <%= item.maxStock || 0 %>
                     }<%= index < cartItems.length - 1 ? ',' : '' %>
                 <% }) %>
             <% } %>

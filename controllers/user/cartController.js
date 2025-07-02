@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const Cart = require("../../models/cartSchema")
+const Category = require("../../models/categorySchema")
 
 const loadCart = async (req,res) =>{
     try {
@@ -15,9 +16,52 @@ const loadCart = async (req,res) =>{
             return res.redirect("/pageNotFound");
         }
 
-        // Get cart items for the user
-        const cart = await Cart.findOne({ userId }).populate('items.productId');
-        const cartItems = cart ? cart.items : [];
+        // Get cart items for the user with populated product and category data
+        const cart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            populate: {
+                path: 'category',
+                model: 'Category'
+            }
+        });
+
+        let cartItems = cart ? cart.items : [];
+
+        // Check for out-of-stock or unavailable items
+        if (cartItems.length > 0) {
+            cartItems = cartItems.map(item => {
+                const product = item.productId;
+                let isAvailable = true;
+                let unavailableReason = '';
+
+                // Only mark as unavailable for serious issues
+                if (!product) {
+                    isAvailable = false;
+                    unavailableReason = 'Product not found';
+                } else if (product.isBlocked) {
+                    isAvailable = false;
+                    unavailableReason = 'Product is blocked';
+                } else if (product.status !== 'Available') {
+                    isAvailable = false;
+                    unavailableReason = 'Product is not available';
+                } else if (!product.category || !product.category.isListed) {
+                    isAvailable = false;
+                    unavailableReason = 'Category is not available';
+                } else if (product.quantity <= 0) {
+                    isAvailable = false;
+                    unavailableReason = 'Out of stock';
+                }
+                // Don't mark as unavailable just because cart quantity > stock
+                // Let the quantity controls handle this validation
+
+                return {
+                    ...item.toObject(),
+                    isAvailable,
+                    unavailableReason,
+                    maxStock: product ? product.quantity : 0
+                };
+            });
+        }
 
         res.render("cart", {
             user: userData,
@@ -55,13 +99,19 @@ const addToCart = async(req,res)=>{
         }
 
         // Check if product exists and is available
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId).populate('category');
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
+        // Check if product is blocked or not available
         if (product.isBlocked || product.status !== 'Available') {
             return res.status(400).json({ success: false, message: 'Product is not available' });
+        }
+
+        // Check if product category is unlisted
+        if (!product.category || !product.category.isListed) {
+            return res.status(400).json({ success: false, message: 'Product category is not available' });
         }
 
         if (product.quantity <= 0) {
@@ -133,6 +183,13 @@ const addToCart = async(req,res)=>{
 
         await cart.save();
 
+        // Remove product from wishlist if it exists
+        const user = await User.findById(userId);
+        if (user && user.wishlist.includes(productId)) {
+            user.wishlist = user.wishlist.filter(item => item.toString() !== productId);
+            await user.save();
+        }
+
         // Get updated cart count
         const cartCount = cart.items.reduce((total, item) => total + item.quantity, 0);
 
@@ -183,13 +240,18 @@ const moveToCartFromWishlist = async(req, res) => {
         }
 
         // Check if product exists and is available
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId).populate('category');
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
         if (product.isBlocked || product.status !== 'Available') {
             return res.status(400).json({ success: false, message: 'Product is not available' });
+        }
+
+        // Check if product category is unlisted
+        if (!product.category || !product.category.isListed) {
+            return res.status(400).json({ success: false, message: 'Product category is not available' });
         }
 
         if (product.quantity <= 0) {
@@ -303,6 +365,31 @@ const updateCartQuantity = async(req, res) => {
         const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
         if (itemIndex === -1) {
             return res.status(404).json({ success: false, message: 'Item not found in cart' });
+        }
+
+        // Get product to check stock
+        const product = await Product.findById(cart.items[itemIndex].productId).populate('category');
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Check if product is still available
+        if (product.isBlocked || product.status !== 'Available') {
+            return res.status(400).json({ success: false, message: 'Product is no longer available' });
+        }
+
+        // Check if product category is still listed
+        if (!product.category || !product.category.isListed) {
+            return res.status(400).json({ success: false, message: 'Product category is no longer available' });
+        }
+
+        // Check stock availability
+        if (quantity > product.quantity) {
+            return res.status(400).json({
+                success: false,
+                message: `Only ${product.quantity} items available in stock`,
+                availableStock: product.quantity
+            });
         }
 
         // Update quantity

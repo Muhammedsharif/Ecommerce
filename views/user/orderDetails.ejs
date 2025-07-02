@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - 1NOTONE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .order-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .order-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        .status-shipped { background: #d4edda; color: #155724; }
+        .status-delivered { background: #d1ecf1; color: #0c5460; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .order-items {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .item-specs {
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .summary-label {
+            color: #6c757d;
+        }
+
+        .summary-value {
+            font-weight: 500;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+            min-width: 300px;
+        }
+
+        .toast-notification.toast-error {
+            background: #dc3545;
+        }
+
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .order-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .order-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/user/header") %>
+
+    <div class="container">
+        <!-- Order Header -->
+        <div class="order-header">
+            <div class="header-top">
+                <h1 class="order-title">
+                    <i class="fas fa-receipt"></i>
+                    Order Details
+                </h1>
+                <a href="/orders" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Orders
+                </a>
+            </div>
+
+            <div class="order-info-grid">
+                <div class="info-card">
+                    <div class="info-label">Order ID</div>
+                    <div class="info-value">#<%= order.orderId %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Order Date</div>
+                    <div class="info-value"><%= new Date(order.createdOn).toLocaleDateString() %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Status</div>
+                    <div class="order-status status-<%= order.status.toLowerCase() %>">
+                        <%= order.status %>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Total Amount</div>
+                    <div class="info-value">₹<%= order.finalAmount.toLocaleString() %></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-items">
+            <h2 class="section-title">
+                <i class="fas fa-box"></i>
+                Order Items
+            </h2>
+            
+            <% order.orderedItems.forEach(item => { %>
+                <div class="item">
+                    <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                         alt="<%= item.product.productName %>" 
+                         class="item-image"
+                         onerror="this.src='/uploads/placeholder.jpg'">
+                    <div class="item-details">
+                        <div class="item-name"><%= item.product.productName %></div>
+                        <div class="item-specs">
+                            Quantity: <%= item.quantity %> | 
+                            Size: <%= item.size || 'N/A' %> | 
+                            Color: <%= item.color || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="item-price">₹<%= item.price.toLocaleString() %></div>
+                </div>
+            <% }) %>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h2 class="section-title">
+                <i class="fas fa-calculator"></i>
+                Order Summary
+            </h2>
+            
+            <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value">₹<%= order.totalPrice.toLocaleString() %></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value">Free</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Discount</span>
+                <span class="summary-value">-₹<%= (order.totalPrice - order.finalAmount).toLocaleString() %></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Total</span>
+                <span class="summary-value">₹<%= order.finalAmount.toLocaleString() %></span>
+            </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="order-actions">
+            <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
+                    <i class="fas fa-times"></i>
+                    Cancel Order
+                </button>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const existingToasts = document.querySelectorAll('.toast-notification');
+            existingToasts.forEach(toast => toast.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Cancel order function
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/cancel-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Order cancelled successfully', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.message || 'Failed to cancel order', 'error');
+                }
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                showToast('An error occurred while cancelling the order', 'error');
+            }
+        }
+
+        // Show messages if any
+        <% if (typeof success !== 'undefined' && success) { %>
+            showToast('<%= success %>', 'success');
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            showToast('<%= error %>', 'error');
+        <% } %>
+    </script>
+</body>
+</html>

@@ -509,21 +509,38 @@
             <div class="section">
                 <div class="section-header">
                     <div class="section-title">
-                        <div class="section-icon">♡</div>
+                        <div class="section-icon">👤</div>
                         Profile Details
                     </div>
-                    
-                  <a href="/change-password"> <button class="edit-btn">
-                        <span id="edit-icon">✏️</span>
-                        <span id="edit-text">Edit Profile</span>
-                    </button></a> 
+
+                    <a href="/edit-profile">
+                        <button class="edit-btn">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Profile</span>
+                        </button>
+                    </a>
+                </div>
+
+                <!-- Profile Image Section -->
+                <div class="form-group" style="text-align: center; margin-bottom: 2rem;">
+                    <label class="form-label">Profile Picture</label>
+                    <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                        <% if (user.profileImage) { %>
+                            <img src="/uploads/profile-images/<%= user.profileImage %>"
+                                 alt="Profile Picture"
+                                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #667eea;">
+                        <% } else { %>
+                            <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">
+                                <%= user.name.charAt(0).toUpperCase() %>
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
                     <div class="input-container">
                         <input type="text" class="form-input" value="<%=user.name%>" readonly>
-                      
                     </div>
                 </div>
 
@@ -531,28 +548,25 @@
                     <label class="form-label">Email Address</label>
                     <div class="input-container">
                         <input type="email" class="form-input" value="<%=user.email%>" readonly>
-                        
                     </div>
                 </div>
-                   
 
                 <div class="form-group">
                     <label class="form-label">Phone Number</label>
                     <div class="input-container">
-                        <input type="text" class="form-input" value="<%=user.phone%>" readonly>
-                        
+                        <input type="text" class="form-input" value="<%=user.phone || 'Not provided'%>" readonly>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Member Since</label>
                     <div class="input-container">
-                        <% 
+                        <%
                          const createdDate = new Date(user.createdOn);
                          const day = createdDate.getDate().toString().padStart(2, '0');
                           const month = (createdDate.getMonth() + 1).toString().padStart(2, '0'); // +1 since Jan = 0
                           const year = createdDate.getFullYear();
-                          const formattedDate = `${day}-${year}-${month}`;
+                          const formattedDate = `${day}-${month}-${year}`;
                           %>
                         <input type="text" class="form-input" value="<%= formattedDate %>" readonly>
                     </div>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - 1NOTONE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .orders-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+
+        .orders-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .orders-list {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .no-orders i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+        .order-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .order-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-info {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .order-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .order-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .order-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        .status-shipped { background: #d4edda; color: #155724; }
+        .status-delivered { background: #d1ecf1; color: #0c5460; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .order-body {
+            padding: 1.5rem;
+        }
+
+        .order-items {
+            margin-bottom: 1rem;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-specs {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+            min-width: 300px;
+        }
+
+        .toast-notification.toast-error {
+            background: #dc3545;
+        }
+
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .order-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .order-actions {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/user/header") %>
+
+    <div class="container">
+        <!-- Orders Header -->
+        <div class="orders-header">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-shopping-bag"></i>
+                    My Orders
+                </h1>
+                <a href="/Profile" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Profile
+                </a>
+            </div>
+
+            <!-- Order Statistics -->
+            <div class="orders-stats">
+                <div class="stat-card">
+                    <div class="stat-number"><%= orders.length %></div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><%= orders.filter(order => order.status === 'Delivered').length %></div>
+                    <div class="stat-label">Delivered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><%= orders.filter(order => order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped').length %></div>
+                    <div class="stat-label">Active Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">₹<%= orders.reduce((total, order) => total + order.finalAmount, 0).toLocaleString() %></div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="orders-list">
+            <% if (orders.length === 0) { %>
+                <div class="no-orders">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>No Orders Yet</h3>
+                    <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                    <a href="/shop" class="btn btn-outline" style="margin-top: 1rem;">
+                        <i class="fas fa-shopping-cart"></i>
+                        Start Shopping
+                    </a>
+                </div>
+            <% } else { %>
+                <% orders.forEach(order => { %>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-detail">
+                                    <span class="order-label">Order ID</span>
+                                    <span class="order-value">#<%= order.orderId %></span>
+                                </div>
+                                <div class="order-detail">
+                                    <span class="order-label">Order Date</span>
+                                    <span class="order-value"><%= new Date(order.createdOn).toLocaleDateString() %></span>
+                                </div>
+                                <div class="order-detail">
+                                    <span class="order-label">Total Amount</span>
+                                    <span class="order-value">₹<%= order.finalAmount.toLocaleString() %></span>
+                                </div>
+                            </div>
+                            <div class="order-status status-<%= order.status.toLowerCase() %>">
+                                <%= order.status %>
+                            </div>
+                        </div>
+
+                        <div class="order-body">
+                            <div class="order-items">
+                                <% order.orderedItems.forEach(item => { %>
+                                    <div class="order-item">
+                                        <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                                             alt="<%= item.product.productName %>" 
+                                             class="item-image"
+                                             onerror="this.src='/uploads/placeholder.jpg'">
+                                        <div class="item-details">
+                                            <div class="item-name"><%= item.product.productName %></div>
+                                            <div class="item-specs">
+                                                Quantity: <%= item.quantity %> | 
+                                                Size: <%= item.size || 'N/A' %> | 
+                                                Color: <%= item.color || 'N/A' %>
+                                            </div>
+                                        </div>
+                                        <div class="item-price">₹<%= item.price.toLocaleString() %></div>
+                                    </div>
+                                <% }) %>
+                            </div>
+
+                            <div class="order-actions">
+                                <a href="/order-details/<%= order._id %>" class="btn btn-outline">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
+                                </a>
+                                <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                                    <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
+                                        <i class="fas fa-times"></i>
+                                        Cancel Order
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const existingToasts = document.querySelectorAll('.toast-notification');
+            existingToasts.forEach(toast => toast.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Cancel order function
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/cancel-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Order cancelled successfully', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.message || 'Failed to cancel order', 'error');
+                }
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                showToast('An error occurred while cancelling the order', 'error');
+            }
+        }
+
+        // Show messages if any
+        <% if (typeof success !== 'undefined' && success) { %>
+            showToast('<%= success %>', 'success');
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            showToast('<%= error %>', 'error');
+        <% } %>
+    </script>
+</body>
+</html>

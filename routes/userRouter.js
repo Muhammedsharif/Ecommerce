@@ -7,6 +7,7 @@ const productController=require("../controllers/user/productController")
 const wishlistController=require("../controllers/user/wishlistController")
 const cartController=require("../controllers/user/cartController")
 const { userAuth } = require("../middlewares/auth");
+const profileUpload = require("../helpers/profileMulter");
 
 
 
@@ -63,6 +64,14 @@ router.get("/referral",userAuth,profileController.loadReferral)
 router.post("/send-email-otp",userAuth,profileController.sendEmailOTP)
 router.get("/verify-email-otp",userAuth,profileController.loadVerifyEmailOTP)
 router.post("/verify-email-otp",userAuth,profileController.verifyEmailOTP)
+
+// Edit Profile Routes
+router.get("/edit-profile",userAuth,profileController.loadEditProfile)
+router.post("/edit-profile",userAuth,profileUpload.single('profileImage'),profileController.updateProfile)
+
+// Order Management Routes
+router.get("/order-details/:orderId",userAuth,profileController.loadOrderDetails)
+router.post("/cancel-order",userAuth,profileController.cancelOrder)
 
 //Address Management
 router.get("/address",userAuth,profileController.loadAddress)

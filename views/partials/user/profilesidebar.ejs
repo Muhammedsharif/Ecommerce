@@ -178,7 +178,13 @@
 
         <aside class="sidebar">
             <div class="profile-section">
-                <div class="profile-avatar">U</div>
+                <% if (user.profileImage) { %>
+                    <img src="/uploads/profile-images/<%= user.profileImage %>"
+                         alt="Profile"
+                         style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem;">
+                <% } else { %>
+                    <div class="profile-avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+                <% } %>
                 <div class="profile-name"><%=user.name%></div>
                 <div class="status">
                     <div class="status-dot"></div>
@@ -224,7 +230,7 @@
                     <span class="menu-icon">🎁</span>
                     Referral Code
                 </a>
-                <a href="/logout" class="menu-item" style="color: #e74c3c;">
+                <a href="/logout" class="menu-item logout-item" style="color: #e74c3c;">
                     <span class="menu-icon">🚪</span>
                     Log out
                 </a>
