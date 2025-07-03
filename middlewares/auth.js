@@ -10,7 +10,8 @@ const userAuth =  (req,res,next) =>{
             if(data && !data.isBlocked){
                 next(); // User is valid, proceed to next middleware/route
             }else{
-              req.session.destroy() // Destroy session for blocked/invalid users
+                // Only clear user session data, preserve admin session if exists
+                delete req.session.user;
                 res.redirect("/login")
             }
         })

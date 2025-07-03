@@ -341,20 +341,23 @@
 
     const logout = async (req,res)=>{
         try {
+            // Only clear user session data, preserve admin session if exists
+            delete req.session.user;
 
-             req.session.destroy((err)=>{
+            // Save the session to ensure the deletion is persisted
+            req.session.save((err) => {
                 if(err){
-                    console.log("Session destruction error",err.message)
+                    console.log("Session save error",err.message)
                     return res.redirect("/pageNotFound")
                 }
                 return res.redirect("/login")
             })
-            
+
         } catch (error) {
 
             console.log("Logout error",error);
             res.redirect("/pageNotFound")
-            
+
         }
     }
     
@@ -487,9 +490,9 @@ const filterProducts = async (req, res) => {
 
         let userWishlist = [];
         if (user) {
-            const userData = await User.findById(user).lean();
-            userWishlist = userData.wishlist.map(id => id.toString());
-        }
+                const userData = await User.findById(user).lean();
+                    userWishlist = userData.wishlist.map(id => id.toString());
+                }
 
         let itemsPerPage = 9;
         let currentPage = parseInt(page) || 1;
@@ -513,7 +516,7 @@ const filterProducts = async (req, res) => {
             }
         }
 
-        req.session.filteredProducts = currentProducts;
+            req.session.filteredProducts = currentProducts;
 
         res.status(200).json({
             user: userData,

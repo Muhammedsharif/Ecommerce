@@ -905,28 +905,10 @@
                                     <%= products[i].productName %>
                                 </a>
                             </h3>
-                            <%
-                                // Calculate display price based on variants or product level
-                                let displayPrice = products[i].salePrice || products[i].regularPrice;
-                                let originalPrice = products[i].regularPrice;
-                                let hasDiscount = false;
-
-                                // If product has variants, use the first variant's price as default
-                                if (products[i].variant && products[i].variant.length > 0) {
-                                    const defaultVariant = products[i].variant[0];
-                                    displayPrice = defaultVariant.salePrice || defaultVariant.varientPrice;
-                                    originalPrice = products[i].regularPrice; // User's manual fix: use product regular price for strike-through
-                                    hasDiscount = defaultVariant.salePrice && defaultVariant.salePrice < defaultVariant.varientPrice;
-                                } else {
-                                    hasDiscount = products[i].salePrice && products[i].salePrice < products[i].regularPrice;
-                                }
-                            %>
+                           
                             <p class="product-price">
-                                ₹<%= (displayPrice || 0).toLocaleString('en-IN') %>
-                                <% if (hasDiscount && originalPrice) { %>
-                                  
-                                    <span><strike>₹<%= originalPrice.toLocaleString('en-IN') %></strike></span>
-                                <% } %>
+                                ₹<%= products[i].variant && products[i].variant.length > 0 ? products[i].variant[0].varientPrice : (products[i].regularPrice || 0) %>
+
                             </p>
                             <div class="product-rating">
                                 <% for(let j=0; j < 5; j++) { %>
@@ -1084,10 +1066,21 @@
 
                         data.products.forEach(product => {
                             const isInWishlist = data.userWishlist && data.userWishlist.includes(product._id);
+
+                            // Calculate variant-based pricing (same logic as server-side template)
+                            let displayPrice = 0;
+                            if (product.variant && product.variant.length > 0) {
+                                // Use first variant price (consistent with server-side template)
+                                displayPrice = product.variant[0].varientPrice || 0;
+                            } else {
+                                // Fallback to regular price if no variants
+                                displayPrice = product.regularPrice || 0;
+                            }
+
                             const productCard = `
                     <div class="product-card">
                         <div class="product-header">
-                            <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="addToWishlist('${product._id}')" data-product-name="${product.productName}" data-product-price="${product.salePrice}">♡</button>
+                            <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="addToWishlist('${product._id}')" data-product-name="${product.productName}" data-product-price="${displayPrice}">♡</button>
                         </div>
                         <div class="product-image">
                             <a href="/productDetails?id=${product._id}">
@@ -1098,14 +1091,14 @@
                             <a href="/productDetails?id=${product._id}">${product.productName}</a>
                         </h3>
                         <p class="product-price">
-                            ₹${(product.salePrice || product.regularPrice || 0).toLocaleString('en-IN')}
-                            ${product.salePrice && product.salePrice < product.regularPrice ?
-                                `<span><strike>₹${product.regularPrice.toLocaleString('en-IN')}</strike></span>` : ''}
+                            ₹${displayPrice}
                         </p>
                         <div class="product-rating">
                             ${'<span class="star">★</span>'.repeat(product.rating || 5)}
                         </div>
-                        <button class="add-to-cart" onclick="addToCart('${product._id}')" data-product-name="${product.productName}" data-product-price="${product.salePrice}">Add to Cart</button>
+                        <a href="/productDetails?id=${product._id}">
+                            <button class="add-to-cart">View Product</button>
+                        </a>
                     </div>
                 `;
                             productsGrid.insertAdjacentHTML('beforeend', productCard);
@@ -1173,11 +1166,11 @@
                         await fetchProducts('', 1, currentFilters);
                     });
 
-                    // Pagination click
-                    document.querySelector('.pagination').addEventListener('click', async (e) => {
-                        e.preventDefault();
+                    // Pagination click - Use event delegation on document since pagination gets replaced
+                    document.addEventListener('click', async (e) => {
                         const link = e.target.closest('.page-link');
                         if (link) {
+                            e.preventDefault();
                             const page = parseInt(link.getAttribute('data-page'));
                             console.log('Navigating to page:', page);
                             await fetchProducts(currentSearchQuery, page, currentFilters);

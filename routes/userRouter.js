@@ -32,10 +32,6 @@ router.post("/login",userController.login)
 router.get("/logout",userController.logout)
 
 //Home page & Shopping page
-router.get("/debug-test", (req, res) => {
-    console.log('DEBUG TEST ROUTE HIT');
-    res.send('Debug test route working - ' + new Date().toISOString());
-});
 router.get("/",userController.loadHomepage)
 router.get("/shop",userController.loadShoppingPage)
 router.get("/filter",userAuth,userController.filterProducts)
