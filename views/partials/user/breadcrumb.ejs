@@ -1,0 +1,95 @@
+<!-- Breadcrumb Navigation -->
+<nav class="breadcrumb-nav">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    Home
+                </a>
+            </li>
+            <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
+                <% breadcrumbs.forEach((crumb, index) => { %>
+                    <li class="breadcrumb-item <%= index === breadcrumbs.length - 1 ? 'active' : '' %>">
+                        <% if (index === breadcrumbs.length - 1) { %>
+                            <%= crumb.name %>
+                        <% } else { %>
+                            <a href="<%= crumb.url %>"><%= crumb.name %></a>
+                        <% } %>
+                    </li>
+                <% }) %>
+            <% } %>
+        </ol>
+    </div>
+</nav>
+
+<style>
+.breadcrumb-nav {
+    background-color: #f8f9fa;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 20px;
+}
+
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    align-items: center;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "/";
+    color: #6c757d;
+    margin: 0 8px;
+    font-weight: normal;
+}
+
+.breadcrumb-item a {
+    color: #007bff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.breadcrumb-item svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+    .breadcrumb-nav {
+        padding: 8px 0;
+    }
+    
+    .breadcrumb-item {
+        font-size: 14px;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        margin: 0 6px;
+    }
+}
+</style>

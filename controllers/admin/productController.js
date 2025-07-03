@@ -1,17 +1,24 @@
+// Import required models and modules for product management
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
+const Brand = require("../../models/brandSchema");
 const User = require("../../models/userSchema");
-const fs = require("fs");
-const path = require("path");
-const sharp = require("sharp");
+const fs = require("fs"); // File system operations
+const path = require("path"); // Path manipulation utilities
+const sharp = require("sharp"); // Image processing library
 
+// Controller function to render the add product page with categories and brands
 const getProductAddPage = async (req, res) => {
   try {
+    // Fetch active categories and brands for the form dropdowns
     const category = await Category.find({ isListed: true });
+    const brands = await Brand.find({ isBlocked: false });
     res.render("productAdd", {
       cat: category,
+      brands: brands,
     });
   } catch (error) {
+    // Redirect to error page if database operations fail
     res.redirect("/pageerror");
   }
 };
@@ -67,6 +74,8 @@ const getAllProducts = async (req, res) => {
 const addProducts = async (req, res) => {
   try {
     const products = req.body;
+    console.log("Received product data:", products);
+
     const productExists = await Product.findOne({
       productName: products.productName,
     });
@@ -115,9 +124,9 @@ const addProducts = async (req, res) => {
         }
       }
 
-      const categoryId = await Category.findOne({ name: products.category });
+      const categoryId = await Category.findById(products.category);
       if (!categoryId) {
-        return res.status(400).json({ error: "Invalid category name" });
+        return res.status(400).json({ error: "Invalid category ID" });
       }
 
       // 🟡 Handle selected sizes
@@ -130,26 +139,64 @@ const addProducts = async (req, res) => {
       }
       
 
-      // Create variant array
+      // Handle tags
+      let tags = [];
+      if (products.tags && products.tags.trim() !== '') {
+        tags = products.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+      }
+
+      // Calculate sale price based on product offer (will be updated after regularPrice calculation)
+      let salePrice = 0;
+
+      // Parse size variants data from form
+      let sizeVariants = {};
+      try {
+        if (products.sizeVariants) {
+          sizeVariants = JSON.parse(products.sizeVariants);
+        }
+      } catch (error) {
+        console.error("Error parsing size variants:", error);
+      }
+
+      // Calculate regular price as the average of all variant prices
+      let varientPrice = 0;
+      if (selectedSizes.length > 0) {
+        const totalPrice = selectedSizes.reduce((sum, size) => {
+          return sum + (parseFloat(sizeVariants[size]?.price) || 0);
+        }, 0);
+        varientPrice = totalPrice / selectedSizes.length;
+      }
+
+      // Calculate sale price based on product offer using the calculated regular price
+      salePrice = varientPrice;
+      if (products.productOffer && products.productOffer > 0) {
+        const discountAmount = (varientPrice * products.productOffer) / 100;
+        salePrice = varientPrice - discountAmount;
+      }
+
+      // Create variant array with quantities from size variants
       const variantData = selectedSizes.map((size) => ({
         size,
-        varientPrice: products.regularPrice,
-        salePrice: products.salePrice,
-        varientquantity: products.quantity,
+        varientPrice: sizeVariants[size]?.price || varientPrice,
+        salePrice: salePrice,
+        varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
       }));
-   
+
       const newProduct = new Product({
         productName: products.productName,
         description: products.description,
+        brand: products.brand || null,
         category: categoryId._id,
-        regularPrice: products.regularPrice,
-        salePrice: products.salePrice,
+        salePrice: salePrice,
+        varientPrice: varientPrice,
+        productOffer: products.productOffer || 0,
         createdOn: new Date(),
-        quantity: products.quantity,
+        quantity: 0, // Default quantity, managed through variants
         color: products.color,
         productImage: image,
-        variant: variantData, // ✅ stored as array
-        status: "Available",
+        variant: variantData,
+        tags: tags,
+        status: products.status || "Available",
       });
 
       await newProduct.save();
@@ -215,11 +262,13 @@ const getEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
     const product = await Product.findOne({ _id: id });
-    const category = await Category.find({});
+    const category = await Category.find({ isListed: true });
+    const brands = await Brand.find({ isBlocked: false });
 
     res.render("editProduct", {
       product: product,
       cat: category,
+      brands: brands,
     });
   } catch (error) {
     res.redirect("/pageerror");
@@ -279,10 +328,10 @@ const editProduct = async (req, res) => {
       }
     }
 
-    // Find category ID
-    const categoryId = await Category.findOne({ name: data.category });
+    // Find category by ID (form sends category ID, not name)
+    const categoryId = await Category.findOne({ _id: data.category });
     if (!categoryId) {
-      return res.status(400).json({ error: "Invalid category name" });
+      return res.status(400).json({ error: "Invalid category selected" });
     }
 
     let selectedSizes = req.body.sizes;
@@ -293,21 +342,49 @@ const editProduct = async (req, res) => {
     }
     console.log("Selected sizes:", selectedSizes);
 
-    // Create variant array
+    // Parse size variants data from form
+    let sizeVariants = {};
+    try {
+      if (data.sizeVariants) {
+        sizeVariants = JSON.parse(data.sizeVariants);
+        console.log("Parsed size variants:", sizeVariants);
+      }
+    } catch (error) {
+      console.error("Error parsing size variants:", error);
+    }
+
+    // Calculate regular price as the average of all variant prices
+    let varientPrice = 0;
+    if (selectedSizes.length > 0) {
+      const totalPrice = selectedSizes.reduce((sum, size) => {
+        return sum + (parseFloat(sizeVariants[size]?.price) || 0);
+      }, 0);
+      varientPrice = totalPrice / selectedSizes.length;
+    }
+
+    // Calculate sale price based on product offer using the calculated regular price
+    let salePrice = varientPrice;
+    if (data.productOffer && data.productOffer > 0) {
+      const discountAmount = (varientPrice * data.productOffer) / 100;
+      salePrice = varientPrice - discountAmount;
+    }
+
+    // Create variant array with data from form or defaults
     const variantData = selectedSizes.map((size) => ({
       size,
-      varientPrice: product.regularPrice,
-      salePrice: product.salePrice,
-      varientquantity: product.quantity,
+      varientPrice: sizeVariants[size]?.price || varientPrice,
+      salePrice: salePrice,
+      varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
     }));
 
     const updateFields = {
       productName: data.productName,
       description: data.description,
       category: categoryId._id,
-      regularPrice: data.regularPrice,
-      salePrice: data.salePrice,
-      quantity: data.quantity,
+      salePrice: salePrice,
+      varientPrice: varientPrice,
+      productOffer: data.productOffer || 0,
+      quantity: 0, // Default quantity, managed through variants
       color: data.color,
       variant: variantData,
     };

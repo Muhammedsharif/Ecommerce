@@ -32,7 +32,8 @@ const loadProductDetails = async (req,res)=>{
             similarProducts:similarProducts,
             totalOffer:totalOffer,
             category:findCategory,
-            sizes: availableSizes
+            sizes: availableSizes,
+            variants: product.variant || []
         })
 
 

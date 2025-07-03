@@ -1,23 +1,23 @@
+// User-facing routes configuration for the e-commerce application
 const express=require("express")
 const router=express.Router()
-const passport = require('passport');
+const passport = require('passport'); // Authentication middleware
 const userController=require("../controllers/user/userController");
 const profileController=require("../controllers/user/profileController")
 const productController=require("../controllers/user/productController")
 const wishlistController=require("../controllers/user/wishlistController")
 const cartController=require("../controllers/user/cartController")
-const { userAuth } = require("../middlewares/auth");
-const profileUpload = require("../helpers/profileMulter");
+const checkoutController=require("../controllers/user/checkoutController")
+const { userAuth } = require("../middlewares/auth"); // User authentication middleware
+const profileUpload = require("../helpers/profileMulter"); // Profile image upload helper
 
-
-
-
+// Error page route
 router.get("/pageNotFound",userController.pageNotFound)
 
-//SignUp Management
+// User Registration and Authentication Routes
 router.get("/pageNotFound",userController.pageNotFound)
-router.get("/signup",userController.loadSignup)
-router.post("/signup",userController.signup)
+router.get("/signup",userController.loadSignup) // Display signup form
+router.post("/signup",userController.signup) // Process signup form submission
 router.post("/verify-otp",userController.verifyOtp)
 router.post("/resend-otp",userController.resendOtp)
 router.get("/auth/google",passport.authenticate('google',{scope:['profile','email']}))
@@ -32,8 +32,12 @@ router.post("/login",userController.login)
 router.get("/logout",userController.logout)
 
 //Home page & Shopping page
-router.get("/",userAuth,userController.loadHomepage)
-router.get("/shop",userAuth,userController.loadShoppingPage)
+router.get("/debug-test", (req, res) => {
+    console.log('DEBUG TEST ROUTE HIT');
+    res.send('Debug test route working - ' + new Date().toISOString());
+});
+router.get("/",userController.loadHomepage)
+router.get("/shop",userController.loadShoppingPage)
 router.get("/filter",userAuth,userController.filterProducts)
 router.post("/search",userAuth,userController.searchProduct)
 router.get('/products',userAuth,userController.getAllProducts);
@@ -102,6 +106,11 @@ router.post("/update-cart-quantity",userAuth,cartController.updateCartQuantity)
 router.post("/remove-from-cart",userAuth,cartController.removeFromCart)
 router.post("/empty-cart",userAuth,cartController.emptyCart)
 router.post("/move-to-cart-from-wishlist",userAuth,cartController.moveToCartFromWishlist)
+
+//Checkout Management
+router.get("/checkout",userAuth,checkoutController.loadCheckout)
+router.post("/checkout",userAuth,checkoutController.processCheckout)
+router.get("/order-confirmation/:orderId",userAuth,checkoutController.loadThankYou)
 
 //Wallet Management
 router.get("/wallet",userAuth,profileController.loadWallet)

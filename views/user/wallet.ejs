@@ -243,6 +243,14 @@
    
     <%- include("../partials/user/header") %>
 
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", {
+        breadcrumbs: [
+            { name: "My Account", url: "/profile" },
+            { name: "Wallet", url: "/wallet" }
+        ]
+    }) %>
+
     <!-- Main Container -->
     <div class="main-container">
         <!-- Profile Sidebar -->

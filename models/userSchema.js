@@ -1,21 +1,26 @@
+// User model schema for the e-commerce application
 const mongoose = require('mongoose');
 const {Schema}=mongoose;
 
+// Define user schema with all required fields for user management
 const userSchema = new Schema({
+    // User's full name - required field
     name:{
         type:String,
         required:true,
     },
+    // User's email address - required and unique for authentication
     email:{
         type:String,
         required:true,
         unique:true
     },
+    // User's phone number - optional field with sparse indexing
     phone:{
         type:String,
         required:false,
         unique:false,
-        sparse:true,
+        sparse:true, // Allows multiple null values
         default:null
     },
     profileImage:{

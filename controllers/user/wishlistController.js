@@ -1,13 +1,14 @@
+// Wishlist management controller for user wishlist functionality
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 
-
-
+// Controller function to load and display user's wishlist page
 const loadWishlist = async(req,res)=>{
     try {
-
+        // Get user ID from session and fetch user data
         const userId = req.session.user
         const user = await User.findById(userId)
+        // Fetch all products in user's wishlist with category information
         const products = await Product.find({_id:{$in:user.wishlist}}).populate('category')
         res.render("wishlist",{
             user,

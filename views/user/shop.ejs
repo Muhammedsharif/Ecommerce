@@ -778,6 +778,9 @@
 <body>
     <%- include("../partials/user/header") %>
 
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", { breadcrumbs: [{ name: "Shop", url: "/shop" }] }) %>
+
         <section class="hero-section" id="home">
             <div class="floating-elements">
                 <img src="/images/close-up-futuristic-sneakers-showcase_23-2151005675.avif" alt="">
@@ -902,9 +905,28 @@
                                     <%= products[i].productName %>
                                 </a>
                             </h3>
-                            <p class="product-price">₹<%= products[i].salePrice.toLocaleString('en-IN') %>
-                                    <span><strike>₹<%= products[i].regularPrice.toLocaleString('en-IN') %>
-                                        </strike></span>
+                            <%
+                                // Calculate display price based on variants or product level
+                                let displayPrice = products[i].salePrice || products[i].regularPrice;
+                                let originalPrice = products[i].regularPrice;
+                                let hasDiscount = false;
+
+                                // If product has variants, use the first variant's price as default
+                                if (products[i].variant && products[i].variant.length > 0) {
+                                    const defaultVariant = products[i].variant[0];
+                                    displayPrice = defaultVariant.salePrice || defaultVariant.varientPrice;
+                                    originalPrice = products[i].regularPrice; // User's manual fix: use product regular price for strike-through
+                                    hasDiscount = defaultVariant.salePrice && defaultVariant.salePrice < defaultVariant.varientPrice;
+                                } else {
+                                    hasDiscount = products[i].salePrice && products[i].salePrice < products[i].regularPrice;
+                                }
+                            %>
+                            <p class="product-price">
+                                ₹<%= (displayPrice || 0).toLocaleString('en-IN') %>
+                                <% if (hasDiscount && originalPrice) { %>
+                                  
+                                    <span><strike>₹<%= originalPrice.toLocaleString('en-IN') %></strike></span>
+                                <% } %>
                             </p>
                             <div class="product-rating">
                                 <% for(let j=0; j < 5; j++) { %>
@@ -1075,8 +1097,10 @@
                         <h3 class="product-name">
                             <a href="/productDetails?id=${product._id}">${product.productName}</a>
                         </h3>
-                        <p class="product-price">₹${product.salePrice.toLocaleString('en-IN')}
-                            <span><strike>₹${product.regularPrice.toLocaleString('en-IN')}</strike></span>
+                        <p class="product-price">
+                            ₹${(product.salePrice || product.regularPrice || 0).toLocaleString('en-IN')}
+                            ${product.salePrice && product.salePrice < product.regularPrice ?
+                                `<span><strike>₹${product.regularPrice.toLocaleString('en-IN')}</strike></span>` : ''}
                         </p>
                         <div class="product-rating">
                             ${'<span class="star">★</span>'.repeat(product.rating || 5)}

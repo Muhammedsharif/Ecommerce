@@ -1,12 +1,16 @@
+// Import required models for cart functionality
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const Cart = require("../../models/cartSchema")
 const Category = require("../../models/categorySchema")
 
+// Controller function to load and display the cart page
 const loadCart = async (req,res) =>{
     try {
+        // Get user ID from session
         const userId = req.session.user;
 
+        // Redirect to login if user is not authenticated
         if (!userId) {
             return res.redirect("/login");
         }
@@ -47,9 +51,13 @@ const loadCart = async (req,res) =>{
                 } else if (!product.category || !product.category.isListed) {
                     isAvailable = false;
                     unavailableReason = 'Category is not available';
-                } else if (product.quantity <= 0) {
-                    isAvailable = false;
-                    unavailableReason = 'Out of stock';
+                } else {
+                    // Check variant-based stock availability
+                    const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+                    if (totalVariantStock <= 0) {
+                        isAvailable = false;
+                        unavailableReason = 'Out of stock';
+                    }
                 }
                 // Don't mark as unavailable just because cart quantity > stock
                 // Let the quantity controls handle this validation
@@ -58,7 +66,7 @@ const loadCart = async (req,res) =>{
                     ...item.toObject(),
                     isAvailable,
                     unavailableReason,
-                    maxStock: product ? product.quantity : 0
+                    maxStock: product ? product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0) : 0
                 };
             });
         }
@@ -75,14 +83,17 @@ const loadCart = async (req,res) =>{
     }
 }
 
+// Controller function to add products to cart with size and color selection
 const addToCart = async(req,res)=>{
     try {
+        // Debug logging for cart addition requests
         console.log('=== ADD TO CART REQUEST RECEIVED ===');
         console.log('Request method:', req.method);
         console.log('Request URL:', req.url);
         console.log('Request body:', req.body);
         console.log('Session:', req.session);
 
+        // Extract user ID and product details from request
         const userId = req.session.user;
         const { productId, size, color } = req.body;
 
@@ -114,7 +125,21 @@ const addToCart = async(req,res)=>{
             return res.status(400).json({ success: false, message: 'Product category is not available' });
         }
 
-        if (product.quantity <= 0) {
+        // Check specific size variant stock availability
+        let selectedVariant = null;
+        if (size && size !== 'N/A') {
+            selectedVariant = product.variant.find(variant => variant.size === size);
+            if (!selectedVariant) {
+                return res.status(400).json({ success: false, message: 'Selected size is not available' });
+            }
+            if (selectedVariant.varientquantity <= 0) {
+                return res.status(400).json({ success: false, message: `Size ${size} is out of stock` });
+            }
+        }
+
+        // Check variant-based stock availability
+        const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+        if (totalVariantStock <= 0) {
             return res.status(400).json({ success: false, message: 'Product is out of stock' });
         }
 
@@ -141,10 +166,20 @@ const addToCart = async(req,res)=>{
                     });
                 }
 
-                if (currentQuantity >= product.quantity) {
+                // Check stock limit based on specific variant or total stock
+                let stockLimit;
+                if (selectedVariant) {
+                    stockLimit = selectedVariant.varientquantity;
+                } else {
+                    stockLimit = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+                }
+
+                if (currentQuantity >= stockLimit) {
                     return res.status(400).json({
                         success: false,
-                        message: 'Cannot add more items. Stock limit reached.'
+                        message: selectedVariant ?
+                            `Cannot add more items. Size ${size} stock limit reached.` :
+                            'Cannot add more items. Stock limit reached.'
                     });
                 }
 
@@ -254,8 +289,28 @@ const moveToCartFromWishlist = async(req, res) => {
             return res.status(400).json({ success: false, message: 'Product category is not available' });
         }
 
-        if (product.quantity <= 0) {
-            return res.status(400).json({ success: false, message: 'Product is out of stock' });
+        // Check specific size variant stock availability
+        let selectedVariant = null;
+        let productPrice = 0;
+
+        if (size && size !== 'N/A') {
+            selectedVariant = product.variant.find(variant => variant.size === size);
+            if (!selectedVariant) {
+                return res.status(400).json({ success: false, message: 'Selected size is not available' });
+            }
+            if (selectedVariant.varientquantity <= 0) {
+                return res.status(400).json({ success: false, message: `Size ${size} is out of stock` });
+            }
+            // Use variant-specific pricing
+            productPrice = selectedVariant.salePrice || selectedVariant.varientPrice;
+        } else {
+            // If no specific size, check total variant stock
+            const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+            if (totalVariantStock <= 0) {
+                return res.status(400).json({ success: false, message: 'Product is out of stock' });
+            }
+            // Use first variant price as default
+            productPrice = product.variant[0]?.salePrice || product.variant[0]?.varientPrice || 0;
         }
 
         // Remove from wishlist
@@ -282,26 +337,36 @@ const moveToCartFromWishlist = async(req, res) => {
                 // Product exists, increment quantity
                 const currentQuantity = cart.items[existingItemIndex].quantity;
 
-                if (currentQuantity >= product.quantity) {
+                // Check stock limit based on specific variant or total stock
+                let stockLimit;
+                if (selectedVariant) {
+                    stockLimit = selectedVariant.varientquantity;
+                } else {
+                    stockLimit = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+                }
+
+                if (currentQuantity >= stockLimit) {
                     // Add back to wishlist since we can't add to cart
                     user.wishlist.push(productId);
                     await user.save();
                     return res.status(400).json({
                         success: false,
-                        message: 'Cannot add more items. Stock limit reached.'
+                        message: selectedVariant ?
+                            `Cannot add more items. Size ${size} stock limit reached.` :
+                            'Cannot add more items. Stock limit reached.'
                     });
                 }
 
                 cart.items[existingItemIndex].quantity += 1;
                 cart.items[existingItemIndex].totalPrice =
-                    cart.items[existingItemIndex].quantity * product.salePrice;
+                    cart.items[existingItemIndex].quantity * productPrice;
             } else {
                 // Add new product to cart
                 cart.items.push({
                     productId: productId,
                     quantity: 1,
-                    price: product.salePrice,
-                    totalPrice: product.salePrice,
+                    price: productPrice,
+                    totalPrice: productPrice,
                     size: size || 'N/A',
                     color: color || 'N/A'
                 });
@@ -313,8 +378,8 @@ const moveToCartFromWishlist = async(req, res) => {
                 items: [{
                     productId: productId,
                     quantity: 1,
-                    price: product.salePrice,
-                    totalPrice: product.salePrice,
+                    price: productPrice,
+                    totalPrice: productPrice,
                     size: size || 'N/A',
                     color: color || 'N/A'
                 }]
@@ -383,12 +448,13 @@ const updateCartQuantity = async(req, res) => {
             return res.status(400).json({ success: false, message: 'Product category is no longer available' });
         }
 
-        // Check stock availability
-        if (quantity > product.quantity) {
+        // Check variant-based stock availability
+        const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+        if (quantity > totalVariantStock) {
             return res.status(400).json({
                 success: false,
-                message: `Only ${product.quantity} items available in stock`,
-                availableStock: product.quantity
+                message: `Only ${totalVariantStock} items available in stock`,
+                availableStock: totalVariantStock
             });
         }
 

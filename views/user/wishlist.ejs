@@ -627,6 +627,14 @@
     <!-- Header -->
  <%- include("../partials/user/header") %>
 
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", {
+        breadcrumbs: [
+            { name: "My Account", url: "/profile" },
+            { name: "Wishlist", url: "/wishlist" }
+        ]
+    }) %>
+
     <div class="container">
         <!-- Sidebar -->
        
@@ -677,23 +685,37 @@
                     <div class="product-info">
                         <div class="product-brand">Nike</div>
                         <h3 class="product-title"><%=product.productName%></h3>
-                        <div class="product-price">₹<%=product.salePrice%></div>
+                        <div class="product-price">₹<%=product.variant[0].salePrice%></div>
                         <div class="size-selector">
                             <label>Select Size:</label>
                             <select class="size-select" data-product-id="<%=product._id%>">
                                 <option value="">Choose a size</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
+                                <% if (product.variant && product.variant.length > 0) { %>
+                                    <% product.variant.forEach(variant => { %>
+                                        <% if (variant.varientquantity > 0) { %>
+                                            <option value="<%= variant.size %>"><%= variant.size %></option>
+                                        <% } %>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option value="N/A" disabled>No sizes available</option>
+                                <% } %>
                             </select>
                         </div>
                         <div class="product-actions">
-                            <button class="add-to-cart-btn" onclick="addToCart(this)">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Add to Cart</span>
-                            </button>
+                            <%
+                                const hasStock = product.variant && product.variant.some(variant => variant.varientquantity > 0);
+                            %>
+                            <% if (hasStock) { %>
+                                <button class="add-to-cart-btn" onclick="addToCart(this)">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Add to Cart</span>
+                                </button>
+                            <% } else { %>
+                                <button class="add-to-cart-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
+                                    <i class="fas fa-ban"></i>
+                                    <span>Out of Stock</span>
+                                </button>
+                            <% } %>
                            <a href="/productDetails?id=<%= product._id %>"> <button class="view-btn">
                                 <i class="fas fa-eye"></i>
                             </button></a>
@@ -793,14 +815,18 @@
             document.head.appendChild(style);
         }
 
-        async function addToCart(button) {
+        async function  addToCart(button) {
             try {
+                console.log('🔄 AddToCart function called');
                 const productCard = button.closest('.product-card');
                 const productTitle = productCard.querySelector('.product-title').textContent;
+                console.log('📦 Product:', productTitle);
 
                 // Get product ID from the card
                 const productId = productCard.getAttribute('data-product-id');
+                console.log('🆔 Product ID:', productId);
                 if (!productId) {
+                    console.error('❌ Product ID not found');
                     showToast('Product ID not found', 'error');
                     return;
                 }
@@ -808,9 +834,11 @@
                 // Get selected size
                 const sizeSelect = productCard.querySelector('.size-select');
                 const selectedSize = sizeSelect.value;
+                console.log('📏 Selected size:', selectedSize);
 
                 // Check if size is selected
                 if (!selectedSize) {
+                    console.error('❌ No size selected');
                     showToast('Please select a size before adding to cart', 'error');
                     sizeSelect.focus();
                     return;
@@ -820,6 +848,9 @@
                 button.disabled = true;
                 const originalHTML = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Moving...</span>';
+
+                console.log('🚀 Sending request to /move-to-cart-from-wishlist');
+                console.log('📤 Request data:', { productId, size: selectedSize, color: 'Default' });
 
                 const response = await fetch('/move-to-cart-from-wishlist', {
                     method: 'POST',
@@ -833,18 +864,25 @@
                     })
                 });
 
+                console.log('📥 Response status:', response.status);
                 const data = await response.json();
+                console.log('📋 Response data:', data);
 
                 if (data.success) {
+                    console.log('✅ Success! Moving product to cart');
                     // Show success message
                     showToast(data.message, 'success');
 
                     // Update cart counter
+                    console.log('🔄 Updating cart counter to:', data.cartCount);
                     if (window.updateCartCounter) {
                         window.updateCartCounter(data.cartCount);
+                    } else {
+                        console.warn('⚠️ updateCartCounter function not found');
                     }
 
                     // Remove product card from wishlist with animation
+                    console.log('🗑️ Removing product card from wishlist');
                     productCard.style.transition = 'all 0.3s ease';
                     productCard.style.transform = 'translateX(100%)';
                     productCard.style.opacity = '0';
@@ -855,6 +893,8 @@
                         // Update wishlist count
                         if (window.decrementWishlistCounter) {
                             window.decrementWishlistCounter();
+                        } else {
+                            console.warn('⚠️ decrementWishlistCounter function not found');
                         }
 
                         // Check if wishlist is empty
@@ -865,13 +905,15 @@
                     }, 300);
 
                 } else {
+                    console.error('❌ Failed to move to cart:', data.message);
                     showToast(data.message || 'Failed to move to cart', 'error');
                     button.innerHTML = originalHTML;
                     button.disabled = false;
                 }
 
             } catch (error) {
-                console.error('Error moving to cart:', error);
+                console.error('💥 Error moving to cart:', error);
+                console.error('💥 Error details:', error.message, error.stack);
                 showToast('Something went wrong. Please try again.', 'error');
 
                 // Reset button
@@ -927,37 +969,7 @@
             document.getElementById('emptyState').classList.add('show');
         }
 
-        function showToast(message) {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #10b981;
-                color: white;
-                padding: 12px 24px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 1000;
-                opacity: 0;
-                transform: translateX(100%);
-                transition: all 0.3s ease;
-            `;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateX(0)';
-            }, 100);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, 3000);
-        }
+
 
         // Add hover effects
         document.querySelectorAll('.product-card').forEach(card => {

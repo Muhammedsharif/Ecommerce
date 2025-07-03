@@ -46,6 +46,8 @@ router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 
 //Order Management
 router.get("/orders",adminAuth,orderController.getOrderPage)
+router.post("/update-order-status",adminAuth,orderController.updateOrderStatus)
+router.get("/order-details/:orderId",adminAuth,orderController.getOrderDetails)
 
 //Banner Management
 router.get("/banner",adminAuth,bannerController.getBannerPage)

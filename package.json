@@ -7,7 +7,7 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "E-commerce application with user authentication, product management, cart, wishlist, and admin panel",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "dotenv": "^16.5.0",

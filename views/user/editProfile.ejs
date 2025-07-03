@@ -288,6 +288,14 @@
 <body>
     <%- include("../partials/user/header") %>
 
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", {
+        breadcrumbs: [
+            { name: "My Account", url: "/profile" },
+            { name: "Edit Profile", url: "/editProfile" }
+        ]
+    }) %>
+
     <div class="container">
         <div class="edit-profile-card">
             <div class="header">

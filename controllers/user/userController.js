@@ -66,30 +66,50 @@
 
     const loadHomepage = async (req, res) => {
   try {
+    console.log('=== HOMEPAGE FUNCTION CALLED ===');
     const user = req.session.user;
 
-    // Get products with basic filters - same as shop page
+    // First, let's check all products in database
+    const allProducts = await Product.find({});
+    console.log('Total products in database:', allProducts.length);
+
+    // Check products that are not blocked/deleted
+    const activeProducts = await Product.find({
+      isBlocked: false,
+      isDeleted: false
+    });
+    console.log('Active products (not blocked/deleted):', activeProducts.length);
+
+    // Get products with proper filters including category validation
     let productData = await Product.find({
       isBlocked: false,
-      isDeleted: false,
-      quantity: { $gt: 0 }
+      isDeleted: false
+    }).populate({
+      path: 'category',
+      match: { isListed: true }
     });
 
-    console.log('Products found:', productData.length);
+    console.log('Products before variant check:', productData.length);
+
+    // Debug: Check variant quantities for first product
+    if (productData.length > 0) {
+      console.log('First product variant data:', JSON.stringify(productData[0].variant, null, 2));
+    }
+
+    // Filter out products with unlisted categories
+    productData = productData.filter(product => product.category !== null);
+    console.log('Products after category filter:', productData.length);
+
     productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     productData = productData.slice(0, 9);
-    console.log('Products after slice:', productData.length);
-
-    
+    console.log('Final products to render:', productData.length);
 
     if (user) {
       const userData = await User.findById(user);
-      console.log('Rendering home with user:', userData?.name, 'Products:', productData.length);
-      res.render("home", { user: userData, products: productData });
+      res.render("home", { user: userData, products: productData, timestamp: new Date().toISOString() });
     }
     else {
-      console.log('Rendering home without user, Products:', productData.length);
-      res.render("home", { products: productData });
+      res.render("home", { products: productData, timestamp: new Date().toISOString() });
     }
   } catch (error) {
     console.log("Home page not found", error); // Log the full error
@@ -348,7 +368,7 @@ const loadShoppingPage = async (req, res) => {
 
         const query = {
             isBlocked: false,
-            quantity: { $gt: 0 },
+            isDeleted: false
         };
 
         // Define sort options
@@ -361,13 +381,23 @@ const loadShoppingPage = async (req, res) => {
             default: sortOption = { createdAt: -1 };
         }
 
-        let findProducts = await Product.find(query).sort(sortOption).lean();
+        let findProducts = await Product.find(query).populate({
+            path: 'category',
+            match: { isListed: true }
+        }).sort(sortOption).lean();
 
+        // Filter out products with unlisted categories
+        findProducts = findProducts.filter(product => product.category !== null);
+console.log("shop findProduct",findProducts.length)
         const categories = await Category.find({ isListed: true }).lean();
 
-        const userwish = await User.findById(userId);
-
-          const wishlistIds = userwish.wishlist.map(id => id.toString()); // Get only product IDs
+        let wishlistIds = [];
+        if (userId) {
+            const userwish = await User.findById(userId);
+            if (userwish && userwish.wishlist) {
+                wishlistIds = userwish.wishlist.map(id => id.toString()); // Get only product IDs
+            }
+        }
 
 
         let itemsPerPage = 9;
@@ -412,7 +442,7 @@ const filterProducts = async (req, res) => {
 
         const query = {
             isBlocked: false,
-            quantity: { $gt: 0 },
+            isDeleted: false
         };
 
         // Category filter
@@ -445,7 +475,13 @@ const filterProducts = async (req, res) => {
             default: sortOption = { createdAt: -1 };
         }
 
-        let findProducts = await Product.find(query).sort(sortOption).lean();
+        let findProducts = await Product.find(query).populate({
+            path: 'category',
+            match: { isListed: true }
+        }).sort(sortOption).lean();
+
+        // Filter out products with unlisted categories
+        findProducts = findProducts.filter(product => product.category !== null);
 
         const categories = await Category.find({ isListed: true }).lean();
 
@@ -522,8 +558,8 @@ const searchProduct = async (req, res) => {
         let searchResult = await Product.find({
             productName: { $regex: `.*${search}.*`, $options: 'i' },
             isBlocked: false,
-            quantity: { $gt: 0 },
-            category: { $in: categoryIds },
+            isDeleted: false,
+            category: { $in: categoryIds }
         }).sort(sortOption).lean();
 
         const itemsPerPage = 9;
@@ -580,7 +616,7 @@ const getAllProducts = async (req, res) => {
 
         const products = await Product.find({
             isBlocked: false,
-            quantity: { $gt: 0 },
+            isDeleted: false,
             category: { $in: categoryIds },
         }).lean();
 

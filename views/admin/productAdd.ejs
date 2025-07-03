@@ -785,7 +785,11 @@ img[src*="data:"] {
                             </label>
                             <select class="form-control form-select" name="brand">
                                 <option value="">Select a brand</option>
-                                <!-- Brand options would be populated here -->
+                                <% if (typeof brands !== 'undefined') { %>
+                                    <% for(let i = 0; i < brands.length; i++) { %>
+                                        <option value="<%=brands[i].brandName%>"><%=brands[i].brandName%></option>
+                                    <% } %>
+                                <% } %>
                             </select>
                             <div id="brand-error" class="error-message"></div>
                         </div>
@@ -799,13 +803,6 @@ img[src*="data:"] {
                         </div>
 
                         <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-dollar-sign"></i> Regular Price
-                                </label>
-                                <input placeholder="0.00" name="regularPrice" type="text" class="form-control">
-                                <div id="regularPrice-error" class="error-message"></div>
-                            </div>
                             <div class="form-group">
                                 <label class="form-label">
                                     <i class="fas fa-gift"></i> Product Offer (%)
@@ -831,7 +828,7 @@ img[src*="data:"] {
                                     <option value="">Select category</option>
                                     <% if (typeof cat !== 'undefined') { %>
                                         <% for(let i = 0; i < cat.length; i++) { %>
-                                            <option value="<%=cat[i].name%>"><%=cat[i].name%></option>
+                                            <option value="<%=cat[i]._id%>"><%=cat[i].name%></option>
                                         <% } %>
                                     <% } %>
                                 </select>
@@ -866,6 +863,27 @@ img[src*="data:"] {
                                 </label>
                             </div>
                             <div id="sizes-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-tags"></i> Tags (comma separated)
+                                </label>
+                                <input name="tags" type="text" class="form-control" placeholder="e.g. casual, comfortable, trendy">
+                                <div id="tags-error" class="error-message"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-info-circle"></i> Status
+                                </label>
+                                <select class="form-control form-select" name="status">
+                                    <option value="Available">Available</option>
+                                    <option value="out of stock">Out of Stock</option>
+                                    <option value="Discountinued">Discontinued</option>
+                                </select>
+                                <div id="status-error" class="error-message"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -1053,10 +1071,23 @@ img[src*="data:"] {
                 });
 
                 try {
+                    // Get form element and create FormData object for submission
                     const form = document.getElementById('productForm');
                     const formData = new FormData(form);
-                    
-                    // Add size variants data
+
+                    // CRITICAL FIX: Sync current form values with sizeVariants object before submission
+                    // This ensures that the latest input values are captured even if onchange events didn't fire
+                    selectedSizes.forEach(size => {
+                        const priceInput = document.getElementsByName(`variant_price_${size}`)[0];
+                        const quantityInput = document.getElementsByName(`variant_quantity_${size}`)[0];
+
+                        if (sizeVariants[size]) {
+                            sizeVariants[size].price = priceInput.value;
+                            sizeVariants[size].quantity = quantityInput.value;
+                        }
+                    });
+
+                    // Add size variants data as JSON string to form data
                     formData.append('sizeVariants', JSON.stringify(sizeVariants));
                     
                     // Ensure only the selected images are included
@@ -1281,10 +1312,11 @@ img[src*="data:"] {
             const name = document.getElementsByName('productName')[0].value;
             const description = document.getElementById('descriptionid').value;
             const brand = document.getElementsByName('brand')[0].value;
-            const price = document.getElementsByName('regularPrice')[0].value;
+            const productOffer = document.getElementsByName('productOffer')[0].value;
             const color = document.getElementsByName('color')[0].value;
             const category = document.getElementsByName('category')[0].value;
             const sizes = document.querySelectorAll('input[name="sizes"]:checked');
+            const status = document.getElementsByName('status')[0].value;
 
             let isValid = true;
 
@@ -1304,8 +1336,10 @@ img[src*="data:"] {
                 isValid = false;
             }
 
-            if (!price || !/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) <= 0) {
-                displayErrorMessage('regularPrice-error', 'Please enter a valid positive price.');
+
+
+            if (productOffer && (!/^\d+$/.test(productOffer) || parseInt(productOffer) < 0 || parseInt(productOffer) > 100)) {
+                displayErrorMessage('productOffer-error', 'Product offer must be between 0 and 100.');
                 isValid = false;
             }
 
@@ -1321,6 +1355,11 @@ img[src*="data:"] {
 
             if (sizes.length === 0) {
                 displayErrorMessage('sizes-error', 'Please select at least one size.');
+                isValid = false;
+            }
+
+            if (!status || status.trim() === "") {
+                displayErrorMessage('status-error', 'Please select a status.');
                 isValid = false;
             }
 

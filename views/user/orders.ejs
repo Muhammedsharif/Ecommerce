@@ -321,6 +321,14 @@
 <body>
     <%- include("../partials/user/header") %>
 
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", {
+        breadcrumbs: [
+            { name: "My Account", url: "/profile" },
+            { name: "My Orders", url: "/orders" }
+        ]
+    }) %>
+
     <div class="container">
         <!-- Orders Header -->
         <div class="orders-header">

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - 1NOTONE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .checkout-main {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .checkout-sidebar {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        .cart-review {
+            margin-bottom: 2rem;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-specs {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .address-section {
+            margin-bottom: 2rem;
+        }
+
+        .address-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .address-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .address-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .address-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .address-card input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+
+        .address-type {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .address-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .payment-section {
+            margin-bottom: 2rem;
+        }
+
+        .payment-options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .payment-option {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-option:hover {
+            border-color: #3b82f6;
+        }
+
+        .payment-option.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .payment-option input[type="radio"] {
+            margin-right: 0.75rem;
+        }
+
+        .payment-icon {
+            margin-right: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .order-summary {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-row:last-child {
+            margin-bottom: 0;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        .place-order-btn {
+            width: 100%;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1.5rem;
+        }
+
+        .place-order-btn:hover {
+            background: #047857;
+        }
+
+        .place-order-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .checkout-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/user/header") %>
+
+    <div class="checkout-container">
+        <div class="checkout-main">
+            <!-- Cart Review Section -->
+            <div class="cart-review">
+                <h2 class="section-title">
+                    <i class="fas fa-shopping-cart"></i> Order Review
+                </h2>
+                <% cartItems.forEach(item => { %>
+                    <div class="cart-item">
+                        <% if (item.productId.productImage && item.productId.productImage.length > 0) { %>
+                            <img src="/uploads/product-images/<%= item.productId.productImage[0] %>" 
+                                 alt="<%= item.productId.productName %>" 
+                                 class="item-image">
+                        <% } else { %>
+                            <div class="item-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        <% } %>
+                        <div class="item-details">
+                            <div class="item-name"><%= item.productId.productName %></div>
+                            <div class="item-specs">
+                                Size: <%= item.size %> | Color: <%= item.color %> | Qty: <%= item.quantity %>
+                            </div>
+                            <div class="item-price">₹<%= item.itemTotal.toLocaleString('en-IN') %></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- Delivery Address Section -->
+            <div class="address-section">
+                <h2 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i> Delivery Address
+                </h2>
+                <% if (addresses.length > 0) { %>
+                    <div class="address-grid">
+                        <% addresses.forEach((address, index) => { %>
+                            <div class="address-card" onclick="selectAddress('<%= address._id %>')">
+                                <input type="radio" name="address" value="<%= address._id %>" 
+                                       id="address-<%= index %>" <%= address.isDefault ? 'checked' : '' %>>
+                                <label for="address-<%= index %>">
+                                    <div class="address-type"><%= address.addressType %></div>
+                                    <div class="address-details">
+                                        <%= address.name %><br>
+                                        <%= address.landmark %>, <%= address.city %><br>
+                                        <%= address.state %> - <%= address.pincode %><br>
+                                        Phone: <%= address.phone %>
+                                    </div>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p>No addresses found. <a href="/profile">Add an address</a> to continue.</p>
+                <% } %>
+                <div id="address-error" class="error-message"></div>
+            </div>
+
+            <!-- Payment Method Section -->
+            <div class="payment-section">
+                <h2 class="section-title">
+                    <i class="fas fa-credit-card"></i> Payment Method
+                </h2>
+                <div class="payment-options">
+                    <div class="payment-option" onclick="selectPayment('COD')">
+                        <input type="radio" name="payment" value="COD" id="payment-cod" checked>
+                        <i class="fas fa-money-bill-wave payment-icon"></i>
+                        <label for="payment-cod">Cash on Delivery</label>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment('ONLINE')">
+                        <input type="radio" name="payment" value="ONLINE" id="payment-online">
+                        <i class="fas fa-credit-card payment-icon"></i>
+                        <label for="payment-online">Online Payment</label>
+                    </div>
+                </div>
+                <div id="payment-error" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="checkout-sidebar">
+            <h3 class="section-title">Order Summary</h3>
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Subtotal (<%= cartItems.length %> items)</span>
+                    <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span><%= shippingCost === 0 ? 'FREE' : '₹' + shippingCost.toLocaleString('en-IN') %></span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (GST 18%)</span>
+                    <span>₹<%= taxAmount.toLocaleString('en-IN') %></span>
+                </div>
+                <div class="summary-row">
+                    <span>Total</span>
+                    <span>₹<%= totalAmount.toLocaleString('en-IN') %></span>
+                </div>
+            </div>
+            
+            <button class="place-order-btn" onclick="placeOrder()" id="place-order-btn">
+                Place Order
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your order...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAddress = '<%= addresses.find(addr => addr.isDefault)?._id || "" %>';
+        let selectedPayment = 'COD';
+
+        function selectAddress(addressId) {
+            selectedAddress = addressId;
+            document.querySelectorAll('.address-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('address-error').textContent = '';
+        }
+
+        function selectPayment(paymentMethod) {
+            selectedPayment = paymentMethod;
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('payment-error').textContent = '';
+        }
+
+        async function placeOrder() {
+            // Validate selections
+            if (!selectedAddress) {
+                document.getElementById('address-error').textContent = 'Please select a delivery address';
+                return;
+            }
+
+            if (!selectedPayment) {
+                document.getElementById('payment-error').textContent = 'Please select a payment method';
+                return;
+            }
+
+            // Get order details for confirmation
+            const totalAmount = '₹<%= totalAmount.toLocaleString("en-IN") %>';
+            const paymentMethodText = selectedPayment === 'COD' ? 'Cash on Delivery' : selectedPayment;
+            const itemCount = <%= cartItems.length %>;
+
+            // Show SweetAlert confirmation dialog
+            const result = await Swal.fire({
+                title: 'Confirm Your Order',
+                html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <p style="margin-bottom: 10px;"><strong>Order Total:</strong> ${totalAmount}</p>
+                        <p style="margin-bottom: 10px;"><strong>Items:</strong> ${itemCount} item${itemCount > 1 ? 's' : ''}</p>
+                        <p style="margin-bottom: 10px;"><strong>Payment Method:</strong> ${paymentMethodText}</p>
+                        <hr style="margin: 15px 0;">
+                        <p style="color: #666; font-size: 14px;">Are you sure you want to place this order?</p>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Place Order!',
+                cancelButtonText: 'Cancel',
+                width: 450
+            });
+
+            // If user cancels, return early
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            // Show loading
+            document.getElementById('place-order-btn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch('/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        addressId: selectedAddress,
+                        paymentMethod: selectedPayment
+                    })
+                });
+
+                const apiResult = await response.json();
+
+                if (apiResult.success) {
+                    // Show success message with order details
+                    await Swal.fire({
+                        title: 'Order Placed Successfully!',
+                        html: `
+                            <div style="text-align: center; padding: 10px;">
+                                <div style="font-size: 48px; color: #28a745; margin-bottom: 15px;">✅</div>
+                                <p style="margin-bottom: 10px; font-size: 16px;"><strong>Order ID:</strong> ${apiResult.orderId}</p>
+                                <p style="margin-bottom: 10px;"><strong>Total Amount:</strong> ${totalAmount}</p>
+                                <p style="margin-bottom: 15px; color: #666;">Thank you for your order! You will receive a confirmation email shortly.</p>
+                                <hr style="margin: 15px 0;">
+                                <p style="color: #666; font-size: 14px;">Redirecting to your profile...</p>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'View Orders',
+                        confirmButtonColor: '#28a745',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+
+                    // Redirect to profile page or order confirmation
+                    if (apiResult.redirectUrl) {
+                        window.location.href = apiResult.redirectUrl;
+                    } else {
+                        window.location.href = '/profile';
+                    }
+                } else {
+                    // Show error message
+                    await Swal.fire({
+                        title: 'Order Failed',
+                        text: apiResult.message || 'Failed to place order. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'Try Again',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                // Show error message for network/server errors
+                await Swal.fire({
+                    title: 'Connection Error',
+                    text: 'Failed to place order due to a network error. Please check your connection and try again.',
+                    icon: 'error',
+                    confirmButtonText: 'Try Again',
+                    confirmButtonColor: '#d33'
+                });
+            } finally {
+                // Hide loading
+                document.getElementById('place-order-btn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Initialize selected states
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default address as selected
+            const defaultAddress = document.querySelector('input[name="address"]:checked');
+            if (defaultAddress) {
+                defaultAddress.closest('.address-card').classList.add('selected');
+            }
+
+            // Set default payment as selected
+            document.querySelector('.payment-option').classList.add('selected');
+        });
+    </script>
+</body>
+</html>

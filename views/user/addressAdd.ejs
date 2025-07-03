@@ -504,25 +504,14 @@
     <!-- Header -->
      <%- include("../partials/user/header") %>
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-        <nav class="breadcrumb">
-                    <a href="/" onclick="navigateHome()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                        </svg>
-                    </a>
-                    <span class="breadcrumb-separator">/</span>
-                    <a href="/profile" onclick="navigateAccount()">My Account</a>
-                    <span class="breadcrumb-separator">/</span>
-                    <a href="/address" onclick="navigateAccount()">My Address</a>
-                 
-                     <span class="breadcrumb-separator">/</span>
-                     <a href="#" onclick="navigateAccount()">Add New Address</a>
-                    <span class="breadcrumb-separator">/</span>
-                   
-                </nav>
-    </div>
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", {
+        breadcrumbs: [
+            { name: "My Account", url: "/profile" },
+            { name: "My Address", url: "/address" },
+            { name: "Add New Address", url: "#" }
+        ]
+    }) %>
 
     <!-- Main Content -->
     <div class="container">

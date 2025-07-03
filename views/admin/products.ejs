@@ -1018,26 +1018,59 @@
                 </td>
                 <td>
                     <div class="pricing-info">
-                        <% if (data[i].regularPrice && data[i].salePrice < data[i].regularPrice) { %>
-                            <div class="price-original">₹<%= data[i].regularPrice.toLocaleString() %></div>
-                            <div class="price-sale">₹<%= data[i].salePrice.toLocaleString() %></div>
-                            <% 
-                                let discount = Math.round(((data[i].regularPrice - data[i].salePrice) / data[i].regularPrice) * 100);
+                        <%
+                            // Find the first variant (smallest size alphabetically) for price display
+                            let displayVariant = null;
+                            let displayPrice = 0;
+                            let originalPrice = 0;
+                            let hasDiscount = false;
+
+                            if (data[i].variant && data[i].variant.length > 0) {
+                                // Sort variants by size alphabetically and get the first one
+                                const sortedVariants = data[i].variant.sort((a, b) => a.size.localeCompare(b.size));
+                                displayVariant = sortedVariants[0];
+
+                                // Use variant prices
+                                originalPrice = displayVariant.varientPrice || 0;
+                                displayPrice = displayVariant.salePrice || originalPrice;
+
+                                // Check if there's a discount (sale price is less than variant price)
+                                hasDiscount = displayPrice < originalPrice;
+                            } else {
+                                // Fallback to product-level prices if no variants
+                                originalPrice = data[i].regularPrice || 0;
+                                displayPrice = data[i].salePrice || originalPrice;
+                                hasDiscount = displayPrice < originalPrice;
+                            }
+                        %>
+
+                        <% if (hasDiscount && originalPrice > 0) { %>
+                            <div class="price-original">₹<%= originalPrice.toLocaleString('en-IN') %></div>
+                            <div class="price-sale">₹<%= displayPrice.toLocaleString('en-IN') %></div>
+                            <%
+                                let discount = Math.round(((originalPrice - displayPrice) / originalPrice) * 100);
                             %>
                             <span class="offer-badge"><%= discount %>% OFF</span>
                         <% } else { %>
-                            <div class="price-sale">₹<%= data[i].salePrice.toLocaleString() %></div>
+                            <div class="price-sale">₹<%= displayPrice.toLocaleString('en-IN') %></div>
                         <% } %>
                     </div>
                 </td>
                 <td>
                     <div class="stock-info">
-                        <div class="stock-quantity"><%= data[i].quantity %> units</div>
-                        <% if (data[i].quantity > 50) { %>
+                        <%
+                            // Calculate total quantity from variants
+                            let totalQuantity = 0;
+                            if (data[i].variant && data[i].variant.length > 0) {
+                                totalQuantity = data[i].variant.reduce((sum, variant) => sum + (variant.varientquantity || 0), 0);
+                            }
+                        %>
+                        <div class="stock-quantity"><%= totalQuantity %> units</div>
+                        <% if (totalQuantity > 50) { %>
                             <span class="stock-badge stock-high">High Stock</span>
-                        <% } else if (data[i].quantity > 10) { %>
+                        <% } else if (totalQuantity > 10) { %>
                             <span class="stock-badge stock-medium">Medium Stock</span>
-                        <% } else if (data[i].quantity > 0) { %>
+                        <% } else if (totalQuantity > 0) { %>
                             <span class="stock-badge stock-low">Low Stock</span>
                         <% } else { %>
                             <span class="stock-badge stock-out">Out of Stock</span>

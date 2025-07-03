@@ -375,6 +375,10 @@
     <!-- Header -->
 
  <%- include("../partials/user/header") %>
+
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", { breadcrumbs: [{ name: "Shopping Cart", url: "/cart" }] }) %>
+
     <!-- Cart Container -->
     <div class="cart-container">
         <!-- Cart Items -->
@@ -727,14 +731,19 @@
 
         // Proceed to checkout
         function proceedToCheckout() {
-            alert('Proceeding to checkout...');
-            // window.location.href = '/checkout';
+            // Check if cart has items
+            if (cartItems.length === 0) {
+                showToast('Your cart is empty. Add some items to proceed.', 'error');
+                return;
+            }
+
+            // Redirect to checkout page
+            window.location.href = '/checkout';
         }
 
         // Continue shopping
         function continueShopping() {
-            alert('Continuing shopping...');
-            // window.location.href = '/shop';
+            window.location.href = '/shop';
         }
 
         // Add smooth animations on load
