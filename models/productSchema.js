@@ -15,7 +15,7 @@ const variantSchema = new Schema(
     },
     salePrice: {
       type: Number,
-      required: true
+      required: false
     },
     varientquantity: {
       type: Number,
@@ -44,7 +44,8 @@ const productSchema=new Schema({
     },
     productOffer:{
         type:Number,
-        default:0
+        default:0,
+        required:false
     },
     color:{
         type:String,

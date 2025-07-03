@@ -95,6 +95,12 @@
             position: relative;
              transition: transform 0.2s ease, color 0.2s ease;
         }
+        .nav-icon a {
+            text-decoration: none;
+            color: #111;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
 
         .nav-icon:hover {
             color: #ef0909;

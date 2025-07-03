@@ -94,28 +94,35 @@
                 <div class="product-info">
                     <h3 class="product-name"><%=products[i].productName%></h3>
 
-                    <%
-                        // Calculate display price based on variants or product level
-                        let displayPrice = products[i].salePrice || products[i].regularPrice;
-                        let originalPrice = products[i].regularPrice;
-                        let hasDiscount = false;
+                                <%
+                                 let displayVariant = null;
+                    let displayPrice = 0;
+                    let originalPrice = 0;
+                    let hasDiscount = false;
 
-                        // If product has variants, use the first variant's price as default
-                        if (products[i].variant && products[i].variant.length > 0) {
-                            const defaultVariant = products[i].variant[0];
-                            displayPrice = defaultVariant.salePrice || defaultVariant.varientPrice;
-                            originalPrice = defaultVariant.varientPrice;
-                            hasDiscount = defaultVariant.salePrice && defaultVariant.salePrice < defaultVariant.varientPrice;
+                    if (products[i].variant && products[i].variant.length > 0) {
+                        const variant = products[i].variant[0];
+                        displayVariant = variant;
+
+                        if (variant.salePrice && variant.salePrice < variant.varientPrice) {
+                            displayPrice = variant.salePrice;
+                            originalPrice = variant.varientPrice||0
+                            hasDiscount = true;
                         } else {
-                            hasDiscount = products[i].salePrice && products[i].salePrice < products[i].regularPrice;
+                            displayPrice = variant.varientPrice;
+                            hasDiscount = false;
                         }
-                    %>
-                    <p class="product-price">
-                        ₹<%= (displayPrice || 0).toLocaleString('en-IN') %>
-                        <% if (hasDiscount && originalPrice) { %>
-                            <span style="text-decoration: line-through; color: #999; margin-left: 8px;">₹<%= originalPrice.toLocaleString('en-IN') %></span>
-                        <% } %>
-                    </p>
+                    }
+                %>
+
+<p class="product-price">
+    ₹<%=originalPrice .toLocaleString('en-IN') %>
+    <% if (hasDiscount) { %>
+        <span style="text-decoration: line-through; color: #999; margin-left: 8px;">
+            ₹<%= displayPrice.toLocaleString('en-IN') %>
+        </span>
+    <% } %>
+</p>
                 </div>
                 <a href="/productDetails?id=<%=products[i]._id%>">
                 <button class="add-to-cart">View Product</button></a>

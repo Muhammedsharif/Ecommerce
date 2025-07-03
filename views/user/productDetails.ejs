@@ -118,17 +118,24 @@
         }
 
         .thumbnail {
-            width: 64px;
-            height: 64px;
+            width: 80px;
+            height: 80px;
             border: 2px solid #e5e5e5;
             border-radius: 8px;
             overflow: hidden;
             cursor: pointer;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .thumbnail:hover {
+            border-color: #007bff;
+            transform: scale(1.05);
         }
 
         .thumbnail.active {
-            border-color: #000;
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
         }
 
         .thumbnail img {
@@ -142,12 +149,40 @@
             border-radius: 8px;
             overflow: hidden;
             aspect-ratio: 1;
+            position: relative;
+            cursor: zoom-in;
         }
 
         .main-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .zoom-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .main-image:hover .zoom-indicator {
+            opacity: 1;
+        }
+
+        .main-image.zoomed {
+            cursor: zoom-out;
+        }
+
+        .main-image.zoomed img {
+            transform: scale(2);
         }
 
         /* Product Details */
@@ -341,6 +376,18 @@
 .minus-btn:hover,
 .plus-btn:hover {
   background-color: #444;
+}
+
+.minus-btn:disabled,
+.plus-btn:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.minus-btn:disabled:hover,
+.plus-btn:disabled:hover {
+  background-color: #ccc;
 }
 
 
@@ -739,18 +786,15 @@
                 <!-- Product Images -->
                 <div class="product-images">
                     <div class="thumbnail-container">
-                        <div class="thumbnail">
-                            <img src="/Uploads/product-images/<%=product.productImage[0]%>" alt="product image">
+                        <% for (let i = 0; i < product.productImage.length; i++) { %>
+                        <div class="thumbnail <%= i === 0 ? 'active' : '' %>" data-image-index="<%= i %>">
+                            <img src="/Uploads/product-images/<%=product.productImage[i]%>" alt="product image <%= i + 1 %>">
                         </div>
-                        <div class="thumbnail">
-                            <img src="/Uploads/product-images/<%=product.productImage[1]%>" alt="product image">
-                        </div>
-                        <div class="thumbnail">
-                            <img src="/Uploads/product-images/<%=product.productImage[2]%>" alt="product image">
-                        </div>
+                        <% } %>
                     </div>
                     <div class="main-image" id="productZoomContainer">
-                        <img id="mainProductImage" src="/Uploads/product-images/<%=product.productImage[0]%>" alt="Premium Running Shoe">
+                        <img id="mainProductImage" src="/Uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.productName %>">
+                        <div class="zoom-indicator">🔍 Click to zoom</div>
                     </div>
                 </div>
 
@@ -788,13 +832,26 @@
                     </div>
 
                     <div class="price-container">
-                        <% for (let i = 0; i < product.variant.length; i++) { %>
+                        <%
+                        // Get first variant for initial pricing display
+                        const firstVariant = product.variant.sort((a, b) => {
+                            const aNum = parseFloat(a.size);
+                            const bNum = parseFloat(b.size);
+                            if (!isNaN(aNum) && !isNaN(bNum)) {
+                                return aNum - bNum;
+                            }
+                            return a.size.localeCompare(b.size);
+                        })[0];
 
-                        <span class="current-price" id="total-price" >₹<%= Math.round(product.variant[i].salePrice) %></span>
-                        
-                        <%break%>
-                        <%}%>
-                        <span class="original-price" id="total-price1" >₹<%=product.regularPrice%></span>
+                        // Calculate discounted price for first variant
+                        const variantPrice = firstVariant ? firstVariant.varientPrice : product.regularPrice;
+                        const discountedPrice = totalOffer > 0 ?
+                            Math.round(variantPrice - (variantPrice * totalOffer / 100)) :
+                            variantPrice;
+                        %>
+
+                        <span class="current-price" id="total-price">₹<%= discountedPrice %></span>
+                        <span class="original-price" id="total-price1">₹<%= variantPrice %></span>
                         <span class="discount-badge">
                             <%if(!totalOffer){%>
                                 No Offers
@@ -813,15 +870,29 @@
                     <div class="size-options">
     <h3>Size:</h3>
     <div class="size-buttons">
-        <% for (let i = 0; i < product.variant.length; i++) { %>
-            <input 
-                type="radio" 
-                id="size-<%= product.variant[i].size %>" 
-                name="size" 
-                value="<%= product.variant[i].size %>" 
-                <%= product.variant[i].size === '6' ? 'checked' : '' %>
+        <%
+        // Sort variants by size for consistent ordering
+        const sortedVariants = product.variant.sort((a, b) => {
+            // Try to sort numerically first, then alphabetically
+            const aNum = parseFloat(a.size);
+            const bNum = parseFloat(b.size);
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return aNum - bNum;
+            }
+            return a.size.localeCompare(b.size);
+        });
+        %>
+        <% for (let i = 0; i < sortedVariants.length; i++) { %>
+            <input
+                type="radio"
+                id="size-<%= sortedVariants[i].size %>"
+                name="size"
+                value="<%= sortedVariants[i].size %>"
+                <%= i === 0 ? 'checked' : '' %>
+                data-variant-price="<%= sortedVariants[i].varientPrice %>"
+                data-variant-quantity="<%= sortedVariants[i].varientquantity %>"
             >
-            <label for="size-<%= product.variant[i].size %>"><%= product.variant[i].size %></label>
+            <label for="size-<%= sortedVariants[i].size %>"><%= sortedVariants[i].size %></label>
         <% } %>
     </div>
 </div>
@@ -1002,19 +1073,45 @@
                     <h2 class="similar-title">Similar Products</h2>
                     <div class="products-grid">
                         <% for (let i = 0; i < similarProducts.length; i++) { %>
+                        <%
+                        // Calculate lowest variant price for similar product
+                        const currentProduct = similarProducts[i];
+                        let lowestPrice = currentProduct.regularPrice;
+                        let lowestVariantPrice = currentProduct.regularPrice;
+
+                        if (currentProduct.variant && currentProduct.variant.length > 0) {
+                            // Find the lowest variant price
+                            lowestVariantPrice = Math.min(...currentProduct.variant.map(v => v.varientPrice));
+                            lowestPrice = lowestVariantPrice;
+                        }
+
+                        // Calculate category and product offers for similar product
+                        const productOfferPercent = currentProduct.productOffer || 0;
+                        const categoryOfferPercent = currentProduct.category?.categoryOffer || 0;
+                        const totalOfferPercent = productOfferPercent + categoryOfferPercent;
+
+                        // Calculate discounted price
+                        const discountedPrice = totalOfferPercent > 0 ?
+                            Math.round(lowestPrice - (lowestPrice * totalOfferPercent / 100)) :
+                            lowestPrice;
+                        %>
                         <div class="product-card">
                             <div class="product-image">
-                                <a href="/productDetails?id=<%=similarProducts[i]._id%>">
-                                    <img src="/Uploads/product-images/<%= similarProducts[i].productImage[0] %>" alt="<%= similarProducts[i].productName %>">
+                                <a href="/productDetails?id=<%=currentProduct._id%>">
+                                    <img src="/Uploads/product-images/<%= currentProduct.productImage[0] %>" alt="<%= currentProduct.productName %>">
                                 </a>
                             </div>
-                            <h3 class="product-name"><%= similarProducts[i].productName %></h3>
-                            <div class="product-price">₹<%= similarProducts[i].salePrice %></div>
+                            <h3 class="product-name"><%= currentProduct.productName %></h3>
+                            <div class="product-price">₹<%= discountedPrice %></div>
                             <div class="price-row">
-                                <span class="product-original-price">₹<%= similarProducts[i].regularPrice %></span>
-                                <span class="product-discount">20% OFF</span>
+                                <span class="product-original-price">₹<%= lowestPrice %></span>
+                                <% if (totalOfferPercent > 0) { %>
+                                    <span class="product-discount"><%= totalOfferPercent %>% OFF</span>
+                                <% } else { %>
+                                    <span class="product-discount">No Offers</span>
+                                <% } %>
                             </div>
-                        </div>  
+                        </div>
                         <% } %>
                     </div>
                 </section>
@@ -1050,17 +1147,34 @@
                     });
                 });
 
-                // Thumbnail selection
+                // Enhanced thumbnail selection with smooth transitions
                 const thumbnails = document.querySelectorAll(".thumbnail");
                 const mainImage = document.querySelector(".main-image img");
+                const zoomContainer = document.getElementById('productZoomContainer');
 
-                thumbnails.forEach((thumbnail) => {
+                thumbnails.forEach((thumbnail, index) => {
                     thumbnail.addEventListener("click", function () {
+                        // Remove active class from all thumbnails
                         thumbnails.forEach((t) => t.classList.remove("active"));
+
+                        // Add active class to clicked thumbnail
                         this.classList.add("active");
 
+                        // Get new image source
                         const newSrc = this.querySelector("img").src;
-                        mainImage.src = newSrc;
+
+                        // Add fade effect during image change
+                        mainImage.style.opacity = '0.5';
+
+                        setTimeout(() => {
+                            mainImage.src = newSrc;
+                            mainImage.style.opacity = '1';
+
+                            // Reset zoom if image was zoomed
+                            if (zoomContainer.classList.contains('zoomed')) {
+                                zoomContainer.classList.remove('zoomed');
+                            }
+                        }, 150);
                     });
                 });
 
@@ -1077,9 +1191,19 @@
                 const categoryOffer = <%- ((totalOffer || 0) - (product.productOffer || 0)) %>;
                 const totalOfferPercent = <%- totalOffer || 0 %>;
 
+                // Sort variants by size for consistent ordering (same logic as server-side)
+                const sortedVariants = variants.sort((a, b) => {
+                    const aNum = parseFloat(a.size);
+                    const bNum = parseFloat(b.size);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return aNum - bNum;
+                    }
+                    return a.size.localeCompare(b.size);
+                });
+
                 // Create a map for quick variant lookup by size for efficient price calculations
                 const variantMap = {};
-                variants.forEach(variant => {
+                sortedVariants.forEach(variant => {
                     variantMap[variant.size] = variant;
                 });
 
@@ -1117,6 +1241,37 @@
                     }
                 }
 
+                // Initialize page with first size selected and proper pricing
+                function initializePage() {
+                    const firstSizeInput = document.querySelector('input[name="size"]:checked');
+                    if (firstSizeInput && sortedVariants.length > 0) {
+                        const firstVariant = sortedVariants[0];
+
+                        // Update prices based on first variant
+                        updatePricesAndTotals(firstVariant);
+
+                        // Update stock display
+                        const stockText = document.querySelector('.stock-text');
+                        if (stockText) {
+                            stockText.textContent = `${firstVariant.varientquantity || 0} Items in Stock`;
+                        }
+
+                        // Initialize quantity controls
+                        const currentQty = parseInt(quantityInput.value) || 1;
+                        const maxStock = firstVariant.varientquantity || 0;
+
+                        // Set initial button states
+                        const minusBtn = document.querySelector(".minus-btn");
+                        const plusBtn = document.querySelector(".plus-btn");
+
+                        if (minusBtn) minusBtn.disabled = currentQty <= 1;
+                        if (plusBtn) plusBtn.disabled = currentQty >= maxStock;
+
+                        // Set max attribute on quantity input
+                        quantityInput.setAttribute('max', maxStock);
+                    }
+                }
+
                 // Size selection event listener
                 sizeInputs.forEach((input) => {
                     input.addEventListener("change", function () {
@@ -1125,29 +1280,73 @@
 
                         // Update prices based on selected variant
                         updatePricesAndTotals(selectedVariant);
+
+                        // Update stock display
+                        const stockText = document.querySelector('.stock-text');
+                        if (stockText && selectedVariant) {
+                            stockText.textContent = `${selectedVariant.varientquantity || 0} Items in Stock`;
+                        }
                     });
                 });
 
-                // Quantity controls
+                // Initialize the page when DOM is ready
+                initializePage();
+
+                // Enhanced quantity controls with stock validation
                 const minusBtn = document.querySelector(".minus-btn");
                 const plusBtn = document.querySelector(".plus-btn");
 
+                // Function to validate and update quantity
+                function validateAndUpdateQuantity(newQty, selectedVariant) {
+                    const maxStock = selectedVariant ? selectedVariant.varientquantity : 0;
+
+                    if (newQty < 1) {
+                        newQty = 1;
+                    } else if (newQty > maxStock) {
+                        newQty = maxStock;
+                        // Show stock limit message
+                        const stockText = document.querySelector('.stock-text');
+                        if (stockText) {
+                            stockText.style.color = '#e74c3c';
+                            setTimeout(() => {
+                                stockText.style.color = '';
+                            }, 2000);
+                        }
+                    }
+
+                    quantityInput.value = newQty;
+                    updatePricesAndTotals(selectedVariant);
+
+                    // Update button states
+                    minusBtn.disabled = newQty <= 1;
+                    plusBtn.disabled = newQty >= maxStock;
+
+                    return newQty;
+                }
+
                 minusBtn.addEventListener("click", () => {
                     let qty = parseInt(quantityInput.value);
-                    if (qty > 1) {
-                        quantityInput.value = qty - 1;
-                        const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
-                        const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
-                        updatePricesAndTotals(selectedVariant);
-                    }
+                    const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
+                    const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
+
+                    validateAndUpdateQuantity(qty - 1, selectedVariant);
                 });
 
                 plusBtn.addEventListener("click", () => {
                     let qty = parseInt(quantityInput.value);
-                    quantityInput.value = qty + 1;
                     const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
                     const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
-                    updatePricesAndTotals(selectedVariant);
+
+                    validateAndUpdateQuantity(qty + 1, selectedVariant);
+                });
+
+                // Handle direct input changes
+                quantityInput.addEventListener("input", () => {
+                    let qty = parseInt(quantityInput.value) || 1;
+                    const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
+                    const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
+
+                    validateAndUpdateQuantity(qty, selectedVariant);
                 });
 
                 quantityInput.addEventListener("input", () => {
@@ -1176,25 +1375,42 @@
                     this.reset();
                 });
 
-                // Image zoom functionality
-                const zoomContainer = document.getElementById('productZoomContainer');
-                const mainImage = document.getElementById('mainProductImage');
-                
+                // Enhanced image zoom functionality with mouse tracking
+                // Note: zoomContainer already declared in thumbnail section
+
                 if (zoomContainer && mainImage) {
                     let isZoomed = false;
-                    let zoomLevel = 2; // How much to zoom in
-                    
-                    zoomContainer.addEventListener('click', function() {
+                    let zoomLevel = 2.5; // How much to zoom in
+
+                    zoomContainer.addEventListener('click', function(e) {
                         isZoomed = !isZoomed;
+
                         if (isZoomed) {
+                            zoomContainer.classList.add('zoomed');
                             zoomContainer.style.overflow = 'hidden';
+
+                            // Calculate zoom origin based on click position
+                            const rect = zoomContainer.getBoundingClientRect();
+                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                            mainImage.style.transformOrigin = `${x}% ${y}%`;
                             mainImage.style.transform = `scale(${zoomLevel})`;
-                            mainImage.style.transformOrigin = 'center';
-                            mainImage.style.transition = 'transform 0.3s ease';
-                            mainImage.style.cursor = 'zoom-out';
                         } else {
+                            zoomContainer.classList.remove('zoomed');
                             mainImage.style.transform = 'scale(1)';
-                            mainImage.style.cursor = 'zoom-in';
+                            mainImage.style.transformOrigin = 'center';
+                        }
+                    });
+
+                    // Mouse move tracking for zoomed image
+                    zoomContainer.addEventListener('mousemove', function(e) {
+                        if (isZoomed) {
+                            const rect = zoomContainer.getBoundingClientRect();
+                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                            mainImage.style.transformOrigin = `${x}% ${y}%`;
                         }
                     });
                     
