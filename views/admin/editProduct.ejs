@@ -830,28 +830,22 @@ body {
                             <label class="form-label">
                                 <i class="fas fa-ruler-combined"></i> Available Sizes
                             </label>
-                            <div class="checkbox-group">
-                                <label>
-                                    <input type="checkbox" name="sizes" value="6" onchange="toggleSizeVariant('6', this.checked)">
-                                    <span>Size 6</span>
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="sizes" value="7" onchange="toggleSizeVariant('7', this.checked)">
-                                    <span>Size 7</span>
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="sizes" value="8" onchange="toggleSizeVariant('8', this.checked)">
-                                    <span>Size 8</span>
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="sizes" value="9" onchange="toggleSizeVariant('9', this.checked)">
-                                    <span>Size 9</span>
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="sizes" value="10" onchange="toggleSizeVariant('10', this.checked)">
-                                    <span>Size 10</span>
-                                </label>
-                            </div>
+                           <div class="checkbox-group">
+    <% const selectedSizes = product.variant ? product.variant.map(v => v.size) : []; %>
+
+    <% const allSizes = ['6', '7', '8', '9', '10']; %>
+    <% allSizes.forEach(size => { %>
+        <label>
+            <input
+                type="checkbox"
+                name="sizes"
+                value="<%= size %>"
+                onchange="toggleSizeVariant('<%= size %>', this.checked)"
+                <%= selectedSizes.includes(size) ? 'checked' : '' %> >
+            <span>Size <%= size %></span>
+        </label>
+    <% }) %>
+</div>
                             <div id="sizes-error" class="error-message"></div>
                         </div>
 
@@ -876,6 +870,8 @@ body {
                             </div>
                         </div>
                     </div>
+
+
 
                     <!-- Product Variants Section -->
                     <div class="product-variants-section" id="productVariantsSection" style="display: none;">
@@ -1003,47 +999,42 @@ body {
         // Initialize existing variants from product data
         function initializeExistingVariants() {
             const existingVariants = <%- JSON.stringify(product.variant || []) %>;
-            console.log('=== EDIT PRODUCT DEBUG ===');
-            console.log('Existing variants from product:', existingVariants);
-            console.log('Product data:', <%- JSON.stringify(product) %>);
+
+            // Temporary debug logging
+            console.log('🔍 DEBUG: Raw variant data from server:', existingVariants);
+
+            // Clear any existing data first
+            selectedSizes.length = 0;
+            Object.keys(sizeVariants).forEach(key => delete sizeVariants[key]);
 
             if (!existingVariants || existingVariants.length === 0) {
-                console.log('No existing variants found');
+                console.log('🔍 DEBUG: No variants found');
                 return;
             }
 
-            existingVariants.forEach((variant, index) => {
-                console.log(`Processing variant ${index + 1}:`, variant);
+            // Process each existing variant
+            existingVariants.forEach((variant) => {
                 const size = variant.size;
-                const checkbox = document.querySelector(`input[name="sizes"][value="${size}"]`);
+                console.log(`🔍 DEBUG: Processing variant for size ${size}:`, variant);
 
-                console.log(`Looking for checkbox with value "${size}":`, checkbox);
-
-                if (checkbox) {
-                    console.log(`Found checkbox for size ${size}, checking it...`);
-                    // Check the checkbox without triggering onchange event
-                    checkbox.checked = true;
-
-                    // Add to selected sizes if not already present
-                    if (!selectedSizes.includes(size)) {
-                        selectedSizes.push(size);
-                        console.log(`Added size ${size} to selectedSizes:`, selectedSizes);
-                    }
-
-                    // Store variant data with proper values
-                    sizeVariants[size] = {
-                        price: variant.varientPrice || '',
-                        quantity: variant.varientquantity || ''
-                    };
-                    console.log(`Stored variant data for size ${size}:`, sizeVariants[size]);
-                } else {
-                    console.log(`No checkbox found for size ${size}`);
+                // Add to selected sizes array
+                if (!selectedSizes.includes(size)) {
+                    selectedSizes.push(size);
                 }
+
+                // Store variant data with proper values
+                sizeVariants[size] = {
+                    price: variant.varientPrice || '',
+                    quantity: variant.varientquantity || ''
+                };
+                console.log(`🔍 DEBUG: Stored data for size ${size}:`, sizeVariants[size]);
             });
 
+            console.log('🔍 DEBUG: Final selectedSizes:', selectedSizes);
+            console.log('🔍 DEBUG: Final sizeVariants:', sizeVariants);
+
             // Update the variants section to show all selected variants
-            if (existingVariants.length > 0) {
-                console.log('Updating variants section with selectedSizes:', selectedSizes);
+            if (selectedSizes.length > 0) {
                 updateVariantsSection();
             }
         }
@@ -1081,24 +1072,19 @@ body {
 
         // Update variants section visibility and content
         function updateVariantsSection() {
-            console.log('=== UPDATE VARIANTS SECTION ===');
-            console.log('selectedSizes:', selectedSizes);
-            console.log('sizeVariants:', sizeVariants);
-
             const variantsSection = document.getElementById('productVariantsSection');
             const variantsGrid = document.getElementById('variantsGrid');
 
-            console.log('variantsSection element:', variantsSection);
-            console.log('variantsGrid element:', variantsGrid);
+            if (!variantsSection || !variantsGrid) {
+                return;
+            }
 
             if (selectedSizes.length > 0) {
-                console.log('Showing variants section...');
                 variantsSection.style.display = 'block';
                 variantsGrid.innerHTML = '';
 
                 selectedSizes.forEach(size => {
                     const variant = sizeVariants[size] || { price: '', quantity: '' };
-                    console.log(`Creating variant HTML for size ${size}:`, variant);
 
                     const variantHTML = `
                         <div class="variant-item" id="variant-${size}">
@@ -1119,9 +1105,7 @@ body {
                     `;
                     variantsGrid.innerHTML += variantHTML;
                 });
-                console.log('Variants section updated with HTML');
             } else {
-                console.log('Hiding variants section (no selected sizes)');
                 variantsSection.style.display = 'none';
             }
         }
@@ -1137,7 +1121,6 @@ body {
         async function validateAndSubmit() {
             if (validateForm()) {
                 document.body.classList.add('loading');
-                console.log(`Submitting form at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
 
                 Swal.fire({
                     title: 'Updating Product...',
@@ -1475,10 +1458,10 @@ body {
 
         // Enhanced interactions
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize existing variants first with a small delay to ensure DOM is ready
+            // Initialize existing variants with a delay to ensure DOM is ready
             setTimeout(() => {
                 initializeExistingVariants();
-            }, 100);
+            }, 500);
 
             // Add focus effects to form controls
             const formControls = document.querySelectorAll('.form-control');

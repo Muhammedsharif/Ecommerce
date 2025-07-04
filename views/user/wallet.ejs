@@ -217,6 +217,14 @@
             font-size: 12px;
         }
 
+        .credit-amount {
+            color: #10b981 !important;
+        }
+
+        .debit-amount {
+            color: #ef4444 !important;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .main-container {
@@ -269,7 +277,7 @@
                     <div class="stat-header">
                         <div class="stat-label">Total Balance</div>
                     </div>
-                    <div class="stat-amount">₹3638.67</div>
+                    <div class="stat-amount">₹<%= walletStats.currentBalance.toLocaleString('en-IN') %></div>
                     <div class="stat-status">
                         <div class="status-indicator"></div>
                         Ready to use
@@ -285,7 +293,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="stat-amount">₹0.00</div>
+                    <div class="stat-amount">₹<%= walletStats.totalSpent.toLocaleString('en-IN') %></div>
                 </div>
 
                 <div class="stat-card secondary">
@@ -297,7 +305,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="stat-amount">₹3638.67</div>
+                    <div class="stat-amount">₹<%= walletStats.totalAdded.toLocaleString('en-IN') %></div>
                 </div>
             </div>
 
@@ -310,23 +318,57 @@
                     <h2 class="transactions-title">Recent Transactions</h2>
                 </div>
 
-                <div class="transaction-item">
-                    <div class="transaction-icon">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                        </svg>
-                    </div>
-                    <div class="transaction-details">
-                        <div class="transaction-title">Money Added</div>
-                        <div class="transaction-description">
-                            Refund for returned items: Entire order (Order: ORD-20250702-9323)
+                <% if (transactions && transactions.length > 0) { %>
+                    <% transactions.forEach(transaction => { %>
+                        <div class="transaction-item">
+                            <div class="transaction-icon">
+                                <% if (transaction.type === 'credit') { %>
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                    </svg>
+                                <% } else { %>
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                    </svg>
+                                <% } %>
+                            </div>
+                            <div class="transaction-details">
+                                <div class="transaction-title">
+                                    <%= transaction.type === 'credit' ? 'Money Added' : 'Money Spent' %>
+                                </div>
+                                <div class="transaction-description">
+                                    <%= transaction.description %>
+                                    <% if (transaction.orderId) { %>
+                                        (Order: <%= transaction.orderId %>)
+                                    <% } %>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount <%= transaction.type === 'credit' ? 'credit-amount' : 'debit-amount' %>">
+                                    <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= transaction.amount.toLocaleString('en-IN') %>
+                                </div>
+                                <div class="transaction-date">
+                                    <%= new Date(transaction.createdAt).toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }) %>
+                                </div>
+                            </div>
                         </div>
+                    <% }) %>
+                <% } else { %>
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 16px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p>No transactions yet</p>
+                        <p style="font-size: 14px; margin-top: 8px;">Your wallet transactions will appear here</p>
                     </div>
-                    <div class="transaction-amount">
-                        <div class="amount">+₹3638.67</div>
-                        <div class="transaction-date">2 Jul 2025, 12:43 pm</div>
-                    </div>
-                </div>
+                <% } %>
             </div>
         </main>
     </div>

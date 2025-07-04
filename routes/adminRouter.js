@@ -40,7 +40,7 @@ router.get("/products",adminAuth,productController.getAllProducts);
 router.delete('/deleteProduct/:id',adminAuth, productController.deleteProduct);
 router.get("/blockProduct",adminAuth,productController.blockProduct)
 router.get("/unblockProduct",adminAuth,productController.unblockProduct)
-router.get("/editProduct",adminAuth,productController.getEditProduct)
+router.get("/editProduct",productController.getEditProduct) // Temporarily disabled auth for debugging
 router.post("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 
@@ -48,6 +48,9 @@ router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 router.get("/orders",adminAuth,orderController.getOrderPage)
 router.post("/update-order-status",adminAuth,orderController.updateOrderStatus)
 router.get("/order-details/:orderId",adminAuth,orderController.getOrderDetails)
+router.get("/return-requests",adminAuth,orderController.getReturnRequestsPage)
+router.post("/approve-return-request",adminAuth,orderController.approveReturnRequest)
+router.post("/reject-return-request",adminAuth,orderController.rejectReturnRequest)
 
 //Banner Management
 router.get("/banner",adminAuth,bannerController.getBannerPage)

@@ -374,24 +374,56 @@ const loadShoppingPage = async (req, res) => {
             isDeleted: false
         };
 
-        // Define sort options
-        let sortOption = {};
-        switch (sort) {
-            case 'price_asc': sortOption = { salePrice: 1 }; break;
-            case 'price_desc': sortOption = { salePrice: -1 }; break;
-            case 'name_asc': sortOption = { productName: 1 }; break;
-            case 'name_desc': sortOption = { productName: -1 }; break;
-            default: sortOption = { createdAt: -1 };
-        }
-
         let findProducts = await Product.find(query).populate({
             path: 'category',
             match: { isListed: true }
-        }).sort(sortOption).lean();
+        }).lean();
 
         // Filter out products with unlisted categories
         findProducts = findProducts.filter(product => product.category !== null);
-console.log("shop findProduct",findProducts.length)
+
+        // Add calculated pricing to each product for sorting
+        findProducts = findProducts.map(product => {
+            // Calculate lowest variant price for sorting
+            let lowestPrice = Infinity;
+
+            if (product.variant && product.variant.length > 0) {
+                product.variant.forEach(variant => {
+                    const variantPrice = variant.varientPrice || 0;
+                    // Apply product offer if exists
+                    const finalPrice = product.productOffer > 0 ?
+                        Math.round(variantPrice - (variantPrice * product.productOffer / 100)) :
+                        variantPrice;
+
+                    if (finalPrice < lowestPrice) lowestPrice = finalPrice;
+                });
+            }
+
+            // Set calculated price for sorting
+            product.calculatedLowestPrice = lowestPrice === Infinity ? 0 : lowestPrice;
+
+            return product;
+        });
+
+        // Apply sorting based on calculated prices
+        switch (sort) {
+            case 'price_asc':
+                findProducts.sort((a, b) => a.calculatedLowestPrice - b.calculatedLowestPrice);
+                break;
+            case 'price_desc':
+                findProducts.sort((a, b) => b.calculatedLowestPrice - a.calculatedLowestPrice);
+                break;
+            case 'name_asc':
+                findProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+                break;
+            case 'name_desc':
+                findProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+                break;
+            default:
+                findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        console.log("shop findProduct after sorting:",findProducts.length)
         const categories = await Category.find({ isListed: true }).lean();
 
         let wishlistIds = [];
@@ -438,6 +470,8 @@ console.log("shop findProduct",findProducts.length)
 
 const filterProducts = async (req, res) => {
     try {
+        console.log('=== FILTER PRODUCTS CALLED ===');
+        console.log('Query params:', req.query);
         const user = req.session.user;
         const { category, minPrice, maxPrice, rating, page, sort } = req.query;
 
@@ -456,35 +490,86 @@ const filterProducts = async (req, res) => {
             }
         }
 
-        // Price range filter
-        if (minPrice || maxPrice) {
-            query.salePrice = {};
-            if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
-            if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
-        }
-
-        // Rating filter
-        // if (rating && rating !== '0') {
-        //     query.rating = { $gte: parseInt(rating) };
-        // }
-
-        // Define sort options
-        let sortOption = {};
-        switch (sort) {
-            case 'price_asc': sortOption = { salePrice: 1 }; break;
-            case 'price_desc': sortOption = { salePrice: -1 }; break;
-            case 'name_asc': sortOption = { productName: 1 }; break;
-            case 'name_desc': sortOption = { productName: -1 }; break;
-            default: sortOption = { createdAt: -1 };
-        }
-
+        // Get products first without price filtering (since we need to filter by variant prices)
         let findProducts = await Product.find(query).populate({
             path: 'category',
             match: { isListed: true }
-        }).sort(sortOption).lean();
+        }).lean();
 
         // Filter out products with unlisted categories
         findProducts = findProducts.filter(product => product.category !== null);
+
+        // Add calculated pricing to each product for filtering and sorting
+        findProducts = findProducts.map(product => {
+            // Calculate lowest variant price for filtering and sorting
+            let lowestPrice = Infinity;
+            let highestPrice = 0;
+
+            if (product.variant && product.variant.length > 0) {
+                product.variant.forEach(variant => {
+                    const variantPrice = variant.varientPrice || 0;
+                    // Apply product offer if exists
+                    const finalPrice = product.productOffer > 0 ?
+                        Math.round(variantPrice - (variantPrice * product.productOffer / 100)) :
+                        variantPrice;
+
+                    if (finalPrice < lowestPrice) lowestPrice = finalPrice;
+                    if (finalPrice > highestPrice) highestPrice = finalPrice;
+                });
+            }
+
+            // Set calculated prices for filtering/sorting
+            product.calculatedLowestPrice = lowestPrice === Infinity ? 0 : lowestPrice;
+            product.calculatedHighestPrice = highestPrice;
+
+            return product;
+        });
+
+        // Apply price range filter using calculated variant prices
+        if (minPrice || maxPrice) {
+            console.log('Applying price filter:', { minPrice, maxPrice });
+            const originalCount = findProducts.length;
+
+            findProducts = findProducts.filter(product => {
+                const productPrice = product.calculatedLowestPrice;
+                let passesFilter = true;
+
+                if (minPrice && productPrice < parseFloat(minPrice)) {
+                    passesFilter = false;
+                }
+                if (maxPrice && productPrice > parseFloat(maxPrice)) {
+                    passesFilter = false;
+                }
+
+                return passesFilter;
+            });
+
+            console.log(`Price filter applied: ${originalCount} -> ${findProducts.length} products`);
+        }
+
+        // Apply sorting based on calculated prices
+        console.log('Applying sort:', sort);
+        switch (sort) {
+            case 'price_asc':
+                findProducts.sort((a, b) => a.calculatedLowestPrice - b.calculatedLowestPrice);
+                console.log('Sorted by price ascending');
+                break;
+            case 'price_desc':
+                findProducts.sort((a, b) => b.calculatedLowestPrice - a.calculatedLowestPrice);
+                console.log('Sorted by price descending');
+                break;
+            case 'name_asc':
+                findProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+                console.log('Sorted by name A-Z');
+                break;
+            case 'name_desc':
+                findProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+                console.log('Sorted by name Z-A');
+                break;
+            default:
+                findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                console.log('Sorted by creation date (default)');
+        }
 
         const categories = await Category.find({ isListed: true }).lean();
 

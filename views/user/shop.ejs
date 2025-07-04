@@ -1006,7 +1006,12 @@
                     document.getElementById('min-price').value = '';
                     document.getElementById('max-price').value = '';
 
-                    document.getElementById('sort').value = 'default';
+                    // Get sort element safely
+                    const sortElement = document.getElementById('sort');
+                    if (sortElement) {
+                        sortElement.value = 'default';
+                    }
+
                     currentFilters = { category: '', minPrice: '', maxPrice: '', rating: '0', sort: 'default' };
                     currentSearchQuery = '';
                     document.getElementById('product-search').value = '';
@@ -1132,12 +1137,16 @@
                     // Filter form submission
                     document.getElementById('filterForm').addEventListener('submit', async (e) => {
                         e.preventDefault();
+
+                        // Get sort element safely
+                        const sortElement = document.getElementById('sort');
+                        const sortValue = sortElement ? sortElement.value : 'default';
+
                         currentFilters = {
                             category: document.getElementById('categoryDropdown').value,
                             minPrice: document.getElementById('min-price').value || '',
                             maxPrice: document.getElementById('max-price').value || '',
-
-                            sort: document.getElementById('sort').value
+                            sort: sortValue
                         };
                         console.log('Applied filters:', currentFilters);
                         currentSearchQuery = '';
@@ -1149,7 +1158,12 @@
                     document.getElementById('searchForm').addEventListener('submit', async (e) => {
                         e.preventDefault();
                         currentSearchQuery = document.getElementById('product-search').value.trim();
-                        currentFilters = { category: '', minPrice: '', maxPrice: '', sort: document.getElementById('sort').value };
+
+                        // Get sort element safely
+                        const sortElement = document.getElementById('sort');
+                        const sortValue = sortElement ? sortElement.value : 'default';
+
+                        currentFilters = { category: '', minPrice: '', maxPrice: '', sort: sortValue };
                         document.getElementById('categoryDropdown').value = '';
                         document.getElementById('min-price').value = '';
                         document.getElementById('max-price').value = '';
@@ -1162,9 +1176,22 @@
                     document.getElementById('clearSearch').addEventListener('click', async () => {
                         document.getElementById('product-search').value = '';
                         currentSearchQuery = '';
-                        currentFilters.sort = document.getElementById('sort').value; // Preserve sort value
+
+                        // Get sort element safely
+                        const sortElement = document.getElementById('sort');
+                        currentFilters.sort = sortElement ? sortElement.value : 'default'; // Preserve sort value
                         await fetchProducts('', 1, currentFilters);
                     });
+
+                    // Sort dropdown change event
+                    const sortElement = document.getElementById('sort');
+                    if (sortElement) {
+                        sortElement.addEventListener('change', async (e) => {
+                            currentFilters.sort = e.target.value;
+                            console.log('Sort changed to:', e.target.value);
+                            await fetchProducts(currentSearchQuery, 1, currentFilters);
+                        });
+                    }
 
                     // Pagination click - Use event delegation on document since pagination gets replaced
                     document.addEventListener('click', async (e) => {

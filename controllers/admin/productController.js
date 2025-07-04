@@ -261,7 +261,17 @@ const deleteProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
+    console.log('=== GET EDIT PRODUCT ===');
+    console.log('Product ID:', id);
+
     const product = await Product.findOne({ _id: id });
+    console.log('Product found:', product ? 'Yes' : 'No');
+
+    if (product) {
+      console.log('Product name:', product.productName);
+      console.log('Product variants:', JSON.stringify(product.variant, null, 2));
+    }
+
     const category = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
 
@@ -271,6 +281,7 @@ const getEditProduct = async (req, res) => {
       brands: brands,
     });
   } catch (error) {
+    console.error('Error in getEditProduct:', error);
     res.redirect("/pageerror");
   }
 };

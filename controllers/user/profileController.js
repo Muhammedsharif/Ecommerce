@@ -700,10 +700,47 @@ const loadWallet = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
+        // Import WalletTransaction model
+        const WalletTransaction = require("../../models/walletTransactionSchema");
+
+        // Get recent wallet transactions (last 10)
+        const transactions = await WalletTransaction.find({ userId: userId })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .lean();
+
+        // Calculate wallet statistics
+        const walletStats = await WalletTransaction.aggregate([
+            { $match: { userId: userData._id } },
+            {
+                $group: {
+                    _id: "$type",
+                    totalAmount: { $sum: "$amount" }
+                }
+            }
+        ]);
+
+        // Process statistics
+        let totalAdded = 0;
+        let totalSpent = 0;
+
+        walletStats.forEach(stat => {
+            if (stat._id === 'credit') {
+                totalAdded = stat.totalAmount;
+            } else if (stat._id === 'debit') {
+                totalSpent = stat.totalAmount;
+            }
+        });
+
         res.render("wallet", {
             user: userData,
             page: 'wallet',
-            message: 'Wallet management coming soon!'
+            transactions: transactions,
+            walletStats: {
+                currentBalance: userData.wallet || 0,
+                totalAdded: totalAdded,
+                totalSpent: totalSpent
+            }
         });
     } catch (error) {
         console.error("Error loading wallet page:", error);
@@ -1118,9 +1155,14 @@ const loadOrderDetails = async (req, res) => {
         if (!order) {
             return res.redirect("/orders?error=" + encodeURIComponent("Order not found"));
         }
+        
+        const taxAmount = order.finalAmount * 0.18;
+        const totalAmount = order.finalAmount + taxAmount;
 
         res.render("orderDetails", {
             user: userData,
+            taxAmount: taxAmount,
+            totalAmount: totalAmount,
             order: order,
             success: req.query.success,
             error: req.query.error
@@ -1167,6 +1209,41 @@ const cancelOrder = async (req, res) => {
     }
 }
 
+// Return Order
+const returnOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Check if order can be returned
+        if (order.status !== 'Delivered') {
+            return res.status(400).json({
+                success: false,
+                message: "Only delivered orders can be returned"
+            });
+        }
+
+        // Update order status to return request
+        await Order.findByIdAndUpdate(orderId, { status: 'Return Request' });
+
+        res.json({ success: true, message: "Return request submitted successfully" });
+
+    } catch (error) {
+        console.error("Error processing return request:", error);
+        res.status(500).json({ success: false, message: "Failed to process return request" });
+    }
+}
+
 module.exports={
     userProfile,
     loadForgotPassword,
@@ -1193,5 +1270,6 @@ module.exports={
     changePassword,
     loadEditProfile,
     updateProfile,
-    cancelOrder
+    cancelOrder,
+    returnOrder
 }

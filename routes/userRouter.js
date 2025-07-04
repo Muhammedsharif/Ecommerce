@@ -34,7 +34,7 @@ router.get("/logout",userController.logout)
 //Home page & Shopping page
 router.get("/",userController.loadHomepage)
 router.get("/shop",userController.loadShoppingPage)
-router.get("/filter",userAuth,userController.filterProducts)
+router.get("/filter",userController.filterProducts)
 router.post("/search",userAuth,userController.searchProduct)
 router.get('/products',userAuth,userController.getAllProducts);
 
@@ -72,6 +72,7 @@ router.post("/edit-profile",userAuth,profileUpload.single('profileImage'),profil
 // Order Management Routes
 router.get("/order-details/:orderId",userAuth,profileController.loadOrderDetails)
 router.post("/cancel-order",userAuth,profileController.cancelOrder)
+router.post("/return-order",userAuth,profileController.returnOrder)
 
 //Address Management
 router.get("/address",userAuth,profileController.loadAddress)

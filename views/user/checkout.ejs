@@ -122,6 +122,32 @@
             background-color: #eff6ff;
         }
 
+        .add-address-section {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .add-address-btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-address-btn:hover {
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
         .address-card input[type="radio"] {
             margin-right: 0.5rem;
         }
@@ -172,6 +198,27 @@
         .payment-icon {
             margin-right: 0.5rem;
             font-size: 1.25rem;
+        }
+
+        .payment-disabled {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+            background-color: #f9fafb;
+        }
+
+        .payment-disabled:hover {
+            border-color: #e5e7eb !important;
+        }
+
+        .wallet-balance {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .insufficient-balance {
+            color: #dc2626;
+            font-weight: 500;
         }
 
         .order-summary {
@@ -297,7 +344,7 @@
                     <div class="address-grid">
                         <% addresses.forEach((address, index) => { %>
                             <div class="address-card" onclick="selectAddress('<%= address._id %>')">
-                                <input type="radio" name="address" value="<%= address._id %>" 
+                                <input type="radio" name="address" value="<%= address._id %>"
                                        id="address-<%= index %>" <%= address.isDefault ? 'checked' : '' %>>
                                 <label for="address-<%= index %>">
                                     <div class="address-type"><%= address.addressType %></div>
@@ -311,8 +358,13 @@
                             </div>
                         <% }) %>
                     </div>
+                    <div class="add-address-section">
+                        <button type="button" class="add-address-btn" onclick="addNewAddress()">
+                            <i class="fas fa-plus"></i> Add New Address
+                        </button>
+                    </div>
                 <% } else { %>
-                    <p>No addresses found. <a href="/profile">Add an address</a> to continue.</p>
+                    <p>No addresses found. <a style="color: #059669; text-decoration: none;" href="/address">Add an address</a> to continue.</p>
                 <% } %>
                 <div id="address-error" class="error-message"></div>
             </div>
@@ -332,6 +384,19 @@
                         <input type="radio" name="payment" value="ONLINE" id="payment-online">
                         <i class="fas fa-credit-card payment-icon"></i>
                         <label for="payment-online">Online Payment</label>
+                    </div>
+                    <div class="payment-option <% if ((user.wallet || 0) < totalAmount) { %>payment-disabled<% } %>" onclick="selectPayment('WALLET')" <% if ((user.wallet || 0) < totalAmount) { %>title="Insufficient wallet balance"<% } %>>
+                        <input type="radio" name="payment" value="WALLET" id="payment-wallet" <% if ((user.wallet || 0) < totalAmount) { %>disabled<% } %>>
+                        <i class="fas fa-wallet payment-icon"></i>
+                        <label for="payment-wallet">
+                            Wallet Payment
+                            <div class="wallet-balance">
+                                Balance: ₹<%= (user.wallet || 0).toLocaleString('en-IN') %>
+                                <% if ((user.wallet || 0) < totalAmount) { %>
+                                    <span class="insufficient-balance">(Insufficient)</span>
+                                <% } %>
+                            </div>
+                        </label>
                     </div>
                 </div>
                 <div id="payment-error" class="error-message"></div>
@@ -385,6 +450,11 @@
         }
 
         function selectPayment(paymentMethod) {
+            // Check if wallet payment is disabled due to insufficient balance
+            if (paymentMethod === 'WALLET' && event.currentTarget.classList.contains('payment-disabled')) {
+                return; // Don't allow selection of disabled wallet payment
+            }
+
             selectedPayment = paymentMethod;
             document.querySelectorAll('.payment-option').forEach(option => {
                 option.classList.remove('selected');
@@ -407,7 +477,9 @@
 
             // Get order details for confirmation
             const totalAmount = '₹<%= totalAmount.toLocaleString("en-IN") %>';
-            const paymentMethodText = selectedPayment === 'COD' ? 'Cash on Delivery' : selectedPayment;
+            const paymentMethodText = selectedPayment === 'COD' ? 'Cash on Delivery' :
+                                     selectedPayment === 'WALLET' ? 'Wallet Payment' :
+                                     selectedPayment === 'ONLINE' ? 'Online Payment' : selectedPayment;
             const itemCount = <%= cartItems.length %>;
 
             // Show SweetAlert confirmation dialog
@@ -506,6 +578,12 @@
                 document.getElementById('place-order-btn').disabled = false;
                 document.getElementById('loading').style.display = 'none';
             }
+        }
+
+        // Function to handle adding new address
+        function addNewAddress() {
+            // Navigate to address management page
+            window.location.href = '/address';
         }
 
         // Initialize selected states

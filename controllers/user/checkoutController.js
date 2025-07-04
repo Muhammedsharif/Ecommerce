@@ -118,9 +118,18 @@ const processCheckout = async (req, res) => {
 
         // Validate required fields
         if (!addressId || !paymentMethod) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Please select delivery address and payment method" 
+            return res.status(400).json({
+                success: false,
+                message: "Please select delivery address and payment method"
+            });
+        }
+
+        // Validate payment method
+        const validPaymentMethods = ['COD', 'ONLINE', 'WALLET'];
+        if (!validPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid payment method selected"
             });
         }
 
@@ -184,6 +193,17 @@ const processCheckout = async (req, res) => {
         const taxAmount = Math.round(subtotal * 0.18);
         const totalAmount = subtotal + shippingCost + taxAmount;
 
+        // Validate wallet payment if selected
+        if (paymentMethod === 'WALLET') {
+            const userWalletBalance = userData.wallet || 0;
+            if (userWalletBalance < totalAmount) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient wallet balance. Available: ₹${userWalletBalance.toLocaleString('en-IN')}, Required: ₹${totalAmount.toLocaleString('en-IN')}`
+                });
+            }
+        }
+
         // Generate unique order ID
         const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
 
@@ -196,11 +216,32 @@ const processCheckout = async (req, res) => {
             discount: 0,
             finalAmount: totalAmount,
             address: userId, // Using userId as per schema design
-            status: paymentMethod === 'COD' ? 'Pending' : 'Processing',
+            status: paymentMethod === 'COD' ? 'Pending' : paymentMethod === 'WALLET' ? 'Processing' : 'Processing',
             createdOn: new Date()
         });
 
         await newOrder.save();
+
+        // Process wallet payment if selected
+        if (paymentMethod === 'WALLET') {
+            // Deduct amount from user wallet
+            await User.findByIdAndUpdate(userId, {
+                $inc: { wallet: -totalAmount }
+            });
+
+            // Create wallet transaction record
+            const WalletTransaction = require("../../models/walletTransactionSchema");
+            await WalletTransaction.create({
+                userId: userId,
+                type: 'debit',
+                amount: totalAmount,
+                description: `Payment for order ${orderId}`,
+                orderId: orderId,
+                source: 'order_payment',
+                balanceAfter: (userData.wallet || 0) - totalAmount,
+                status: 'completed'
+            });
+        }
 
         // Update product stock
         for (let item of cart.items) {

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -260,6 +261,15 @@
             background: #c82333;
         }
 
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -430,6 +440,11 @@
                                         <i class="fas fa-times"></i>
                                         Cancel Order
                                     </button>
+                                <% } else if (order.status === 'Delivered') { %>
+                                    <button onclick="returnOrder('<%= order._id %>')" class="btn btn-warning">
+                                        <i class="fas fa-undo"></i>
+                                        Return Order
+                                    </button>
                                 <% } %>
                             </div>
                         </div>
@@ -438,6 +453,7 @@
             <% } %>
         </div>
     </div>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.all.min.js"></script>
 
     <script>
         // Toast notification function
@@ -472,9 +488,7 @@
 
         // Cancel order function
         async function cancelOrder(orderId) {
-            if (!confirm('Are you sure you want to cancel this order?')) {
-                return;
-            }
+
 
             try {
                 const response = await fetch('/cancel-order', {
@@ -488,16 +502,93 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast('Order cancelled successfully', 'success');
+                    
+                    Swal.fire({
+                        title: 'Order Cancelled!',
+                        text: 'Your order has been cancelled successfully.',
+                        icon: 'success',
+                        timer: 2000,
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        location.reload();
+                    });
+                    
                     setTimeout(() => {
                         location.reload();
                     }, 1500);
                 } else {
-                    showToast(result.message || 'Failed to cancel order', 'error');
+                    Swal.fire({
+                        title: 'Order Cancellation Failed!',
+                        text: result.message || 'Failed to cancel order',
+                        icon: 'error',
+                        timer: 2000,
+                        confirmButtonColor: '#dc3545'
+                    });
+                    
                 }
             } catch (error) {
                 console.error('Error cancelling order:', error);
-                showToast('An error occurred while cancelling the order', 'error');
+                Swal.fire({
+                    title: 'Order Cancellation Failed!',
+                    text: 'An error occurred while cancelling the order',
+                    icon: 'error',
+                    timer: 2000,
+                    confirmButtonColor: '#dc3545'
+                });
+                
+            }
+        }
+
+        // Return order function
+        async function returnOrder(orderId) {
+          
+            try {
+                const response = await fetch('/return-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId })
+                });
+
+                const result = await response.json();
+                
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'Return Request Submitted!',
+                        text: 'Your return request has been submitted successfully. You will be notified once the request is approved.',
+                        icon: 'success',
+                        timer: 2000,
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        location.reload();
+                    });
+
+                    
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    Swal.fire({
+                        title: 'Return Request Submission Failed!',
+                        text: result.message || 'Failed to submit return request',
+                        icon: 'error',
+                        timer: 2000,
+                        confirmButtonColor: '#dc3545'
+                    });
+                    showToast(result.message || 'Failed to submit return request', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting return request:', error);
+                    Swal.fire({
+                        title: 'Return Request Submission Failed!',
+                        text: 'An error occurred while submitting the return request',
+                        icon: 'error',
+                        timer: 2000,
+                        confirmButtonColor: '#dc3545'
+                    });
+                
             }
         }
 

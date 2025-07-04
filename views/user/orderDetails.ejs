@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Test SweetAlert loading
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, checking SweetAlert...');
+            if (typeof Swal !== 'undefined') {
+                console.log('✅ SweetAlert2 loaded successfully');
+            } else {
+                console.error('❌ SweetAlert2 failed to load');
+            }
+        });
+
+        // Test function for debugging
+        function testSweetAlert() {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Test', 'SweetAlert is working!', 'success');
+            } else {
+                alert('SweetAlert not loaded');
+            }
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -226,6 +247,15 @@
             background: #c82333;
         }
 
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -328,6 +358,28 @@
                     <div class="order-status status-<%= order.status.toLowerCase() %>">
                         <%= order.status %>
                     </div>
+                    <% if (order.status === 'Delivered' && order.returnRejectionReason) { %>
+                        <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">
+                                <i class="fas fa-info-circle"></i> Return Request Rejected
+                            </div>
+                            <div style="color: #856404; font-size: 0.9rem;">
+                                <strong>Reason:</strong> <%= order.returnRejectionReason %>
+                            </div>
+                            <% if (order.returnRejectedAt) { %>
+                                <div style="color: #856404; font-size: 0.8rem; margin-top: 5px;">
+                                    Rejected on: <%= new Date(order.returnRejectedAt).toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }) %>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
                 </div>
                 <div class="info-card">
                     <div class="info-label">Total Amount</div>
@@ -379,11 +431,15 @@
             </div>
             <div class="summary-row">
                 <span class="summary-label">Discount</span>
-                <span class="summary-value">-₹<%= (order.totalPrice - order.finalAmount).toLocaleString() %></span>
+                <span class="summary-value">0</span>
             </div>
             <div class="summary-row">
+                    <span>Tax (GST 18%)</span>
+                    <span>₹<%= taxAmount.toLocaleString('en-IN') %></span>
+                </div>
+            <div class="summary-row">
                 <span class="summary-label">Total</span>
-                <span class="summary-value">₹<%= order.finalAmount.toLocaleString() %></span>
+                <span class="summary-value">₹<%= taxAmount.toLocaleString() %></span>
             </div>
         </div>
 
@@ -393,6 +449,11 @@
                 <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
                     <i class="fas fa-times"></i>
                     Cancel Order
+                </button>
+            <% } else if (order.status === 'Delivered') { %>
+                <button onclick="returnOrder('<%= order._id %>')" class="btn btn-warning">
+                    <i class="fas fa-undo"></i>
+                    Return Order
                 </button>
             <% } %>
         </div>
@@ -431,10 +492,48 @@
 
         // Cancel order function
         async function cancelOrder(orderId) {
-            if (!confirm('Are you sure you want to cancel this order?')) {
-                return;
-            }
+            console.log('Cancel order function called for:', orderId);
 
+            try {
+                // Check if SweetAlert is loaded
+                if (typeof Swal === 'undefined') {
+                    console.error('SweetAlert2 is not loaded');
+                    if (confirm('Are you sure you want to cancel this order?')) {
+                        // Fallback to regular processing
+                        await processCancelOrder(orderId);
+                    }
+                    return;
+                }
+
+                console.log('SweetAlert2 is loaded, showing confirmation dialog');
+
+                // Show SweetAlert confirmation dialog
+                const result = await Swal.fire({
+                    title: 'Cancel Order?',
+                    text: 'Are you sure you want to cancel this order? This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'Keep Order'
+                });
+
+                console.log('SweetAlert result:', result);
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                await processCancelOrder(orderId);
+            } catch (error) {
+                console.error('Error in cancelOrder:', error);
+                showToast('An error occurred while showing the confirmation dialog', 'error');
+            }
+        }
+
+        // Helper function to process cancel order
+        async function processCancelOrder(orderId) {
             try {
                 const response = await fetch('/cancel-order', {
                     method: 'POST',
@@ -460,14 +559,87 @@
             }
         }
 
-        // Show messages if any
-        <% if (typeof success !== 'undefined' && success) { %>
-            showToast('<%= success %>', 'success');
-        <% } %>
-        
-        <% if (typeof error !== 'undefined' && error) { %>
-            showToast('<%= error %>', 'error');
-        <% } %>
+        // Return order function
+        async function returnOrder(orderId) {
+            console.log('Return order function called for:', orderId);
+
+            try {
+                // Check if SweetAlert is loaded
+                if (typeof Swal === 'undefined') {
+                    console.error('SweetAlert2 is not loaded');
+                    if (confirm('Are you sure you want to return this order?')) {
+                        // Fallback to regular processing
+                        await processReturnOrder(orderId);
+                    }
+                    return;
+                }
+
+                console.log('SweetAlert2 is loaded, showing confirmation dialog');
+
+                // Show SweetAlert confirmation dialog
+                const result = await Swal.fire({
+                    title: 'Return Order?',
+                    text: 'Are you sure you want to return this order? A return request will be submitted for admin review.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, submit return request!',
+                    cancelButtonText: 'Cancel'
+                });
+
+                console.log('SweetAlert result:', result);
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                await processReturnOrder(orderId);
+            } catch (error) {
+                console.error('Error in returnOrder:', error);
+                showToast('An error occurred while showing the confirmation dialog', 'error');
+            }
+        }
+
+        // Helper function to process return order
+        async function processReturnOrder(orderId) {
+            try {
+                const response = await fetch('/return-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Return request submitted successfully', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.message || 'Failed to submit return request', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting return request:', error);
+                showToast('An error occurred while submitting the return request', 'error');
+            }
+        }
     </script>
+
+    <!-- Show messages if any -->
+    <% if (typeof success !== 'undefined' && success) { %>
+        <script>
+            showToast('<%= success %>', 'success');
+        </script>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <script>
+            showToast('<%= error %>', 'error');
+        </script>
+    <% } %>
 </body>
 </html>
