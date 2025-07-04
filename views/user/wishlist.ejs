@@ -683,17 +683,50 @@
                         </button>
                     </div>
                     <div class="product-info">
-                        <div class="product-brand">Nike</div>
+                        <div class="product-brand"><%=product.brand || 'Brand'%></div>
                         <h3 class="product-title"><%=product.productName%></h3>
-                        <div class="product-price">₹<%=product.variant[0].salePrice%></div>
+
+                        <%
+                        // Calculate total offer (product + category)
+                        const productOffer = product.productOffer || 0;
+                        const categoryOffer = product.category?.categoryOffer || 0;
+                        const totalOffer = productOffer + categoryOffer;
+
+                        // Get first variant for initial pricing display (sorted by size)
+                        const sortedVariants = product.variant.sort((a, b) => {
+                            const aNum = parseFloat(a.size);
+                            const bNum = parseFloat(b.size);
+                            if (!isNaN(aNum) && !isNaN(bNum)) {
+                                return aNum - bNum;
+                            }
+                            return a.size.localeCompare(b.size);
+                        });
+                        const firstVariant = sortedVariants[0];
+
+                        // Calculate initial discounted price
+                        const initialPrice = firstVariant ? firstVariant.varientPrice : 0;
+                        const initialDiscountedPrice = totalOffer > 0 ?
+                            Math.round(initialPrice - (initialPrice * totalOffer / 100)) :
+                            initialPrice;
+                        %>
+
+                        <div class="product-price" data-product-id="<%=product._id%>">
+                            <% if (totalOffer > 0) { %>
+                                <span class="current-price">₹<%=initialDiscountedPrice.toLocaleString('en-IN')%></span>
+                                <span class="original-price" style="text-decoration: line-through; color: #999; margin-left: 8px; font-size: 16px;">₹<%=initialPrice.toLocaleString('en-IN')%></span>
+                            <% } else { %>
+                                <span class="current-price">₹<%=initialPrice.toLocaleString('en-IN')%></span>
+                            <% } %>
+                        </div>
+
                         <div class="size-selector">
                             <label>Select Size:</label>
-                            <select class="size-select" data-product-id="<%=product._id%>">
+                            <select class="size-select" data-product-id="<%=product._id%>" onchange="updateWishlistPrice(this)">
                                 <option value="">Choose a size</option>
                                 <% if (product.variant && product.variant.length > 0) { %>
-                                    <% product.variant.forEach(variant => { %>
+                                    <% sortedVariants.forEach(variant => { %>
                                         <% if (variant.varientquantity > 0) { %>
-                                            <option value="<%= variant.size %>"><%= variant.size %></option>
+                                            <option value="<%= variant.size %>" data-price="<%= variant.varientPrice %>"><%= variant.size %></option>
                                         <% } %>
                                     <% }); %>
                                 <% } else { %>
@@ -701,6 +734,16 @@
                                 <% } %>
                             </select>
                         </div>
+
+                        <!-- Hidden data for JavaScript calculations -->
+                        <script type="application/json" class="product-data" data-product-id="<%=product._id%>">
+                            {
+                                "variants": <%- JSON.stringify(product.variant || []) %>,
+                                "productOffer": <%- productOffer %>,
+                                "categoryOffer": <%- categoryOffer %>,
+                                "totalOffer": <%- totalOffer %>
+                            }
+                        </script>
                         <div class="product-actions">
                             <%
                                 const hasStock = product.variant && product.variant.some(variant => variant.varientquantity > 0);
@@ -815,6 +858,80 @@
             document.head.appendChild(style);
         }
 
+        // Function to update wishlist price when size is changed
+        function updateWishlistPrice(selectElement) {
+            try {
+                const productId = selectElement.getAttribute('data-product-id');
+                const selectedSize = selectElement.value;
+
+                console.log('🔄 Updating price for product:', productId, 'size:', selectedSize);
+
+                // Get product data from the hidden script tag
+                const productDataScript = document.querySelector(`.product-data[data-product-id="${productId}"]`);
+                if (!productDataScript) {
+                    console.error('❌ Product data not found for:', productId);
+                    return;
+                }
+
+                const productData = JSON.parse(productDataScript.textContent);
+                const { variants, totalOffer } = productData;
+
+                // Find the selected variant
+                let selectedVariant = null;
+                if (selectedSize && selectedSize !== '') {
+                    selectedVariant = variants.find(variant => variant.size === selectedSize);
+                }
+
+                // If no size selected, use first variant (sorted)
+                if (!selectedVariant && variants.length > 0) {
+                    const sortedVariants = variants.sort((a, b) => {
+                        const aNum = parseFloat(a.size);
+                        const bNum = parseFloat(b.size);
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return aNum - bNum;
+                        }
+                        return a.size.localeCompare(b.size);
+                    });
+                    selectedVariant = sortedVariants[0];
+                }
+
+                if (!selectedVariant) {
+                    console.error('❌ No variant found for product:', productId);
+                    return;
+                }
+
+                // Calculate prices
+                const originalPrice = selectedVariant.varientPrice;
+                const discountedPrice = totalOffer > 0 ?
+                    Math.round(originalPrice - (originalPrice * totalOffer / 100)) :
+                    originalPrice;
+
+                // Update price display
+                const priceContainer = document.querySelector(`.product-price[data-product-id="${productId}"]`);
+                if (priceContainer) {
+                    if (totalOffer > 0) {
+                        priceContainer.innerHTML = `
+                            <span class="current-price">₹${discountedPrice.toLocaleString('en-IN')}</span>
+                            <span class="original-price" style="text-decoration: line-through; color: #999; margin-left: 8px; font-size: 16px;">₹${originalPrice.toLocaleString('en-IN')}</span>
+                        `;
+                    } else {
+                        priceContainer.innerHTML = `
+                            <span class="current-price">₹${originalPrice.toLocaleString('en-IN')}</span>
+                        `;
+                    }
+
+                    console.log('✅ Price updated:', {
+                        originalPrice,
+                        discountedPrice,
+                        totalOffer
+                    });
+                }
+
+            } catch (error) {
+                console.error('💥 Error updating wishlist price:', error);
+            }
+        }
+
         async function  addToCart(button) {
             try {
                 console.log('🔄 AddToCart function called');
@@ -844,24 +961,48 @@
                     return;
                 }
 
+                // Get product data for price calculation
+                const productDataScript = productCard.querySelector('.product-data');
+                let variantPrice = null;
+
+                if (productDataScript) {
+                    try {
+                        const productData = JSON.parse(productDataScript.textContent);
+                        const selectedVariant = productData.variants.find(variant => variant.size === selectedSize);
+                        if (selectedVariant) {
+                            variantPrice = selectedVariant.varientPrice;
+                            console.log('💰 Variant price found:', variantPrice);
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Could not parse product data:', error);
+                    }
+                }
+
                 // Disable button temporarily
                 button.disabled = true;
                 const originalHTML = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Moving...</span>';
 
                 console.log('🚀 Sending request to /move-to-cart-from-wishlist');
-                console.log('📤 Request data:', { productId, size: selectedSize, color: 'Default' });
+                console.log('📤 Request data:', { productId, size: selectedSize, color: 'Default', variantPrice });
+
+                const requestBody = {
+                    productId,
+                    size: selectedSize,
+                    color: 'Default' // You can add color selection later if needed
+                };
+
+                // Include variant price if available for backend validation
+                if (variantPrice !== null) {
+                    requestBody.variantPrice = variantPrice;
+                }
 
                 const response = await fetch('/move-to-cart-from-wishlist', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        productId,
-                        size: selectedSize,
-                        color: 'Default' // You can add color selection later if needed
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 console.log('📥 Response status:', response.status);

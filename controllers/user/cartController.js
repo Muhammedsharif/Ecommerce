@@ -125,8 +125,15 @@ const addToCart = async(req,res)=>{
             return res.status(400).json({ success: false, message: 'Product category is not available' });
         }
 
-        // Check specific size variant stock availability
+        // Check specific size variant stock availability and calculate pricing
         let selectedVariant = null;
+        let productPrice = 0;
+
+        // Calculate total offer (product + category)
+        const productOffer = product.productOffer || 0;
+        const categoryOffer = product.category?.categoryOffer || 0;
+        const totalOffer = productOffer + categoryOffer;
+
         if (size && size !== 'N/A') {
             selectedVariant = product.variant.find(variant => variant.size === size);
             if (!selectedVariant) {
@@ -135,6 +142,18 @@ const addToCart = async(req,res)=>{
             if (selectedVariant.varientquantity <= 0) {
                 return res.status(400).json({ success: false, message: `Size ${size} is out of stock` });
             }
+
+            // Calculate discounted price for the selected variant
+            const variantRegularPrice = selectedVariant.varientPrice;
+            productPrice = totalOffer > 0 ?
+                Math.round(variantRegularPrice - (variantRegularPrice * totalOffer / 100)) :
+                variantRegularPrice;
+        } else {
+            // If no specific size, use first variant price with discount calculation
+            const firstVariantPrice = product.variant[0]?.varientPrice || 0;
+            productPrice = totalOffer > 0 ?
+                Math.round(firstVariantPrice - (firstVariantPrice * totalOffer / 100)) :
+                firstVariantPrice;
         }
 
         // Check variant-based stock availability
@@ -185,18 +204,18 @@ const addToCart = async(req,res)=>{
 
                 cart.items[existingItemIndex].quantity += 1;
                 cart.items[existingItemIndex].totalPrice =
-                    cart.items[existingItemIndex].quantity * product.salePrice;
+                    cart.items[existingItemIndex].quantity * productPrice;
                 // Ensure size and color are preserved/updated
                 cart.items[existingItemIndex].size = size || cart.items[existingItemIndex].size || 'N/A';
                 cart.items[existingItemIndex].color = color || cart.items[existingItemIndex].color || 'N/A';
-                    
+
             } else {
                 // Add new product to cart
                 cart.items.push({
                     productId: productId,
                     quantity: 1,
-                    price: product.salePrice,
-                    totalPrice: product.salePrice,
+                    price: productPrice,
+                    totalPrice: productPrice,
                     size: size || 'N/A',
                     color: color || 'N/A'
                 });
@@ -208,8 +227,8 @@ const addToCart = async(req,res)=>{
                 items: [{
                     productId: productId,
                     quantity: 1,
-                    price: product.salePrice,
-                    totalPrice: product.salePrice,
+                    price: productPrice,
+                    totalPrice: productPrice,
                     size: size || 'N/A',
                     color: color || 'N/A'
                 }]
@@ -293,6 +312,19 @@ const moveToCartFromWishlist = async(req, res) => {
         let selectedVariant = null;
         let productPrice = 0;
 
+        // Calculate total offer (product + category)
+        const productOffer = product.productOffer || 0;
+        const categoryOffer = product.category?.categoryOffer || 0;
+        const totalOffer = productOffer + categoryOffer;
+
+        console.log('💰 Pricing calculation for wishlist to cart:', {
+            productId,
+            size,
+            productOffer,
+            categoryOffer,
+            totalOffer
+        });
+
         if (size && size !== 'N/A') {
             selectedVariant = product.variant.find(variant => variant.size === size);
             if (!selectedVariant) {
@@ -301,16 +333,36 @@ const moveToCartFromWishlist = async(req, res) => {
             if (selectedVariant.varientquantity <= 0) {
                 return res.status(400).json({ success: false, message: `Size ${size} is out of stock` });
             }
-            // Use variant-specific pricing
-            productPrice = selectedVariant.salePrice || selectedVariant.varientPrice;
+
+            // Calculate discounted price for the selected variant
+            const variantRegularPrice = selectedVariant.varientPrice;
+            productPrice = totalOffer > 0 ?
+                Math.round(variantRegularPrice - (variantRegularPrice * totalOffer / 100)) :
+                variantRegularPrice;
+
+            console.log('💰 Variant pricing calculation:', {
+                variantRegularPrice,
+                totalOffer,
+                finalPrice: productPrice
+            });
         } else {
             // If no specific size, check total variant stock
             const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
             if (totalVariantStock <= 0) {
                 return res.status(400).json({ success: false, message: 'Product is out of stock' });
             }
-            // Use first variant price as default
-            productPrice = product.variant[0]?.salePrice || product.variant[0]?.varientPrice || 0;
+
+            // Use first variant price as default with discount calculation
+            const firstVariantPrice = product.variant[0]?.varientPrice || 0;
+            productPrice = totalOffer > 0 ?
+                Math.round(firstVariantPrice - (firstVariantPrice * totalOffer / 100)) :
+                firstVariantPrice;
+
+            console.log('💰 Default variant pricing calculation:', {
+                firstVariantPrice,
+                totalOffer,
+                finalPrice: productPrice
+            });
         }
 
         // Remove from wishlist
@@ -428,6 +480,7 @@ const updateCartQuantity = async(req, res) => {
         }
 
         const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
+
         if (itemIndex === -1) {
             return res.status(404).json({ success: false, message: 'Item not found in cart' });
         }
@@ -435,22 +488,30 @@ const updateCartQuantity = async(req, res) => {
         // Get product to check stock
         const product = await Product.findById(cart.items[itemIndex].productId).populate('category');
         if (!product) {
+            console.log('Product not found:', cart.items[itemIndex].productId);
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
+        console.log('Product found:', product.productName);
+
         // Check if product is still available
         if (product.isBlocked || product.status !== 'Available') {
+            console.log('Product not available:', { isBlocked: product.isBlocked, status: product.status });
             return res.status(400).json({ success: false, message: 'Product is no longer available' });
         }
 
         // Check if product category is still listed
         if (!product.category || !product.category.isListed) {
+            console.log('Category not available:', product.category);
             return res.status(400).json({ success: false, message: 'Product category is no longer available' });
         }
 
         // Check variant-based stock availability
         const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+        console.log('Total variant stock:', totalVariantStock, 'Requested quantity:', quantity);
+
         if (quantity > totalVariantStock) {
+            console.log('Insufficient stock');
             return res.status(400).json({
                 success: false,
                 message: `Only ${totalVariantStock} items available in stock`,
@@ -459,12 +520,22 @@ const updateCartQuantity = async(req, res) => {
         }
 
         // Update quantity
+        console.log('Updating quantity from', cart.items[itemIndex].quantity, 'to', quantity);
         cart.items[itemIndex].quantity = quantity;
         cart.items[itemIndex].totalPrice = cart.items[itemIndex].price * quantity;
 
         await cart.save();
+        console.log('Cart saved successfully');
 
-        res.json({ success: true, message: 'Cart updated successfully' });
+        // Calculate total cart count
+        const cartCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        console.log('Total cart count:', cartCount);
+
+        res.json({
+            success: true,
+            message: 'Cart updated successfully',
+            cartCount: cartCount
+        });
 
     } catch (error) {
         console.error("Error updating cart quantity:", error);

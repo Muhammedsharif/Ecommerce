@@ -336,7 +336,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #28a745;
+            background: #0aff43;
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
@@ -349,11 +349,13 @@
         }
 
         .toast-notification.toast-error {
-            background: #dc3545;
+            background: #e0e0e0;
+            color: rgb(251, 3, 3);
         }
 
         .toast-notification.toast-success {
-            background: #28a745;
+            background: #ffffff;
+            color: #0d6e24;
         }
 
         .toast-notification.show {
@@ -499,6 +501,18 @@
                     return;
                 }
 
+                // Check stock availability
+                if (item.maxStock && newQuantity > item.maxStock) {
+                    showToast(`Only ${item.maxStock} items available in stock`, 'error');
+                    return;
+                }
+
+                // Check if item is available
+                if (!item.isAvailable) {
+                    showToast(item.unavailableReason || 'Product is no longer available', 'error');
+                    return;
+                }
+
                 await updateCartQuantity(itemId, newQuantity);
             }
         }
@@ -530,12 +544,36 @@
                 return;
             }
 
+            // Additional validation for stock and availability
+            const item = cartItems.find(item => item.id === itemId);
+            if (item) {
+                // Check stock availability
+                if (item.maxStock && newQuantity > item.maxStock) {
+                    showToast(`Only ${item.maxStock} items available in stock`, 'error');
+                    // Reset to current quantity
+                    const input = document.querySelector(`[data-item-id="${itemId}"] .qty-input`);
+                    if (input) input.value = item.quantity;
+                    return;
+                }
+
+                // Check if item is available
+                if (!item.isAvailable) {
+                    showToast(item.unavailableReason || 'Product is no longer available', 'error');
+                    // Reset to current quantity
+                    const input = document.querySelector(`[data-item-id="${itemId}"] .qty-input`);
+                    if (input) input.value = item.quantity;
+                    return;
+                }
+            }
+
             await updateCartQuantity(itemId, newQuantity);
         }
 
         // Update cart quantity via API
         async function updateCartQuantity(itemId, quantity) {
             try {
+                console.log('Updating cart quantity:', { itemId, quantity });
+
                 const response = await fetch('/update-cart-quantity', {
                     method: 'POST',
                     headers: {
@@ -544,7 +582,16 @@
                     body: JSON.stringify({ itemId, quantity })
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
+                console.log('Response data:', data);
+
                 if (data.success) {
                     // Update local data
                     const item = cartItems.find(item => item.id === itemId);
@@ -553,68 +600,96 @@
                         updateUI();
                     }
                     showToast('Cart updated successfully', 'success');
+
+                    // Update cart counter in header using the response cartCount
+                    const cartCount = data.cartCount || cartItems.reduce((total, item) => total + item.quantity, 0);
+                    console.log('Updating cart badge to:', cartCount);
+
+                    // Use the global updateCartCounter function from header
+                    if (typeof updateCartCounter === 'function') {
+                        updateCartCounter(cartCount);
+                    } else {
+                        // Fallback to direct element update
+                        const cartBadge = document.getElementById('cartBadge');
+                        if (cartBadge) {
+                            cartBadge.textContent = cartCount;
+                            cartBadge.style.display = cartCount > 0 ? 'block' : 'none';
+                        } else {
+                            console.warn('Cart badge element not found');
+                        }
+                    }
                 } else {
                     showToast(data.message || 'Failed to update cart', 'error');
                 }
             } catch (error) {
                 console.error('Error updating cart:', error);
-                showToast('Something went wrong', 'error');
+                showToast(`Something went wrong: ${error.message}. Please try again.`, 'error');
             }
         }
 
-        // Remove item
+        // Remove item with toast confirmation
         async function removeItem(itemId) {
-            if (confirm('Are you sure you want to remove this item?')) {
-                try {
-                    const response = await fetch('/remove-from-cart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ itemId })
-                    });
+            // Show confirmation toast instead of browser alert
+            showConfirmationToast(
+                'Are you sure you want to remove this item?',
+                async () => {
+                    try {
+                        const response = await fetch('/remove-from-cart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ itemId })
+                        });
 
-                    const data = await response.json();
-                    if (data.success) {
-                        // Remove from local array
-                        cartItems = cartItems.filter(item => item.id !== itemId);
+                        const data = await response.json();
+                        if (data.success) {
+                            // Remove from local array
+                            cartItems = cartItems.filter(item => item.id !== itemId);
 
-                        // Remove from DOM with animation
-                        const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
-                        if (cartItem) {
-                            cartItem.style.transition = 'all 0.3s ease';
-                            cartItem.style.transform = 'translateX(-100%)';
-                            cartItem.style.opacity = '0';
+                            // Remove from DOM with animation
+                            const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
+                            if (cartItem) {
+                                cartItem.style.transition = 'all 0.3s ease';
+                                cartItem.style.transform = 'translateX(-100%)';
+                                cartItem.style.opacity = '0';
 
-                            setTimeout(() => {
-                                cartItem.remove();
-                                updateUI();
-                            }, 300);
+                                setTimeout(() => {
+                                    cartItem.remove();
+                                    updateUI();
+                                }, 300);
+                            }
+
+                            showToast('Item removed from cart', 'success');
+
+                            // Update cart counter in header
+                            const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+                            if (typeof updateCartCounter === 'function') {
+                                updateCartCounter(totalItems);
+                            } else {
+                                const cartBadge = document.getElementById('cartBadge');
+                                if (cartBadge) {
+                                    cartBadge.textContent = totalItems;
+                                    cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
+                                }
+                            }
+
+                            // Show empty cart message if no items left
+                            if (cartItems.length === 0) {
+                                showToast('Your cart is now empty', 'info');
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            }
+                        } else {
+                            showToast(data.message || 'Failed to remove item', 'error');
                         }
-
-                        showToast('Item removed from cart', 'success');
-
-                        // Update cart counter in header
-                        const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-                        const cartBadge = document.querySelector('.nav-icons .badge');
-                        if (cartBadge) {
-                            cartBadge.textContent = totalItems;
-                        }
-
-                        // Reload page if cart is empty
-                        if (cartItems.length === 0) {
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1000);
-                        }
-                    } else {
-                        showToast(data.message || 'Failed to remove item', 'error');
+                    } catch (error) {
+                        console.error('Error removing item:', error);
+                        showToast('Something went wrong', 'error');
                     }
-                } catch (error) {
-                    console.error('Error removing item:', error);
-                    showToast('Something went wrong', 'error');
                 }
-            }
+            );
         }
 
         // Toast notification function
@@ -650,32 +725,173 @@
             }, 3000);
         }
 
-        // Empty cart
-        async function emptyCart() {
-            if (confirm('Are you sure you want to empty your cart?')) {
-                try {
-                    const response = await fetch('/empty-cart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+        // Confirmation toast function
+        function showConfirmationToast(message, onConfirm) {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.toast-notification, .confirmation-toast');
+            existingToasts.forEach(toast => toast.remove());
 
-                    const data = await response.json();
-                    if (data.success) {
-                        cartItems = [];
-                        showToast('Cart emptied successfully', 'success');
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        showToast(data.message || 'Failed to empty cart', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error emptying cart:', error);
-                    showToast('Something went wrong', 'error');
+            const confirmationToast = document.createElement('div');
+            confirmationToast.className = 'confirmation-toast';
+            confirmationToast.innerHTML = `
+                <div class="confirmation-content">
+                    <div class="confirmation-message">
+                        <i class="fas fa-question-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                    <div class="confirmation-buttons">
+                        <button class="confirm-btn" onclick="handleConfirm()">Yes</button>
+                        <button class="cancel-btn" onclick="handleCancel()">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            // Add styles for confirmation toast
+            const style = document.createElement('style');
+            style.textContent = `
+                .confirmation-toast {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: all 0.3s ease;
+                    max-width: 400px;
+                    width: 90%;
                 }
-            }
+                .confirmation-toast.show {
+                    opacity: 1;
+                }
+                .confirmation-content {
+                    padding: 2rem;
+                }
+                .confirmation-message {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                    font-size: 16px;
+                    color: #333;
+                }
+                .confirmation-message i {
+                    color: #ffc107;
+                    font-size: 20px;
+                }
+                .confirmation-buttons {
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: flex-end;
+                }
+                .confirm-btn, .cancel-btn {
+                    padding: 0.5rem 1.5rem;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+                }
+                .confirm-btn {
+                    background: #dc3545;
+                    color: white;
+                }
+                .confirm-btn:hover {
+                    background: #c82333;
+                }
+                .cancel-btn {
+                    background: #6c757d;
+                    color: white;
+                }
+                .cancel-btn:hover {
+                    background: #5a6268;
+                }
+                .confirmation-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 9999;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Add overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'confirmation-overlay';
+            document.body.appendChild(overlay);
+            document.body.appendChild(confirmationToast);
+
+            // Global functions for buttons
+            window.handleConfirm = () => {
+                confirmationToast.remove();
+                overlay.remove();
+                style.remove();
+                onConfirm();
+                delete window.handleConfirm;
+                delete window.handleCancel;
+            };
+
+            window.handleCancel = () => {
+                confirmationToast.remove();
+                overlay.remove();
+                style.remove();
+                delete window.handleConfirm;
+                delete window.handleCancel;
+            };
+
+            // Show confirmation toast
+            setTimeout(() => {
+                confirmationToast.classList.add('show');
+            }, 100);
+        }
+
+        // Empty cart with toast confirmation
+        async function emptyCart() {
+            // Show confirmation toast instead of browser alert
+            showConfirmationToast(
+                'Are you sure you want to empty your entire cart?',
+                async () => {
+                    try {
+                        const response = await fetch('/empty-cart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            cartItems = [];
+                            showToast('Cart emptied successfully', 'success');
+
+                            // Update cart counter in header
+                            if (typeof updateCartCounter === 'function') {
+                                updateCartCounter(0);
+                            } else {
+                                const cartBadge = document.getElementById('cartBadge');
+                                if (cartBadge) {
+                                    cartBadge.textContent = '0';
+                                    cartBadge.style.display = 'none';
+                                }
+                            }
+
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(data.message || 'Failed to empty cart', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error emptying cart:', error);
+                        showToast('Something went wrong', 'error');
+                    }
+                }
+            );
         }
 
         // Update UI
@@ -707,9 +923,18 @@
             const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
             document.querySelector('.subtotal').textContent = `₹${subtotal.toFixed(2)}`;
 
-            // Update cart badge
+            // Update cart badge using the global function
             const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-            document.querySelector('.nav-icons .badge').textContent = totalItems;
+            if (typeof updateCartCounter === 'function') {
+                updateCartCounter(totalItems);
+            } else {
+                // Fallback to direct element update
+                const cartBadge = document.getElementById('cartBadge');
+                if (cartBadge) {
+                    cartBadge.textContent = totalItems;
+                    cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
+                }
+            }
 
             // If cart is empty, show empty message
             if (cartItems.length === 0) {
