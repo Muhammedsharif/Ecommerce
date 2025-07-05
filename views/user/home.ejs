@@ -9,6 +9,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="/styles/user/header.css">
     <link rel="stylesheet" href="/styles/user/home.css">
@@ -36,31 +39,33 @@
     <!-- Featured Products -->
     <section class="featured">
            <div class="container">
-<h2 class="new-arrivals-title ">New Arrivals</h2>
-        <div class="product-grid">
-            <%for(let i=0;i<products.length && i<4;i++){%>
-            <div class="product-card">
-                <div class="product-image">
-                    <a href="/productDetails?id=<%=products[i]._id%>">
-                    <img src="/uploads/product-images/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>">
-                </a>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-name"><%=products[i].productName%></h3>
-
-                   
-                    <p class="product-price">
-                        ₹<%= products[i].variant[0].varientPrice %>
-                        
-                    </p>
-                </div>
-                <a href="/productDetails?id=<%=products[i]._id%>">
-                <button class="add-to-cart">View Product</button></a>
-            </div>
-
-            <%}%>
+            <h2 class="new-arrivals-title">New Arrivals</h2>
+<div class="swiper newArrivalsSwiper">
+  <div class="swiper-wrapper">
+    <% for(let i = 0; i < products.length && i < 10; i++) { %>
+      <div class="swiper-slide">
+        <div class="product-card">
+          <div class="product-image">
+            <a href="/productDetails?id=<%= products[i]._id %>">
+              <img src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+            </a>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name"><%= products[i].productName %></h3>
+            <p class="product-price">₹<%= products[i].variant[0].varientPrice %></p>
+          </div>
+          <a href="/productDetails?id=<%= products[i]._id %>">
+            <button class="add-to-cart">View Product</button>
+          </a>
         </div>
-        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Optional Swiper Navigation -->
+  <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div>
+</div>
     </section>
 
         <section class="featured">
@@ -160,6 +165,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <script>
@@ -177,6 +185,26 @@
                 menuIcon.className = 'fas fa-bars';
             }
         }
+
+       const newArrivalsSwiper = new Swiper('.newArrivalsSwiper', {
+  slidesPerView: 1,
+  spaceBetween: 20,
+  loop: true, // important for autoplay loop
+  autoplay: {
+    delay: 2000, // 3 seconds per slide
+    disableOnInteraction: false // keeps autoplay even after swipe
+  },
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+  breakpoints: {
+    576: { slidesPerView: 1.2 },
+    768: { slidesPerView: 2 },
+    992: { slidesPerView: 3 },
+    1200: { slidesPerView: 4 }
+  }
+});
 
         // Close mobile nav when clicking on a link
         document.querySelectorAll('.mobile-nav a').forEach(link => {

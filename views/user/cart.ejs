@@ -336,8 +336,8 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #0aff43;
-            color: white;
+            background: #f4f6f4;
+            color: rgb(20, 93, 32);
             padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -635,7 +635,7 @@
                 async () => {
                     try {
                         const response = await fetch('/remove-from-cart', {
-                            method: 'POST',
+                            method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
@@ -858,7 +858,7 @@
                 async () => {
                     try {
                         const response = await fetch('/empty-cart', {
-                            method: 'POST',
+                            method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
                             }
@@ -882,7 +882,7 @@
 
                             setTimeout(() => {
                                 window.location.reload();
-                            }, 1500);
+                            }, 1000);
                         } else {
                             showToast(data.message || 'Failed to empty cart', 'error');
                         }

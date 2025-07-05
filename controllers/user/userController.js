@@ -66,19 +66,19 @@
 
     const loadHomepage = async (req, res) => {
   try {
-    console.log('=== HOMEPAGE FUNCTION CALLED ===');
+    
     const user = req.session.user;
 
     // First, let's check all products in database
     const allProducts = await Product.find({});
-    console.log('Total products in database:', allProducts.length);
+    
 
     // Check products that are not blocked/deleted
     const activeProducts = await Product.find({
       isBlocked: false,
       isDeleted: false
     });
-    console.log('Active products (not blocked/deleted):', activeProducts.length);
+   
 
     // Get products with proper filters including category validation
     let productData = await Product.find({
@@ -89,16 +89,16 @@
       match: { isListed: true }
     });
 
-    console.log('Products before variant check:', productData.length);
+  
 
     // Debug: Check variant quantities for first product
-    if (productData.length > 0) {
-      console.log('First product variant data:', JSON.stringify(productData[0].variant, null, 2));
-    }
+    // if (productData.length > 0) {
+    //   console.log('First product variant data:', JSON.stringify(productData[0].variant, null, 2));
+    // }
 
     // Filter out products with unlisted categories
     productData = productData.filter(product => product.category !== null);
-    console.log('Products after category filter:', productData.length);
+  
 
     productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     productData = productData.slice(0, 9);
@@ -116,6 +116,7 @@
     res.status(500).send("Server error");
   }
 };
+
     const loadSignup = async (req,res)=>{
 
         try{
@@ -194,6 +195,8 @@
 
                 })
             }
+
+            
           
 
             const otp = generateOtp()
@@ -422,8 +425,8 @@ const loadShoppingPage = async (req, res) => {
             default:
                 findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
-
-        console.log("shop findProduct after sorting:",findProducts.length)
+    
+        
         const categories = await Category.find({ isListed: true }).lean();
 
         let wishlistIds = [];
@@ -458,7 +461,7 @@ const loadShoppingPage = async (req, res) => {
             selectedCategory: null,
             minPrice: '',
             maxPrice: '',
-            rating: '0',
+             rating: '0',
             query: { sort: sort || 'default' },
             userWishlist: wishlistIds
         });
@@ -470,8 +473,8 @@ const loadShoppingPage = async (req, res) => {
 
 const filterProducts = async (req, res) => {
     try {
-        console.log('=== FILTER PRODUCTS CALLED ===');
-        console.log('Query params:', req.query);
+       
+        
         const user = req.session.user;
         const { category, minPrice, maxPrice, rating, page, sort } = req.query;
 

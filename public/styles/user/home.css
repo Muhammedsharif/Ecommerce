@@ -274,22 +274,24 @@
         .add-to-cart {
             width: 100%;
 
-             background: linear-gradient(45deg, #ccbfbf, #5e4d4d); 
-            /* border: none; */
-            /* border-color: red; */
+           
             padding: 15px;
             border-radius: 10px;
-            color: rgb(255, 255, 255);
+            /* color: rgb(255, 255, 255); */
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            background-color: white;
+            color: #ff6a00;
+            border: 2px solid #ff6a00;
             
         }
 
         .add-to-cart:hover {
             transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.1);
+            
         }
 
 .banner-section {
@@ -508,4 +510,10 @@
                 gap: 8px;
             }
         }
-    
+    .swiper-slide {
+  display: flex;
+  justify-content: center;
+}
+.newArrivalsSwiper {
+  padding: 20px 0;
+}

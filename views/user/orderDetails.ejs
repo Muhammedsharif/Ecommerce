@@ -405,11 +405,11 @@
                         <div class="item-name"><%= item.product.productName %></div>
                         <div class="item-specs">
                             Quantity: <%= item.quantity %> | 
-                            Size: <%= item.size || 'N/A' %> | 
-                            Color: <%= item.color || 'N/A' %>
+                            Size: <%=   item.variant?.size || 'N/A' %>
+                            
                         </div>
                     </div>
-                    <div class="item-price">₹<%= item.price.toLocaleString() %></div>
+                    <div class="item-price">₹<%= order.finalAmount.toLocaleString() %></div>
                 </div>
             <% }) %>
         </div>
@@ -439,7 +439,7 @@
                 </div>
             <div class="summary-row">
                 <span class="summary-label">Total</span>
-                <span class="summary-value">₹<%= taxAmount.toLocaleString() %></span>
+                <span class="summary-value">₹<%= order.finalAmount.toLocaleString() %></span>
             </div>
         </div>
 

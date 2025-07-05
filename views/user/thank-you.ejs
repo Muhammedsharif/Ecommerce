@@ -386,8 +386,8 @@
                     }) %></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Total Amount</div>
-                    <div class="info-value">₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+                    <div class="info-label">Total Amount (Including Tax)</div>
+                    <div class="info-value"> ₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Payment Method</div>
@@ -418,12 +418,15 @@
                             <div class="item-name"><%= item.product.productName %></div>
                             <div class="item-specs">
                                 Quantity: <%= item.quantity %> | 
-                                Size: <%= item.size || 'N/A' %> | 
-                                Color: <%= item.color || 'N/A' %>
+                                Size: <%= item.size || 'N/A' %> 
+                                
                             </div>
                         </div>
-                        <div class="item-price">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></div>
-                    </div>
+                       
+                        
+                            <div class="item-price">₹<%= (item.price).toLocaleString('en-IN') %></div>
+                
+                        </div>
                 <% }) %>
             </div>
         </div>

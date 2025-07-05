@@ -27,7 +27,12 @@
             price:{
                 type:Number,
                 default:0
+            },
+            size:{
+                type: String,
+      required: true
             }
+
         }],
         totalPrice:{
             type:Number,

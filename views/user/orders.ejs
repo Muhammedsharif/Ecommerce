@@ -340,6 +340,8 @@
     }) %>
 
     <div class="container">
+        
+
         <!-- Orders Header -->
         <div class="orders-header">
             <div class="header-content">
@@ -400,7 +402,7 @@
                                     <span class="order-value"><%= new Date(order.createdOn).toLocaleDateString() %></span>
                                 </div>
                                 <div class="order-detail">
-                                    <span class="order-label">Total Amount</span>
+                                    <span class="order-label">Total Amount (Including Tax)</span>
                                     <span class="order-value">₹<%= order.finalAmount.toLocaleString() %></span>
                                 </div>
                             </div>
@@ -420,9 +422,9 @@
                                         <div class="item-details">
                                             <div class="item-name"><%= item.product.productName %></div>
                                             <div class="item-specs">
-                                                Quantity: <%= item.quantity %> | 
-                                                Size: <%= item.size || 'N/A' %> | 
-                                                Color: <%= item.color || 'N/A' %>
+                                                Quantity: <%= item.quantity %> |
+                                                Size: <%= item.size || 'N/A' %> 
+                                                
                                             </div>
                                         </div>
                                         <div class="item-price">₹<%= item.price.toLocaleString() %></div>

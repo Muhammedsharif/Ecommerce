@@ -395,9 +395,10 @@
         .button-group {
             display: flex;
             gap: 16px;
+            
         }
 
-        .btn {
+        .btn1 {
             padding: 12px 24px;
             border-radius: 4px;
             font-weight: 500;
@@ -408,29 +409,36 @@
             justify-content: center;
             gap: 8px;
             text-decoration: none;
-            border: none;
+           border: none; /* Fixed */
+            background-color: rgb(250, 154, 0);
+            color:#fff;
+            
         }
 
-        .btn-primary {
-            background: #000;
-            color: white;
-            flex: 1;
+         .btn2 {
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            border: none; /* Fixed */
+            background-color: rgb(250, 108, 0);
+            color:#fff;
+            
         }
 
-        .btn-primary:hover {
-            background: #374151;
-        }
+        
 
-        .btn-secondary {
-            background: white;
-            color: #000;
-            border: 1px solid #d1d5db;
-            flex: 1;
-        }
-
-        .btn-secondary:hover {
-            border-color: #000;
-        }
+.btn1:hover,
+.btn2:hover {
+    box-shadow: 0 4px 16px rgba(116, 104, 104, 0.2); /* Smooth shadow */
+    transform: translateY(-2px); /* Slight lift */
+}
 
         .btn-ghost {
             background: transparent;
@@ -920,14 +928,14 @@
  
                     <!-- Action Buttons -->
                     <div class="button-group">
-                        <button class="btn btn-primary" id="addToCartBtn" onclick="addToCart('<%=product._id%>', '<%=product.productName%>')">
+                        <button class="btn1" id="addToCartBtn" onclick="addToCart('<%=product._id%>', '<%=product.productName%>')">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                             </svg>
                             Add to Cart
                         </button>
-                        <button class="btn btn-secondary">⚡ Buy Now</button>
+                        <button class="btn2" onclick="proceedToCheckout()">⚡ Buy Now</button>
                     </div>
 
                     <button class="btn btn-ghost" onclick="addToWishlist('<%=product._id%>')">
@@ -1146,6 +1154,8 @@
                         document.getElementById(targetTab).classList.add("active");
                     });
                 });
+
+         
 
                 // Enhanced thumbnail selection with smooth transitions
                 const thumbnails = document.querySelectorAll(".thumbnail");
@@ -1616,6 +1626,12 @@
                     toast.style.transform = 'translateX(100%)';
                 }, 3000);
             }
+                   function proceedToCheckout() {
+          
+
+            // Redirect to checkout page
+            window.location.href = '/checkout';
+        }
         </script>
 </body>
 

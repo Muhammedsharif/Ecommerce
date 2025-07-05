@@ -59,7 +59,7 @@ const loadCheckout = async (req, res) => {
             }
 
             // Calculate item total using variant pricing
-            let itemPrice = variant.salePrice || variant.varientPrice;
+            let itemPrice =  variant.varientPrice;
             let itemTotal = itemPrice * item.quantity;
             
             validItems.push({
@@ -169,13 +169,15 @@ const processCheckout = async (req, res) => {
                 });
             }
 
-            let itemPrice = variant.salePrice || variant.varientPrice;
+            let itemPrice =  variant.varientPrice;
             let itemTotal = itemPrice * item.quantity;
+            let itemsize = variant.size
             
             validItems.push({
                 product: product._id,
                 quantity: item.quantity,
-                price: itemPrice
+                price: itemPrice,
+                size:itemsize
             });
 
             subtotal += itemTotal;

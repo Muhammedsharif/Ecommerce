@@ -18,6 +18,7 @@ const categoryInfo = async (req, res) => {
                 { name: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 // { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ],
+            isListed:true
         })
         .sort({createdAt:-1})
         .skip(skip)
@@ -261,7 +262,7 @@ const deleteCategory = async (req, res) => {
       });
     }
 
-    await Category.findByIdAndDelete(id);
+    await Category.findByIdAndUpdate({id});
 
     res.json({
       success: true,

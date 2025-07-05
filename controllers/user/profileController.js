@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema")
 const Address = require("../../models/addressSchema")
 const Order = require("../../models/orderSchema")
+const Product = require("../../models/productSchema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
@@ -658,6 +659,7 @@ const deleteAddress = async (req, res) => {
 
 const loadOrders = async (req, res) => {
     try {
+        
         const userId = req.session.user;
         if (!userId) {
             return res.redirect("/login");
@@ -676,9 +678,22 @@ const loadOrders = async (req, res) => {
             })
             .sort({ createdOn: -1 });
 
+          
+            
+
+            const orderprice = await Order.find({userId:userId}).populate({
+                path:'orderedItems.price',
+
+            })
+
+            console.log("orderprice",orderprice.price )
+    
+            
+
         res.render("orders", {
             user: userData,
             orders: orders,
+           orderprice :orderprice ,
             success: req.query.success,
             error: req.query.error
         });
