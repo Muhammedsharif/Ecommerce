@@ -4,6 +4,7 @@ const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
 const Address = require("../../models/addressSchema");
+const { validateCouponForCheckout, markCouponAsUsed } = require("./couponController");
 
 // Controller function to load and display the checkout page
 const loadCheckout = async (req, res) => {
@@ -85,7 +86,35 @@ const loadCheckout = async (req, res) => {
         const shippingCost = subtotal > 500 ? 0 : 50; // Free shipping above ₹500
         const taxRate = 0.18; // 18% GST
         const taxAmount = Math.round(subtotal * taxRate);
-        const totalAmount = subtotal + shippingCost + taxAmount;
+
+        // Get applied coupon from session
+        const appliedCoupon = req.session.appliedCoupon || null;
+        let couponDiscount = 0;
+        let finalAmount = subtotal + shippingCost + taxAmount;
+
+        // Apply coupon discount if available
+        if (appliedCoupon) {
+            // Validate coupon and recalculate discount for display
+            const { validateCouponForCheckout } = require('./couponController');
+            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+
+            if (couponValidation.valid) {
+                const coupon = couponValidation.coupon;
+                const totalBeforeDiscount = subtotal + shippingCost + taxAmount;
+
+                if (coupon.discountType === 'percentage') {
+                    couponDiscount = Math.min((totalBeforeDiscount * coupon.offerPrice) / 100, totalBeforeDiscount);
+                } else {
+                    couponDiscount = Math.min(coupon.offerPrice, totalBeforeDiscount);
+                }
+
+                finalAmount = totalBeforeDiscount - couponDiscount;
+            } else {
+                // Remove invalid coupon from session
+                delete req.session.appliedCoupon;
+                couponDiscount = 0;
+            }
+        }
 
         res.render("checkout", {
             user: userData,
@@ -94,7 +123,10 @@ const loadCheckout = async (req, res) => {
             subtotal: subtotal,
             shippingCost: shippingCost,
             taxAmount: taxAmount,
-            totalAmount: totalAmount
+            totalAmount: finalAmount,
+            appliedCoupon: appliedCoupon,
+            couponDiscount: couponDiscount,
+            originalAmount: subtotal + shippingCost + taxAmount
         });
 
     } catch (error) {
@@ -193,7 +225,50 @@ const processCheckout = async (req, res) => {
         // Calculate totals
         const shippingCost = subtotal > 500 ? 0 : 50;
         const taxAmount = Math.round(subtotal * 0.18);
-        const totalAmount = subtotal + shippingCost + taxAmount;
+        let totalAmount = subtotal + shippingCost + taxAmount;
+
+        // Handle coupon validation and application
+        let couponData = {
+            applied: false,
+            code: null,
+            discount: 0,
+            originalAmount: totalAmount
+        };
+
+        const appliedCoupon = req.session.appliedCoupon;
+        if (appliedCoupon) {
+            // Validate coupon before processing order
+            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+
+            if (couponValidation.valid) {
+                // Recalculate discount based on current cart total and discount type
+                const coupon = couponValidation.coupon;
+                let discountAmount;
+
+                if (coupon.discountType === 'percentage') {
+                    discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
+                } else {
+                    discountAmount = Math.min(coupon.offerPrice, totalAmount);
+                }
+
+                totalAmount = totalAmount - discountAmount;
+
+                couponData = {
+                    applied: true,
+                    code: appliedCoupon.couponCode,
+                    discount: discountAmount,
+                    originalAmount: subtotal + shippingCost + taxAmount,
+                    couponId: appliedCoupon.couponId
+                };
+            } else {
+                // Remove invalid coupon from session
+                delete req.session.appliedCoupon;
+                return res.status(400).json({
+                    success: false,
+                    message: couponValidation.message || "Coupon is no longer valid"
+                });
+            }
+        }
 
         // Validate wallet payment if selected
         if (paymentMethod === 'WALLET') {
@@ -209,20 +284,33 @@ const processCheckout = async (req, res) => {
         // Generate unique order ID
         const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
 
-        // Create order
+        // Create order with coupon information
         const newOrder = new Order({
             orderId: orderId,
             userId: userId,
             orderedItems: validItems,
             totalPrice: subtotal,
-            discount: 0,
+            discount: couponData.discount,
             finalAmount: totalAmount,
             address: userId, // Using userId as per schema design
             status: paymentMethod === 'COD' ? 'Pending' : paymentMethod === 'WALLET' ? 'Processing' : 'Processing',
+            paymentMethod: paymentMethod,
+            paymentStatus: paymentMethod === 'COD' ? 'Pending' : paymentMethod === 'WALLET' ? 'Completed' : 'Pending',
+            couponApplied: couponData.applied,
+            couponCode: couponData.code,
+            couponDiscount: couponData.discount,
+            originalAmount: couponData.originalAmount,
             createdOn: new Date()
         });
 
         await newOrder.save();
+
+        // Mark coupon as used if applied
+        if (couponData.applied && couponData.couponId) {
+            await markCouponAsUsed(couponData.couponId, userId);
+            // Clear coupon from session
+            delete req.session.appliedCoupon;
+        }
 
         // Process wallet payment if selected
         if (paymentMethod === 'WALLET') {
@@ -316,8 +404,57 @@ const loadThankYou = async (req, res) => {
     }
 };
 
+// Load payment success page
+const loadPaymentSuccess = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId } = req.params;
+
+        if (!userId) {
+            return res.redirect('/login');
+        }
+
+        // Find the order
+        const order = await Order.findOne({
+            orderId: orderId,
+            userId: userId
+        }).populate('orderedItems.product');
+
+        if (!order) {
+            return res.redirect('/profile');
+        }
+
+        res.render('payment-success', {
+            user: req.session.user,
+            order: order
+        });
+
+    } catch (error) {
+        console.error('Error loading payment success page:', error);
+        res.redirect('/profile');
+    }
+};
+
+// Load payment failure page
+const loadPaymentFailure = async (req, res) => {
+    try {
+        const error = req.query.error || 'Payment failed. Please try again.';
+        console.log('Payment failed:', error);
+        res.render('payment-failure', {
+            user: req.session.user || null,
+            error: error
+        });
+
+    } catch (error) {
+        console.error('Error loading payment failure page:', error);
+        res.redirect('/checkout');
+    }
+};
+
 module.exports = {
     loadCheckout,
     processCheckout,
-    loadThankYou
+    loadThankYou,
+    loadPaymentSuccess,
+    loadPaymentFailure
 };

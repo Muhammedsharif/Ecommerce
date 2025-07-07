@@ -6,6 +6,7 @@
     <title>Checkout - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         * {
             margin: 0;
@@ -49,7 +50,7 @@
             font-size: 1.25rem;
             font-weight: bold;
             margin-bottom: 1.5rem;
-            color: #1f2937;
+            color: #333;
             border-bottom: 2px solid #e5e7eb;
             padding-bottom: 0.5rem;
         }
@@ -93,7 +94,7 @@
 
         .item-price {
             font-weight: 600;
-            color: #059669;
+            color: #ef4444;
         }
 
         .address-section {
@@ -111,15 +112,30 @@
             padding: 1rem;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
+            background: white;
         }
 
         .address-card:hover {
-            border-color: #3b82f6;
+            border-color: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
         }
 
         .address-card.selected {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
+            border-color: #6366f1;
+            background: #ffffff;
+            color: rgb(0, 0, 0);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .address-card.selected .address-type {
+            color: rgba(0, 0, 0, 0.9);
+        }
+
+        .address-card.selected .address-details {
+            color: rgb(0, 0, 0);
+            font-size: 15px;
+            font-weight: 800px;
         }
 
         .add-address-section {
@@ -128,13 +144,13 @@
         }
 
         .add-address-btn {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: #6366f1;
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
@@ -143,23 +159,23 @@
         }
 
         .add-address-btn:hover {
-            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            background: #f3f3f3;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .address-card input[type="radio"] {
-            margin-right: 0.5rem;
+            display: none;
         }
 
         .address-type {
             font-weight: 600;
-            color: #1f2937;
+            color: #4c51bf;
         }
 
         .address-details {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #718096;
             margin-top: 0.25rem;
         }
 
@@ -180,24 +196,43 @@
             transition: all 0.3s;
             display: flex;
             align-items: center;
+            background: white;
+            position: relative;
         }
 
         .payment-option:hover {
-            border-color: #3b82f6;
+            border-color: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
         }
 
         .payment-option.selected {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
+            border-color: #6366f1;
+            background: #6366f1;
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
-        .payment-option input[type="radio"] {
-            margin-right: 0.75rem;
+        .payment-option.selected .payment-icon {
+            color: white;
+        }
+
+        .payment-option.selected label {
+            color: white;
+        }
+
+        .payment-option.selected .wallet-balance {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .payment-option input[type="radio"],
+        .payment-option input[type="button"] {
+            display: none;
         }
 
         .payment-icon {
-            margin-right: 0.5rem;
+            margin-right: 0.75rem;
             font-size: 1.25rem;
+            color: #6366f1;
         }
 
         .payment-disabled {
@@ -208,29 +243,34 @@
 
         .payment-disabled:hover {
             border-color: #e5e7eb !important;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .wallet-balance {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #718096;
             margin-top: 0.25rem;
         }
 
         .insufficient-balance {
-            color: #dc2626;
+            color: #e53e3e;
             font-weight: 500;
         }
 
         .order-summary {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
             padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
         }
 
         .summary-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.75rem;
+            color: #4a5568;
         }
 
         .summary-row:last-child {
@@ -238,25 +278,26 @@
             padding-top: 0.75rem;
             border-top: 1px solid #e5e7eb;
             font-weight: bold;
-            font-size: 1.125rem;
+            font-size: 1.2rem;
+            color: #ef4444;
         }
 
         .place-order-btn {
             width: 100%;
-            background: #059669;
+            background: #6366f1;
             color: white;
             border: none;
             padding: 1rem;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: background 0.3s;
             margin-top: 1.5rem;
         }
 
         .place-order-btn:hover {
-            background: #047857;
+            background: #5856eb;
         }
 
         .place-order-btn:disabled {
@@ -265,7 +306,7 @@
         }
 
         .error-message {
-            color: #dc2626;
+            color: #e53e3e;
             font-size: 0.875rem;
             margin-top: 0.5rem;
         }
@@ -277,8 +318,8 @@
         }
 
         .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #3b82f6;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -289,6 +330,299 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Coupon Section Styles */
+        .coupon-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .coupon-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .coupon-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .coupon-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .apply-coupon-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .apply-coupon-btn:hover {
+            background: #5856eb;
+        }
+
+        .remove-coupon-btn {
+            background: #ef4444;
+            color: white;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+
+        .remove-coupon-btn:hover {
+            background: #dc2626;
+        }
+
+        .coupon-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .view-coupons-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-coupons-btn:hover {
+            background: #5856eb;
+        }
+
+        /* Available Coupons Modal Styles */
+        .coupons-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .coupons-modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .coupons-modal-header {
+            background: #6366f1;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .coupons-modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .coupons-modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .coupon-item {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .coupon-item:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .coupon-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .coupon-code-display {
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .coupon-discount {
+            background: #6366f1;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .coupon-details {
+            color: #718096;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .coupon-details strong {
+            color: #4a5568;
+        }
+
+        .empty-coupons {
+            text-align: center;
+            padding: 40px 20px;
+            color: #718096;
+        }
+
+        .empty-coupons i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #cbd5e0;
+        }
+
+        .loading-coupons {
+            text-align: center;
+            padding: 40px 20px;
+            color: #718096;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .applied-coupon {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+            min-height: 60px;
+        }
+
+        .applied-coupon-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .applied-coupon-code {
+            font-weight: 600;
+            color: #059669;
+            text-transform: uppercase;
+        }
+
+        .applied-coupon-discount {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .summary-row.discount {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .summary-row.original {
+            text-decoration: line-through;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive layout for applied coupon */
+        @media (max-width: 768px) {
+            .applied-coupon {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .applied-coupon-info {
+                justify-content: center;
+            }
+
+            .remove-coupon-btn {
+                margin-left: 0;
+                align-self: center;
+                width: auto;
+            }
         }
 
         @media (max-width: 768px) {
@@ -386,7 +720,7 @@
                         <label for="payment-online">Online Payment</label>
                     </div>
                     <div class="payment-option <% if ((user.wallet || 0) < totalAmount) { %>payment-disabled<% } %>" onclick="selectPayment('WALLET')" <% if ((user.wallet || 0) < totalAmount) { %>title="Insufficient wallet balance"<% } %>>
-                        <input type="radio" name="payment" value="WALLET" id="payment-wallet" <% if ((user.wallet || 0) < totalAmount) { %>disabled<% } %>>
+                        <input type="button" name="payment" value="WALLET" id="payment-wallet" <% if ((user.wallet || 0) < totalAmount) { %>disabled<% } %>>
                         <i class="fas fa-wallet payment-icon"></i>
                         <label for="payment-wallet">
                             Wallet Payment
@@ -405,6 +739,48 @@
 
         <!-- Order Summary Sidebar -->
         <div class="checkout-sidebar">
+            <!-- Coupon Section -->
+            <div class="coupon-section">
+                <h4 style="margin-bottom: 1rem; color: #374151;">
+                    <i class="fas fa-ticket-alt"></i> Apply Coupon
+                </h4>
+
+                <% if (appliedCoupon) { %>
+                    <!-- Applied Coupon Display -->
+                    <div class="applied-coupon">
+                        <div class="applied-coupon-info">
+                            <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                            <span class="applied-coupon-code"><%= appliedCoupon.couponCode %></span>
+                            <span class="applied-coupon-discount">
+                                -₹<%= appliedCoupon.discountAmount.toLocaleString('en-IN') %>
+                            </span>
+                        </div>
+                        <button class="coupon-btn remove-coupon-btn" onclick="removeCoupon()">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                <% } else { %>
+                    <!-- Coupon Input -->
+                    <div class="coupon-input-group">
+                        <input type="text"
+                               id="coupon-code"
+                               class="coupon-input"
+                               placeholder="Enter coupon code"
+                               maxlength="20">
+                        <button class="coupon-btn apply-coupon-btn" onclick="applyCoupon()">
+                            Apply
+                        </button>
+                    </div>
+
+                    <!-- View Available Coupons Button -->
+                    <div style="text-align: center; margin-top: 0.5rem;">
+                        <button class="view-coupons-btn" onclick="showAvailableCoupons()">
+                            <i class="fas fa-eye"></i> View Available Coupons
+                        </button>
+                    </div>
+                <% } %>
+            </div>
+
             <h3 class="section-title">Order Summary</h3>
             <div class="order-summary">
                 <div class="summary-row">
@@ -419,8 +795,20 @@
                     <span>Tax (GST 18%)</span>
                     <span>₹<%= taxAmount.toLocaleString('en-IN') %></span>
                 </div>
-                <div class="summary-row">
-                    <span>Total</span>
+
+                <% if (appliedCoupon && couponDiscount > 0) { %>
+                    <div class="summary-row original">
+                        <span>Original Total</span>
+                        <span>₹<%= originalAmount.toLocaleString('en-IN') %></span>
+                    </div>
+                    <div class="summary-row discount">
+                        <span>Coupon Discount (<%= appliedCoupon.couponCode %>)</span>
+                        <span>-₹<%= couponDiscount.toLocaleString('en-IN') %></span>
+                    </div>
+                <% } %>
+
+                <div class="summary-row" style="border-top: 2px solid #e5e7eb; padding-top: 1rem; font-weight: 700; font-size: 1.1rem;">
+                    <span>Final Total</span>
                     <span>₹<%= totalAmount.toLocaleString('en-IN') %></span>
                 </div>
             </div>
@@ -439,6 +827,203 @@
     <script>
         let selectedAddress = '<%= addresses.find(addr => addr.isDefault)?._id || "" %>';
         let selectedPayment = 'COD';
+
+        // Coupon Management Functions
+        async function applyCoupon() {
+            const couponCode = document.getElementById('coupon-code').value.trim();
+
+            if (!couponCode) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Please enter a coupon code',
+                    icon: 'error',
+                    timer: 2000,
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/apply-coupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        couponCode: couponCode,
+                        cartTotal:  <%= originalAmount || totalAmount %>
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: result.message,
+                        icon: 'success',
+                        timer: 2000,
+                        confirmButtonColor: '#10b981'
+                    }).then(() => {
+                        // Reload page to show updated prices
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: result.message,
+                        icon: 'error',
+                        timer: 3000,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            } catch (error) {
+                console.error('Error applying coupon:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to apply coupon. Please try again.',
+                    icon: 'error',
+                    timer: 2000,
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        }
+
+        async function removeCoupon() {
+            try {
+                const response = await fetch('/remove-coupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'Removed!',
+                        text: result.message,
+                        icon: 'success',
+                        timer: 2000,
+                        confirmButtonColor: '#10b981'
+                    }).then(() => {
+                        // Reload page to show updated prices
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: result.message,
+                        icon: 'error',
+                        timer: 2000,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            } catch (error) {
+                console.error('Error removing coupon:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to remove coupon. Please try again.',
+                    icon: 'error',
+                    timer: 2000,
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        }
+
+        // Available Coupons Modal Functions
+        async function showAvailableCoupons() {
+            const modal = document.getElementById('couponsModal');
+            const modalBody = document.getElementById('couponsModalBody');
+
+            // Show modal with loading state
+            modal.style.display = 'block';
+            modalBody.innerHTML = `
+                <div class="loading-coupons">
+                    <div class="loading-spinner"></div>
+                    <p>Loading available coupons...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/get-available-coupons', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.coupons.length > 0) {
+                    let couponsHTML = '';
+                    result.coupons.forEach(coupon => {
+                        couponsHTML += `
+                            <div class="coupon-item" onclick="selectCouponFromModal('${coupon.name}')">
+                                <div class="coupon-item-header">
+                                    <span class="coupon-code-display">${coupon.name}</span>
+                                    <span class="coupon-discount">₹${coupon.offerPrice.toLocaleString('en-IN')} OFF</span>
+                                </div>
+                                <div class="coupon-details">
+                                    <strong>Minimum Order:</strong> ₹${coupon.minimumPrice.toLocaleString('en-IN')}<br>
+                                    <strong>Valid Until:</strong> ${new Date(coupon.expireOn).toLocaleDateString('en-IN')}<br>
+                                    <small style="color: #10b981;"><i class="fas fa-hand-pointer"></i> Click to apply this coupon</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    modalBody.innerHTML = couponsHTML;
+                } else {
+                    modalBody.innerHTML = `
+                        <div class="empty-coupons">
+                            <i class="fas fa-ticket-alt"></i>
+                            <h4>No Available Coupons</h4>
+                            <p>There are no active coupons available for your current order.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching coupons:', error);
+                modalBody.innerHTML = `
+                    <div class="empty-coupons">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Error Loading Coupons</h4>
+                        <p>Failed to load available coupons. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeCouponsModal() {
+            document.getElementById('couponsModal').style.display = 'none';
+        }
+
+        function selectCouponFromModal(couponCode) {
+            document.getElementById('coupon-code').value = couponCode;
+            closeCouponsModal();
+            applyCoupon();
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('couponsModal');
+            if (event.target === modal) {
+                closeCouponsModal();
+            }
+        }
+
+        // Allow Enter key to apply coupon
+        document.addEventListener('DOMContentLoaded', function() {
+            const couponInput = document.getElementById('coupon-code');
+            if (couponInput) {
+                couponInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        applyCoupon();
+                    }
+                });
+            }
+        });
 
         function selectAddress(addressId) {
             selectedAddress = addressId;
@@ -513,6 +1098,96 @@
             document.getElementById('loading').style.display = 'block';
 
             try {
+                // Handle different payment methods
+                if (selectedPayment === 'ONLINE') {
+                    // Create Razorpay order
+                    const razorpayResponse = await fetch('/create-razorpay-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            addressId: selectedAddress,
+                            totalAmount: <%= totalAmount %>
+                        })
+                    });
+
+                    const razorpayResult = await razorpayResponse.json();
+
+                    if (razorpayResult.success) {
+                        // Hide loading for Razorpay modal
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('place-order-btn').disabled = false;
+
+                        // Initialize Razorpay payment
+                        const options = {
+                            key: razorpayResult.key,
+                            amount: razorpayResult.amount,
+                            currency: razorpayResult.currency,
+                            name: '1NOTONE',
+                            description: 'Order Payment',
+                            order_id: razorpayResult.orderId,
+                            handler: async function (response) {
+                                // Payment successful, verify on server
+                                try {
+                                    // Show loading again
+                                    document.getElementById('place-order-btn').disabled = true;
+                                    document.getElementById('loading').style.display = 'block';
+
+                                    const verifyResponse = await fetch('/verify-payment', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            razorpay_order_id: response.razorpay_order_id,
+                                            razorpay_payment_id: response.razorpay_payment_id,
+                                            razorpay_signature: response.razorpay_signature,
+                                            addressId: selectedAddress
+                                        })
+                                    });
+
+                                    const verifyResult = await verifyResponse.json();
+
+                                    if (verifyResult.success) {
+                                        // Redirect to success page
+                                        window.location.href = verifyResult.redirectUrl;
+                                    } else {
+                                        throw new Error(verifyResult.message || 'Payment verification failed');
+                                    }
+                                } catch (error) {
+                                    console.error('Payment verification error:', error);
+                                    window.location.href = `/payment-failure?error=${encodeURIComponent(error.message)}`;
+                                }
+                            },
+                            modal: {
+                                ondismiss: function() {
+                                    // Payment cancelled by user
+                                    document.getElementById('place-order-btn').disabled = false;
+                                    document.getElementById('loading').style.display = 'none';
+                                }
+                            },
+                            theme: {
+                                color: '#3399cc'
+                            }
+                        };
+
+                        const rzp = new Razorpay(options);
+
+                        rzp.on('payment.failed', function (response) {
+                            // Payment failed
+                            console.error('Payment failed:', response.error);
+                            window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description)}`;
+                        });
+
+                        rzp.open();
+                        return; // Exit here for online payment
+                    } else {
+                        throw new Error(razorpayResult.message || 'Failed to create payment order');
+                    }
+                }
+
+                // Handle COD and Wallet payments (existing logic)
                 const response = await fetch('/checkout', {
                     method: 'POST',
                     headers: {
@@ -598,5 +1273,23 @@
             document.querySelector('.payment-option').classList.add('selected');
         });
     </script>
+
+    <!-- Available Coupons Modal -->
+    <div id="couponsModal" class="coupons-modal">
+        <div class="coupons-modal-content">
+            <div class="coupons-modal-header">
+                <h3><i class="fas fa-ticket-alt"></i> Available Coupons</h3>
+                <button class="close-modal" onclick="closeCouponsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="coupons-modal-body" id="couponsModalBody">
+                <div class="loading-coupons">
+                    <div class="loading-spinner"></div>
+                    <p>Loading available coupons...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

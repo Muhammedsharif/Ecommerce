@@ -1193,13 +1193,13 @@ const loadOrderDetails = async (req, res) => {
 const cancelOrder = async (req, res) => {
     try {
         const userId = req.session.user;
-        const { orderId } = req.body;
+        const { orderId, cancellationReason } = req.body;
 
         if (!userId) {
             return res.status(401).json({ success: false, message: "Please login to continue" });
         }
 
-        const order = await Order.findOne({ _id: orderId, userId: userId });
+        const order = await Order.findOne({ _id: orderId, userId: userId }).populate('orderedItems.product');
 
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found" });
@@ -1213,8 +1213,25 @@ const cancelOrder = async (req, res) => {
             });
         }
 
-        // Update order status to cancelled
-        await Order.findByIdAndUpdate(orderId, { status: 'Cancelled' });
+        // Increment stock for cancelled products
+        for (let item of order.orderedItems) {
+            const product = await Product.findById(item.product._id);
+            if (product) {
+                const variantIndex = product.variant.findIndex(v => v.size === item.size);
+                if (variantIndex !== -1) {
+                    product.variant[variantIndex].varientquantity += item.quantity;
+                    await product.save();
+                }
+            }
+        }
+
+        // Update order status to cancelled with optional reason
+        const updateData = {
+            status: 'Cancelled',
+            ...(cancellationReason && { cancellationReason: cancellationReason })
+        };
+
+        await Order.findByIdAndUpdate(orderId, updateData);
 
         res.json({ success: true, message: "Order cancelled successfully" });
 
@@ -1228,10 +1245,18 @@ const cancelOrder = async (req, res) => {
 const returnOrder = async (req, res) => {
     try {
         const userId = req.session.user;
-        const { orderId } = req.body;
+        const { orderId, returnReason } = req.body;
 
         if (!userId) {
             return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        // Validate that return reason is provided (mandatory)
+        if (!returnReason || returnReason.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: "Return reason is required"
+            });
         }
 
         const order = await Order.findOne({ _id: orderId, userId: userId });
@@ -1248,8 +1273,11 @@ const returnOrder = async (req, res) => {
             });
         }
 
-        // Update order status to return request
-        await Order.findByIdAndUpdate(orderId, { status: 'Return Request' });
+        // Update order status to return request with mandatory reason
+        await Order.findByIdAndUpdate(orderId, {
+            status: 'Return Request',
+            returnReason: returnReason.trim()
+        });
 
         res.json({ success: true, message: "Return request submitted successfully" });
 

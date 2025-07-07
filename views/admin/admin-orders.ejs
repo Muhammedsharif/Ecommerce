@@ -1262,7 +1262,17 @@
                                                     <div class="order-amount">₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
                                                 </td>
                                                 <td>
-                                                    <div class="payment-method">Cash on Delivery</div>
+                                                    <div class="payment-method">
+                                                        <% if (order.paymentMethod === 'COD') { %>
+                                                            Cash on Delivery
+                                                        <% } else if (order.paymentMethod === 'ONLINE') { %>
+                                                            Online Payment
+                                                        <% } else if (order.paymentMethod === 'WALLET') { %>
+                                                            Wallet Payment
+                                                        <% } else { %>
+                                                            <%= order.paymentMethod || 'N/A' %>
+                                                        <% } %>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <span class="status-badge status-<%= order.status.toLowerCase() %>">

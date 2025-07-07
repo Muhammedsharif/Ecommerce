@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed - 1NOTONE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 25% 75%, #ff006760 0%, transparent 50%),
+                        radial-gradient(circle at 75% 25%, #ff667c60 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, #ff003360 0%, transparent 50%);
+            animation: backgroundPulse 10s ease-in-out infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes backgroundPulse {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        .failure-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            max-width: 750px;
+            width: 90%;
+            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .failure-icon {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pulseGlow 2s ease-in-out infinite alternate;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+        }
+
+        .failure-icon::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
+            animation: rotate 4s linear infinite reverse;
+        }
+
+        @keyframes pulseGlow {
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+            }
+            100% { 
+                transform: scale(1.05);
+                box-shadow: 0 25px 50px rgba(255, 107, 107, 0.5);
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .failure-icon i {
+            font-size: 4rem;
+            color: white;
+            z-index: 1;
+            position: relative;
+        }
+
+        .failure-title {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -2px;
+        }
+
+        .failure-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .error-info {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 55, 66, 0.1));
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .error-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #ff3742);
+        }
+
+        .error-info h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-details {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #555;
+            font-weight: 500;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .help-info {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 86, 179, 0.1));
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 123, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .help-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+        }
+
+        .help-info h4 {
+            color: #007bff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .help-info ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .help-info li {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.8rem 0;
+            color: #555;
+            font-weight: 500;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .help-info li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.1);
+        }
+
+        .help-info li::before {
+            content: '•';
+            color: #007bff;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .contact-info {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+        }
+
+        .contact-info h4 {
+            color: #ff9800;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .contact-info p {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.8rem 0;
+            color: #555;
+            font-weight: 500;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(108, 117, 125, 0.4);
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 55, 66, 0.1));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-circle:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .floating-circle:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 30%;
+            right: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @media (max-width: 768px) {
+            .failure-container {
+                padding: 2rem;
+                margin: 1rem;
+                border-radius: 24px;
+            }
+
+            .failure-title {
+                font-size: 2.5rem;
+            }
+
+            .failure-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .failure-icon i {
+                font-size: 2.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .failure-container {
+                padding: 1.5rem;
+            }
+
+            .failure-title {
+                font-size: 2rem;
+            }
+
+            .failure-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .failure-icon i {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+
+    <div class="failure-container">
+        <div class="failure-icon">
+            <i class="fas fa-times"></i>
+        </div>
+
+        <h1 class="failure-title">Payment Failed!</h1>
+        <p class="failure-message">
+            We're sorry, but your payment could not be processed. Please try again or use a different payment method.
+        </p>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-info">
+            <h3><i class="fas fa-exclamation-triangle"></i> Error Details</h3>
+            <div class="error-details">
+                <%= error %>
+            </div>
+        </div>
+        <% } %>
+
+        <div class="help-info">
+            <h4><i class="fas fa-lightbulb"></i> What can you do?</h4>
+            <ul>
+                <li>Check your internet connection and try again</li>
+                <li>Verify your card details and available balance</li>
+                <li>Try using a different payment method</li>
+                <li>Contact your bank if the issue persists</li>
+                <li>Use Cash on Delivery as an alternative</li>
+            </ul>
+        </div>
+
+        <div class="contact-info">
+            <h4><i class="fas fa-headset"></i> Need Help?</h4>
+            <p><strong>Customer Support:</strong> support@1notone.com</p>
+            <p><strong>Phone:</strong> +91-XXXXXXXXXX (9 AM - 9 PM)</p>
+            <p><strong>Live Chat:</strong> Available on our website</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/checkout" class="btn btn-danger">
+                <i class="fas fa-redo"></i>
+                Retry Payment
+            </a>
+            <a href="/cart" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i>
+                Back to Cart
+            </a>
+            <a href="/shop" class="btn btn-secondary">
+                <i class="fas fa-shopping-bag"></i>
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Get error from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMessage = urlParams.get('error');
+        
+        if (errorMessage && !document.querySelector('.error-info')) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-info';
+            errorDiv.innerHTML = `
+                <h3><i class="fas fa-exclamation-triangle"></i> Error Details</h3>
+                <div class="error-details">${errorMessage}</div>
+            `;
+            
+            const failureMessage = document.querySelector('.failure-message');
+            failureMessage.parentNode.insertBefore(errorDiv, failureMessage.nextSibling);
+        }
+
+        // Auto-focus on retry button for better UX
+        window.addEventListener('load', () => {
+            const retryButton = document.querySelector('.btn-danger');
+            if (retryButton) {
+                retryButton.focus();
+            }
+        });
+    </script>
+</body>
+</html>

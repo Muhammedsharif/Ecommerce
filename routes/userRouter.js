@@ -8,6 +8,8 @@ const productController=require("../controllers/user/productController")
 const wishlistController=require("../controllers/user/wishlistController")
 const cartController=require("../controllers/user/cartController")
 const checkoutController=require("../controllers/user/checkoutController")
+const paymentController=require("../controllers/user/paymentController")
+const couponController=require("../controllers/user/couponController")
 const { userAuth } = require("../middlewares/auth"); // User authentication middleware
 const profileUpload = require("../helpers/profileMulter"); // Profile image upload helper
 
@@ -105,6 +107,18 @@ router.post("/move-to-cart-from-wishlist",userAuth,cartController.moveToCartFrom
 router.get("/checkout",userAuth,checkoutController.loadCheckout)
 router.post("/checkout",userAuth,checkoutController.processCheckout)
 router.get("/order-confirmation/:orderId",userAuth,checkoutController.loadThankYou)
+
+//Coupon Management
+router.post("/apply-coupon",userAuth,couponController.applyCoupon)
+router.post("/remove-coupon",userAuth,couponController.removeCoupon)
+router.get("/get-applied-coupon",userAuth,couponController.getAppliedCoupon)
+router.get("/get-available-coupons",userAuth,couponController.getAvailableCoupons)
+
+//Payment Management
+router.post("/create-razorpay-order",userAuth,paymentController.createRazorpayOrder)
+router.post("/verify-payment",userAuth,paymentController.verifyPayment)
+router.get("/payment-success/:orderId",userAuth,checkoutController.loadPaymentSuccess)
+router.get("/payment-failure",checkoutController.loadPaymentFailure)
 
 //Wallet Management
 router.get("/wallet",userAuth,profileController.loadWallet)

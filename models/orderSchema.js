@@ -67,6 +67,49 @@
         couponApplied:{
             type:Boolean,
             default:false
+        },
+        couponCode:{
+            type:String,
+            default:null
+        },
+        couponDiscount:{
+            type:Number,
+            default:0
+        },
+        originalAmount:{
+            type:Number,
+            default:0
+        },
+        paymentMethod:{
+            type:String,
+            enum:['COD','ONLINE','WALLET'],
+            required:true
+        },
+        paymentStatus:{
+            type:String,
+            enum:['Pending','Completed','Failed','Refunded'],
+            default:'Pending'
+        },
+        razorpayOrderId:{
+            type:String
+        },
+        razorpayPaymentId:{
+            type:String
+        },
+        razorpaySignature:{
+            type:String
+        },
+        cancellationReason:{
+            type:String
+        },
+        returnReason:{
+            type:String
+        },
+        returnRejectionReason:{
+            type:String
+        },
+        returnRejectedAt:{
+            type:Date
         }
     })
 

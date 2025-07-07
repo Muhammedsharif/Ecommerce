@@ -1586,17 +1586,18 @@
                     toast.id = 'toast';
                     toast.style.cssText = `
                         position: fixed;
-                        top: 20px;
+                        top: 650px;
                         right: 20px;
-                        background: white;
+                        background: ${type === 'success' ? '#006400' : '#DC143C'};
+                        color:#FFFFFF;
                         border-radius: 8px;
-                        padding: 16px 20px;
+                        padding: 10px 20px;
                         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                         z-index: 1000;
                         display: flex;
                         align-items: center;
                         gap: 10px;
-                        min-width: 300px;
+                        min-width: 200px;
                         transform: translateX(100%);
                         transition: transform 0.3s ease;
                     `;
@@ -1610,14 +1611,14 @@
                 };
 
                 const borderColor = {
-                    success: '#28a745',
-                    error: '#dc3545',
+                    success: '#006400',
+                    error: '#DC143C',
                     info: '#007bff'
                 };
 
                 toast.innerHTML = `
                     <span style="font-size: 18px;">${emoji[type]}</span>
-                    <span style="color: #333; font-weight: 500;">${message}</span>
+                    <span style="color: #fff; font-weight: 500;">${message}</span>
                 `;
                 toast.style.borderLeft = `5px solid ${borderColor[type]}`;
                 toast.style.transform = 'translateX(0)';
