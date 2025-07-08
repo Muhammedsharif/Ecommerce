@@ -840,6 +840,7 @@ body {
                 type="checkbox"
                 name="sizes"
                 value="<%= size %>"
+                value="<%= size.varientPrice %>"
                 onchange="toggleSizeVariant('<%= size %>', this.checked)"
                 <%= selectedSizes.includes(size) ? 'checked' : '' %> >
             <span>Size <%= size %></span>
@@ -989,576 +990,611 @@ body {
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        const croppers = {};
-        const selectedSizes = [];
-        const sizeVariants = {};
+      const croppers = {};
+const selectedSizes = [];
+const sizeVariants = {};
 
-        // Initialize existing variants when page loads
-        // (This will be handled in the main DOMContentLoaded listener below)
+// Initialize existing variants from product data
+function initializeExistingVariants() {
+    const existingVariants = <%- JSON.stringify(product.variant || []) %>;
+    console.log('🔍 DEBUG: Initializing variants:', existingVariants);
 
-        // Initialize existing variants from product data
-        function initializeExistingVariants() {
-            const existingVariants = <%- JSON.stringify(product.variant || []) %>;
+    // Clear existing data
+    selectedSizes.length = 0;
+    Object.keys(sizeVariants).forEach(key => delete sizeVariants[key]);
 
-            // Temporary debug logging
-            console.log('🔍 DEBUG: Raw variant data from server:', existingVariants);
+    if (!Array.isArray(existingVariants) || existingVariants.length === 0) {
+        console.log('🔍 DEBUG: No variants found');
+        return;
+    }
 
-            // Clear any existing data first
-            selectedSizes.length = 0;
-            Object.keys(sizeVariants).forEach(key => delete sizeVariants[key]);
-
-            if (!existingVariants || existingVariants.length === 0) {
-                console.log('🔍 DEBUG: No variants found');
-                return;
-            }
-
-            // Process each existing variant
-            existingVariants.forEach((variant) => {
-                const size = variant.size;
-                console.log(`🔍 DEBUG: Processing variant for size ${size}:`, variant);
-
-                // Add to selected sizes array
-                if (!selectedSizes.includes(size)) {
-                    selectedSizes.push(size);
-                }
-
-                // Store variant data with proper values
-                sizeVariants[size] = {
-                    price: variant.varientPrice || '',
-                    quantity: variant.varientquantity || ''
-                };
-                console.log(`🔍 DEBUG: Stored data for size ${size}:`, sizeVariants[size]);
-            });
-
-            console.log('🔍 DEBUG: Final selectedSizes:', selectedSizes);
-            console.log('🔍 DEBUG: Final sizeVariants:', sizeVariants);
-
-            // Update the variants section to show all selected variants
-            if (selectedSizes.length > 0) {
-                updateVariantsSection();
-            }
+    // Process each variant
+    existingVariants.forEach(variant => {
+        const size = variant.size;
+        if (!selectedSizes.includes(size)) {
+            selectedSizes.push(size);
         }
 
-        // Toggle size variant section
-        function toggleSizeVariant(size, isChecked) {
-            if (isChecked) {
-                selectedSizes.push(size);
-                addSizeVariant(size);
-            } else {
-                const index = selectedSizes.indexOf(size);
-                if (index > -1) {
-                    selectedSizes.splice(index, 1);
-                }
-                removeSizeVariant(size);
-                delete sizeVariants[size];
-            }
-            updateVariantsSection();
+        // Store variant data with proper type conversion
+        sizeVariants[size] = {
+            price: variant.varientPrice ? String(variant.varientPrice) : '',
+            quantity: variant.varientquantity ? String(variant.varientquantity) : ''
+        };
+
+        // Check the corresponding checkbox
+        const checkbox = document.querySelector(`input[name="sizes"][value="${size}"]`);
+        if (checkbox) {
+            checkbox.checked = true;
         }
+    });
 
-        // Add size variant
-        function addSizeVariant(size) {
-            if (!sizeVariants[size]) {
-                sizeVariants[size] = { price: '', quantity: '' };
-            }
+    // Update the variants section
+    if (selectedSizes.length > 0) {
+        updateVariantsSection();
+    }
+}
+
+// Toggle size variant section
+function toggleSizeVariant(size, isChecked) {
+    if (isChecked) {
+        if (!selectedSizes.includes(size)) {
+            selectedSizes.push(size);
+            addSizeVariant(size);
         }
-
-        // Remove size variant
-        function removeSizeVariant(size) {
-            const variantElement = document.getElementById(`variant-${size}`);
-            if (variantElement) {
-                variantElement.remove();
-            }
+    } else {
+        const index = selectedSizes.indexOf(size);
+        if (index > -1) {
+            selectedSizes.splice(index, 1);
         }
+        removeSizeVariant(size);
+        delete sizeVariants[size];
+    }
+    updateVariantsSection();
+}
 
-        // Update variants section visibility and content
-        function updateVariantsSection() {
-            const variantsSection = document.getElementById('productVariantsSection');
-            const variantsGrid = document.getElementById('variantsGrid');
+// Add size variant
+function addSizeVariant(size) {
+    // Check if variant data exists in existing variants
+    const existingVariants = <%- JSON.stringify(product.variant || []) %>;
+    const variant = existingVariants.find(v => v.size === size);
 
-            if (!variantsSection || !variantsGrid) {
-                return;
-            }
+    if (!sizeVariants[size]) {
+        sizeVariants[size] = {
+            price: variant ? String(variant.varientPrice || '') : '',
+            quantity: variant ? String(variant.varientquantity || '') : ''
+        };
+    }
+}
 
-            if (selectedSizes.length > 0) {
-                variantsSection.style.display = 'block';
-                variantsGrid.innerHTML = '';
+// Remove size variant
+function removeSizeVariant(size) {
+    const variantElement = document.getElementById(`variant-${size}`);
+    if (variantElement) {
+        variantElement.remove();
+    }
+}
 
-                selectedSizes.forEach(size => {
-                    const variant = sizeVariants[size] || { price: '', quantity: '' };
+// Update variants section visibility and content
+function updateVariantsSection() {
+    const variantsSection = document.getElementById('productVariantsSection');
+    const variantsGrid = document.getElementById('variantsGrid');
 
-                    const variantHTML = `
-                        <div class="variant-item" id="variant-${size}">
-                            <h4>Size ${size}</h4>
-                            <div class="variant-field">
-                                <label>Price</label>
-                                <input type="text" placeholder="0.00" name="variant_price_${size}"
-                                       value="${variant.price}" onchange="updateSizeVariant('${size}', 'price', this.value)">
-                                <div id="variant-price-${size}-error" class="error-message"></div>
-                            </div>
-                            <div class="variant-field">
-                                <label>Quantity</label>
-                                <input type="number" placeholder="0" name="variant_quantity_${size}" min="0"
-                                       value="${variant.quantity}" onchange="updateSizeVariant('${size}', 'quantity', this.value)">
-                                <div id="variant-quantity-${size}-error" class="error-message"></div>
-                            </div>
-                        </div>
-                    `;
-                    variantsGrid.innerHTML += variantHTML;
-                });
-            } else {
-                variantsSection.style.display = 'none';
-            }
-        }
+    if (!variantsSection || !variantsGrid) {
+        console.log('🔍 DEBUG: Missing DOM elements');
+        return;
+    }
 
-        // Update size variant data
-        function updateSizeVariant(size, field, value) {
-            if (!sizeVariants[size]) {
-                sizeVariants[size] = { price: '', quantity: '' };
-            }
-            sizeVariants[size][field] = value;
-        }
-        
-        async function validateAndSubmit() {
-            if (validateForm()) {
-                document.body.classList.add('loading');
+    if (selectedSizes.length > 0) {
+        variantsSection.style.display = 'block';
+        variantsGrid.innerHTML = '';
 
-                Swal.fire({
-                    title: 'Updating Product...',
-                    text: 'Please wait while we update your product',
-                    icon: 'info',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+        selectedSizes.forEach(size => {
+            const variant = sizeVariants[size] || { price: '', quantity: '' };
+            console.log(`🔍 DEBUG: Rendering variant for size ${size}:`, variant);
 
-                try {
-                    const productId = document.getElementById('productId').value;
-                    const form = document.getElementById('productForm');
-                    const formData = new FormData(form);
+            // Escape values to prevent HTML injection
+            const escapedPrice = String(variant.price || '').replace(/"/g, '&quot;');
+            const escapedQuantity = String(variant.quantity || '').replace(/"/g, '&quot;');
 
-                    // Sync current form values with sizeVariants object before submission
-                    selectedSizes.forEach(size => {
-                        const priceInput = document.getElementsByName(`variant_price_${size}`)[0];
-                        const quantityInput = document.getElementsByName(`variant_quantity_${size}`)[0];
-
-                        if (sizeVariants[size]) {
-                            sizeVariants[size].price = priceInput.value;
-                            sizeVariants[size].quantity = quantityInput.value;
-                        }
-                    });
-
-                    // Add size variants data
-                    formData.append('sizeVariants', JSON.stringify(sizeVariants));
-
-                    const response = await fetch(`/admin/editProduct/${productId}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-                    if (response.ok) {
-                        await Swal.fire({
-                            title: 'Success!',
-                            text: `Product has been updated successfully on ${new Date(data.updatedOn || Date.now()).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
-                            icon: 'success',
-                            confirmButtonText: 'Great!',
-                            confirmButtonColor: '#10b981',
-                            timer: 1000,
-                            timerProgressBar: true
-                        });
-                        window.location.href = '/admin/products';
-                    } else {
-                        throw new Error(data.error || 'Failed to update product');
-                    }
-                } catch (error) {
-                    console.error(`Error at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}:`, error);
-                    Swal.fire({
-                        title: 'Oops!',
-                        text: error.message || 'Something went wrong while updating the product',
-                        icon: 'error',
-                        confirmButtonText: 'Try Again',
-                        confirmButtonColor: '#ef4444'
-                    });
-                } finally {
-                    document.body.classList.remove('loading');
-                }
-            }
-        }
-
-        // Preview image functions
-        function viewImage1(event) {
-            updateImagePreview(event, 1);
-        }
-
-        function viewImage2(event) {
-            updateImagePreview(event, 2);
-        }
-
-        function viewImage3(event) {
-            updateImagePreview(event, 3);
-        }
-
-        function viewImage4(event) {
-            updateImagePreview(event, 4);
-        }
-
-        function updateImagePreview(event, index) {
-            const preview = document.getElementById(`preview${index}`);
-            if (event.target.files && event.target.files[0]) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview ${index}">`;
-                    preview.classList.remove('empty');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Initialize Cropper
-         function viewImage(event, index) {
-            let input = event.target;
-            if (!input.files || !input.files[0]) return;
-
-            let reader = new FileReader();
-            reader.onload = function () {
-                let image = document.getElementById("croppedImg" + index);
-                image.src = reader.result;
-
-                // Destroy existing Cropper if any
-                if (croppers[index]) {
-                    croppers[index].destroy();
-                }
-
-                // Initialize new Cropper
-                croppers[index] = new Cropper(image, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    guides: true,
-                    background: false,
-                    autoCropArea: 1,
-                    zoomable: true,
-                    fillColor: '#ffffff'
-                });
-
-                // Show cropper container
-                let cropperContainer = document.querySelector("#cropperContainer" + index);
-                cropperContainer.style.display = 'block';
-
-                // Handle save button
-                let saveButton = document.querySelector("#saveButton" + index);
-                saveButton.addEventListener("click", function () {
-                    let croppedCanvas = croppers[index].getCroppedCanvas({
-                        fillColor: '#ffffff'
-                    });
-                    
-                    let timestamp = new Date().getTime();
-                    let fileName = `cropped-img-${timestamp}-${index}.png`;
-
-                    croppedCanvas.toBlob(blob => {
-                        let input = document.getElementById('input' + index);
-                        let imgFile = new File([blob], fileName, blob);
-                        let fileList = new DataTransfer();
-                        fileList.items.add(imgFile);
-                        input.files = fileList.files;
-
-                        // Update thumbnails
-                        handleFileSelect({ target: input });
-
-                        // Update preview
-                        const preview = document.getElementById(`preview${index}`);
-                        preview.innerHTML = `<img src="${croppedCanvas.toDataURL()}" alt="Cropped ${index}">`;
-
-                        // Hide and clean up
-                        cropperContainer.style.display = 'none';
-                        croppers[index].destroy();
-                        delete croppers[index];
-
-                        // Success feedback
-                        Swal.fire({
-                            title: 'Image Cropped!',
-                            text: 'Your image has been cropped successfully',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    }, 'image/jpeg');
-                }, { once: true });
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-
-        // Handle thumbnails
-        const selectedImages = [];
-        ['input1', 'input2', 'input3', 'input4'].forEach(id => {
-            document.getElementById(id).addEventListener("change", handleFileSelect);
+            const variantHTML = `
+                <div class="variant-item" id="variant-${size}">
+                    <h4>Size ${size}</h4>
+                    <div class="variant-field">
+                        <label>Price</label>
+                        <input type="text" placeholder="0.00" name="variant_price_${size}"
+                               value="${escapedPrice}" onchange="updateSizeVariant('${size}', 'price', this.value)">
+                        <div id="variant-price-${size}-error" class="error-message"></div>
+                    </div>
+                    <div class="variant-field">
+                        <label>Quantity</label>
+                        <input type="number" placeholder="0" name="variant_quantity_${size}" min="0"
+                               value="${escapedQuantity}" onchange="updateSizeVariant('${size}', 'quantity', this.value)">
+                        <div id="variant-quantity-${size}-error" class="error-message"></div>
+                    </div>
+                </div>
+            `;
+            variantsGrid.innerHTML += variantHTML;
         });
 
-        function handleFileSelect(event) {
-            const addedImagesContainer = document.getElementById("addedImagesContainer");
-            const files = event.target.files;
-
-            if (files.length > 0) {
-                // Clear the "no images" message
-                addedImagesContainer.innerHTML = "";
-                
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (!selectedImages.some(img => img.name === file.name)) {
-                        selectedImages.push(file);
-                    }
-
-                    const thumbnail = document.createElement("div");
-                    thumbnail.classList.add("thumbnail");
-
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(file);
-                    img.alt = "thumbnail";
-
-                    const removeIcon = document.createElement("span");
-                    removeIcon.classList.add("remove-icon");
-                    removeIcon.innerHTML = "×";
-                    removeIcon.addEventListener("click", function () {
-                        const index = selectedImages.findIndex(img => img.name === file.name);
-                        if (index !== -1) {
-                            selectedImages.splice(index, 1);
-                        }
-                        thumbnail.remove();
-                        
-                        // Show "no images" message if no images left
-                        if (selectedImages.length === 0) {
-                            addedImagesContainer.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No images selected</p>';
-                        }
-                    });
-
-                    thumbnail.appendChild(img);
-                    thumbnail.appendChild(removeIcon);
-                    addedImagesContainer.appendChild(thumbnail);
-                }
-            }
-        }
-
-        function resetImagePreviews() {
-            for (let i = 1; i <= 4; i++) {
-                const preview = document.getElementById(`preview${i}`);
-                preview.innerHTML = `<i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>`;
-                preview.classList.add('empty');
-            }
-            
-            const addedImagesContainer = document.getElementById("addedImagesContainer");
-            addedImagesContainer.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No images selected</p>';
-            
-            selectedImages.length = 0;
-        }
-
-        // Form validation
-        function validateForm() {
-            clearErrorMessages();
-            const name = document.getElementsByName('productName')[0].value;
-            const description = document.getElementById('descriptionid').value;
-            const brand = document.getElementsByName('brand')[0].value;
-            const productOffer = document.getElementsByName('productOffer')[0].value;
-            const color = document.getElementsByName('color')[0].value;
-            const category = document.getElementsByName('category')[0].value;
-            const images = document.getElementById('input1');
-            let isValid = true;
-
-            if (!name || name.trim() === "") {
-                displayErrorMessage('productName-error', 'Please enter a product name.');
-                isValid = false;
-            } else if (!/^[a-zA-Z0-9\s]+$/.test(name.trim())) {
-                displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-                isValid = false;
-            }
-
-            if (!description || description.trim() === "") {
-                displayErrorMessage('description-error', 'Please enter a product description.');
-                isValid = false;
-            } else if (!/^[a-zA-Z0-9\s.,'"’“”\-()\/:!&?—]+$/.test(description.trim())) {
-                displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
-                isValid = false;
-            }
-
-
-
-            if (productOffer && (!/^\d+$/.test(productOffer) || parseInt(productOffer) < 0 || parseInt(productOffer) > 100)) {
-                displayErrorMessage('productOffer-error', 'Product offer must be between 0 and 100.');
-                isValid = false;
-            }
-
-            if (!color || color.trim() === "") {
-                displayErrorMessage('color-error', 'Please enter a color.');
-                isValid = false;
-            }
-
-            if (!category || category.trim() === "") {
-                displayErrorMessage('category-error', 'Please select a category.');
-                isValid = false;
-            }
-
-            // Validate sizes
-            if (selectedSizes.length === 0) {
-                displayErrorMessage('sizes-error', 'Please select at least one size.');
-                isValid = false;
-            }
-
-            // Validate size variants
-            for (const size of selectedSizes) {
+        // Verify input values after rendering
+        setTimeout(() => {
+            selectedSizes.forEach(size => {
                 const priceInput = document.querySelector(`input[name="variant_price_${size}"]`);
                 const quantityInput = document.querySelector(`input[name="variant_quantity_${size}"]`);
-
-                if (priceInput && (!priceInput.value || !/^\d+(\.\d{1,2})?$/.test(priceInput.value) || parseFloat(priceInput.value) <= 0)) {
-                    displayErrorMessage(`variant-price-${size}-error`, 'Please enter a valid price for this size.');
-                    isValid = false;
-                }
-
-                if (quantityInput && (!quantityInput.value || !/^\d+$/.test(quantityInput.value) || parseInt(quantityInput.value) < 0)) {
-                    displayErrorMessage(`variant-quantity-${size}-error`, 'Please enter a valid quantity for this size.');
-                    isValid = false;
-                }
-            }
-
-            // if (!images.files || images.files.length === 0) {
-            //     displayErrorMessage("images-error", 'Please select at least one image.');
-            //     isValid = false;
-            // }
-
-            // Show validation result with SweetAlert
-            if (!isValid) {
-                Swal.fire({
-                    title: 'Validation Error!',
-                    text: 'Please fix the errors in the form before submitting.',
-                    icon: 'warning',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#f59e0b'
-                });
-            }
-
-            return isValid;
-        }
-
-        function displayErrorMessage(elementId, message) {
-            var errorElement = document.getElementById(elementId);
-            if (errorElement) {
-                errorElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-                errorElement.style.display = "block";
-            }
-        }
-
-        function clearErrorMessages() {
-            const errorElements = document.getElementsByClassName('error-message');
-            Array.from(errorElements).forEach(element => {
-                if (element) element.innerText = '';
+                if (priceInput) priceInput.value = sizeVariants[size].price || '';
+                if (quantityInput) quantityInput.value = sizeVariants[size].quantity || '';
             });
-        }
+        }, 100);
+    } else {
+        variantsSection.style.display = 'none';
+    }
+}
 
-        // Enhanced interactions
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize existing variants with a delay to ensure DOM is ready
-            setTimeout(() => {
-                initializeExistingVariants();
-            }, 500);
+// Update size variant data
+function updateSizeVariant(size, field, value) {
+    if (!sizeVariants[size]) {
+        sizeVariants[size] = { price: '', quantity: '' };
+    }
+    sizeVariants[size][field] = value;
+}
 
-            // Add focus effects to form controls
-            const formControls = document.querySelectorAll('.form-control');
-            formControls.forEach(control => {
-                control.addEventListener('focus', function() {
-                    this.parentElement.classList.add('focused');
-                });
+async function validateAndSubmit() {
+    if (validateForm()) {
+        document.body.classList.add('loading');
 
-                control.addEventListener('blur', function() {
-                    this.parentElement.classList.remove('focused');
-                });
-            });
-
-            // Add hover effects to image upload areas
-            const imageInputItems = document.querySelectorAll('.image-input-item');
-            imageInputItems.forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
-                });
-
-                item.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                });
-            });
+        Swal.fire({
+            title: 'Updating Product...',
+            text: 'Please wait while we update your product',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
 
-        function showImageUploadSuccess(count) {
+        try {
+            const productId = document.getElementById('productId').value;
+            const form = document.getElementById('productForm');
+            const formData = new FormData(form);
+
+            // Sync current form values with sizeVariants object before submission
+            selectedSizes.forEach(size => {
+                const priceInput = document.getElementsByName(`variant_price_${size}`)[0];
+                const quantityInput = document.getElementsByName(`variant_quantity_${size}`)[0];
+
+                if (sizeVariants[size]) {
+                    sizeVariants[size].price = priceInput.value;
+                    sizeVariants[size].quantity = quantityInput.value;
+                }
+            });
+
+            // Add size variants data
+            formData.append('sizeVariants', JSON.stringify(sizeVariants));
+
+            const response = await fetch(`/admin/editProduct/${productId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                await Swal.fire({
+                    title: 'Success!',
+                    text: `Product has been updated successfully on ${new Date(data.updatedOn || Date.now()).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
+                    icon: 'success',
+                    confirmButtonText: 'Great!',
+                    confirmButtonColor: '#10b981',
+                    timer: 1000,
+                    timerProgressBar: true
+                });
+                window.location.href = '/admin/products';
+            } else {
+                throw new Error(data.error || 'Failed to update product');
+            }
+        } catch (error) {
+            console.error(`Error at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}:`, error);
             Swal.fire({
-                title: 'Image Uploaded!',
-                text: `${count} image${count > 1 ? 's' : ''} uploaded successfully`,
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
+                title: 'Oops!',
+                text: error.message || 'Something went wrong while updating the product',
+                icon: 'error',
+                confirmButtonText: 'Try Again',
+                confirmButtonColor: '#ef4444'
             });
+        } finally {
+            document.body.classList.remove('loading');
+        }
+    }
+}
+
+// Preview image functions
+function viewImage1(event) {
+    updateImagePreview(event, 1);
+}
+
+function viewImage2(event) {
+    updateImagePreview(event, 2);
+}
+
+function viewImage3(event) {
+    updateImagePreview(event, 3);
+}
+
+function updateImagePreview(event, index) {
+    const preview = document.getElementById(`preview${index}`);
+    if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview ${index}">`;
+            preview.classList.remove('empty');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Initialize Cropper
+function viewImage(event, index) {
+    let input = event.target;
+    if (!input.files || !input.files[0]) return;
+
+    let reader = new FileReader();
+    reader.onload = function () {
+        let image = document.getElementById("croppedImg" + index);
+        image.src = reader.result;
+
+        // Destroy existing Cropper if any
+        if (croppers[index]) {
+            croppers[index].destroy();
         }
 
-        // Add drag and drop functionality
-        const imageUploadSection = document.querySelector('.image-upload-section');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            imageUploadSection.addEventListener(eventName, preventDefaults, false);
+        // Initialize new Cropper
+        croppers[index] = new Cropper(image, {
+            aspectRatio: 1,
+            viewMode: 1,
+            guides: true,
+            background: false,
+            autoCropArea: 1,
+            zoomable: true,
+            fillColor: '#ffffff'
         });
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+        // Show cropper container
+        let cropperContainer = document.querySelector("#cropperContainer" + index);
+        cropperContainer.style.display = 'block';
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            imageUploadSection.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            imageUploadSection.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            imageUploadSection.style.borderColor = '#667eea';
-            imageUploadSection.style.backgroundColor = '#f0f4ff';
-        }
-
-        function unhighlight(e) {
-            imageUploadSection.style.borderColor = '#d1d5db';
-            imageUploadSection.style.backgroundColor = '#f8fafc';
-        }
-
-        imageUploadSection.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
+        // Handle save button
+        let saveButton = document.querySelector("#saveButton" + index);
+        saveButton.addEventListener("click", function () {
+            let croppedCanvas = croppers[index].getCroppedCanvas({
+                fillColor: '#ffffff'
+            });
             
-            if (files.length > 0) {
-                // Find the first empty input field
-                for (let i = 1; i <= 4; i++) {
-                    const input = document.getElementById(`input${i}`);
-                    if (!input.files || input.files.length === 0) {
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(files[0]);
-                        input.files = dataTransfer.files;
-                        
-                        // Trigger the change event
-                        const event = new Event('change', { bubbles: true });
-                        input.dispatchEvent(event);
-                        
-                        showImageUploadSuccess(1);
-                        break;
-                    }
-           
+            let timestamp = new Date().getTime();
+            let fileName = `cropped-img-${timestamp}-${index}.png`;
+
+            croppedCanvas.toBlob(blob => {
+                let input = document.getElementById('input' + index);
+                let imgFile = new File([blob], fileName, blob);
+                let fileList = new DataTransfer();
+                fileList.items.add(imgFile);
+                input.files = fileList.files;
+
+                // Update thumbnails
+                handleFileSelect({ target: input });
+
+                // Update preview
+                const preview = document.getElementById(`preview${index}`);
+                preview.innerHTML = `<img src="${croppedCanvas.toDataURL()}" alt="Cropped ${index}">`;
+
+                // Hide and clean up
+                cropperContainer.style.display = 'none';
+                croppers[index].destroy();
+                delete croppers[index];
+
+                // Success feedback
+                Swal.fire({
+                    title: 'Image Cropped!',
+                    text: 'Your image has been cropped successfully',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }, 'image/jpeg');
+        }, { once: true });
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+// Handle thumbnails
+const selectedImages = [];
+['input1', 'input2', 'input3'].forEach(id => {
+    document.getElementById(id).addEventListener("change", handleFileSelect);
+});
+
+function handleFileSelect(event) {
+    const addedImagesContainer = document.getElementById("addedImagesContainer");
+    const files = event.target.files;
+
+    if (files.length > 0) {
+        // Clear the "no images" message
+        addedImagesContainer.innerHTML = "";
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!selectedImages.some(img => img.name === file.name)) {
+                selectedImages.push(file);
+            }
+
+            const thumbnail = document.createElement("div");
+            thumbnail.classList.add("thumbnail");
+
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            img.alt = "thumbnail";
+
+            const removeIcon = document.createElement("span");
+            removeIcon.classList.add("remove-icon");
+            removeIcon.innerHTML = "×";
+            removeIcon.addEventListener("click", function () {
+                const index = selectedImages.findIndex(img => img.name === file.name);
+                if (index !== -1) {
+                    selectedImages.splice(index, 1);
                 }
+                thumbnail.remove();
+                
+                // Show "no images" message if no images left
+                if (selectedImages.length === 0) {
+                    addedImagesContainer.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No images selected</p>';
+                }
+            });
+
+            thumbnail.appendChild(img);
+            thumbnail.appendChild(removeIcon);
+            addedImagesContainer.appendChild(thumbnail);
+        }
+    }
+}
+
+function resetImagePreviews() {
+    for (let i = 1; i <= 3; i++) {
+        const preview = document.getElementById(`preview${i}`);
+        preview.innerHTML = `<i class="fas fa-camera" style="font-size: 2rem; color: #d1d5db;"></i>`;
+        preview.classList.add('empty');
+    }
+    
+    const addedImagesContainer = document.getElementById("addedImagesContainer");
+    addedImagesContainer.innerHTML = '<p style="color: #9ca3af; font-style: italic;">No images selected</p>';
+    
+    selectedImages.length = 0;
+}
+
+// Form validation
+function validateForm() {
+    clearErrorMessages();
+    const name = document.getElementsByName('productName')[0].value;
+    const description = document.getElementById('descriptionid').value;
+    const brand = document.getElementsByName('brand')[0].value;
+    const productOffer = document.getElementsByName('productOffer')[0].value;
+    const color = document.getElementsByName('color')[0].value;
+    const category = document.getElementsByName('category')[0].value;
+    const images = document.getElementById('input1');
+    let isValid = true;
+
+    if (!name || name.trim() === "") {
+        displayErrorMessage('productName-error', 'Please enter a product name.');
+        isValid = false;
+    } else if (!/^[a-zA-Z0-9\s]+$/.test(name.trim())) {
+        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+    if (!description || description.trim() === "") {
+        displayErrorMessage('description-error', 'Please enter a product description.');
+        isValid = false;
+    } else if (!/^[a-zA-Z0-9\s.,'"’“”\-()\/:!&?—]+$/.test(description.trim())) {
+        displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+    if (productOffer && (!/^\d+$/.test(productOffer) || parseInt(productOffer) < 0 || parseInt(productOffer) > 100)) {
+        displayErrorMessage('productOffer-error', 'Product offer must be between 0 and 100.');
+        isValid = false;
+    }
+
+    if (!color || color.trim() === "") {
+        displayErrorMessage('color-error', 'Please enter a color.');
+        isValid = false;
+    }
+
+    if (!category || category.trim() === "") {
+        displayErrorMessage('category-error', 'Please select a category.');
+        isValid = false;
+    }
+
+    // Validate sizes
+    if (selectedSizes.length === 0) {
+        displayErrorMessage('sizes-error', 'Please select at least one size.');
+        isValid = false;
+    }
+
+    // Validate size variants
+    for (const size of selectedSizes) {
+        const priceInput = document.querySelector(`input[name="variant_price_${size}"]`);
+        const quantityInput = document.querySelector(`input[name="variant_quantity_${size}"]`);
+
+        if (priceInput && (!priceInput.value || !/^\d+(\.\d{1,2})?$/.test(priceInput.value) || parseFloat(priceInput.value) <= 0)) {
+            displayErrorMessage(`variant-price-${size}-error`, 'Please enter a valid price for this size.');
+            isValid = false;
+        }
+
+        if (quantityInput && (!quantityInput.value || !/^\d+$/.test(quantityInput.value) || parseInt(quantityInput.value) < 0)) {
+            displayErrorMessage(`variant-quantity-${size}-error`, 'Please enter a valid quantity for this size.');
+            isValid = false;
+        }
+    }
+
+    if (!isValid) {
+        Swal.fire({
+            title: 'Validation Error!',
+            text: 'Please fix the errors in the form before submitting.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#f59e0b'
+        });
+    }
+
+    return isValid;
+}
+
+function displayErrorMessage(elementId, message) {
+    var errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+        errorElement.style.display = "block";
+    }
+}
+
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        if (element) element.innerText = '';
+    });
+}
+
+// Manual initialization function for testing
+window.manualInitVariants = function() {
+    console.log('🔍 DEBUG: Manual initialization triggered');
+    initializeExistingVariants();
+};
+
+// Enhanced interactions
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 DEBUG: DOMContentLoaded event fired');
+    console.log('🔍 DEBUG: Document readyState:', document.readyState);
+    // Initialize existing variants with a delay to ensure DOM is ready
+    setTimeout(() => {
+        console.log('🔍 DEBUG: DOM ready, initializing variants...');
+        initializeExistingVariants();
+    }, 100);
+
+    // Also try immediate initialization in case DOM is already ready
+    if (document.readyState === 'complete') {
+        console.log('🔍 DEBUG: Document already complete, initializing variants immediately...');
+        initializeExistingVariants();
+    }
+
+    // Add focus effects to form controls
+    const formControls = document.querySelectorAll('.form-control');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+
+        control.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+
+    // Add hover effects to image upload areas
+    const imageInputItems = document.querySelectorAll('.image-input-item');
+    imageInputItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+        });
+
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        });
+    });
+});
+
+// Additional fallback for window load event
+window.addEventListener('load', function() {
+    console.log('🔍 DEBUG: Window loaded, ensuring variants are initialized...');
+    console.log('🔍 DEBUG: Current selectedSizes length:', selectedSizes.length);
+    // Only initialize if not already done
+    if (selectedSizes.length === 0) {
+        console.log('🔍 DEBUG: No sizes selected, initializing...');
+        initializeExistingVariants();
+    } else {
+        console.log('🔍 DEBUG: Sizes already selected, skipping initialization');
+    }
+});
+
+function showImageUploadSuccess(count) {
+    Swal.fire({
+        title: 'Image Uploaded!',
+        text: `${count} image${count > 1 ? 's' : ''} uploaded successfully`,
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+    });
+}
+
+// Add drag and drop functionality
+const imageUploadSection = document.querySelector('.image-upload-section');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    imageUploadSection.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    imageUploadSection.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    imageUploadSection.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    imageUploadSection.style.borderColor = '#667eea';
+    imageUploadSection.style.backgroundColor = '#f0f4ff';
+}
+
+function unhighlight(e) {
+    imageUploadSection.style.borderColor = '#d1d5db';
+    imageUploadSection.style.backgroundColor = '#f8fafc';
+}
+
+imageUploadSection.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+        // Find the first empty input field
+        for (let i = 1; i <= 3; i++) {
+            const input = document.getElementById(`input${i}`);
+            if (!input.files || input.files.length === 0) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                input.files = dataTransfer.files;
+                
+                // Trigger the change event
+                const event = new Event('change', { bubbles: true });
+                input.dispatchEvent(event);
+                
+                showImageUploadSuccess(1);
+                break;
             }
         }
-function deleteSingleImage(imageId, productId, ) {
+    }
+}
+
+function deleteSingleImage(imageId, productId) {
     console.log(imageId, productId);
     Swal.fire({
         title: 'Delete Image?',
@@ -1579,25 +1615,22 @@ function deleteSingleImage(imageId, productId, ) {
                 showConfirmButton: false,
                 didOpen: () => Swal.showLoading()
             });
-            fetch('/admin/deleteImage', { // Updated to match the server route
+            fetch('/admin/deleteImage', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    
                 },
                 body: JSON.stringify({
                     _method: 'DELETE',
-                    imageNameToServer: imageId, // Match controller expectation
+                    imageNameToServer: imageId,
                     productIdToServer: productId
                 })
             })
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
                 return response.json();
             })
             .then(data => {
-                
                 if (data.status) {
                     const imageElement = document.querySelector(`[data-image-id="${imageId}"]`);
                     if (imageElement) imageElement.remove();
@@ -1614,7 +1647,7 @@ function deleteSingleImage(imageId, productId, ) {
                         showConfirmButton: false
                     });
                     window.dispatchEvent(new CustomEvent('imageDeleted', {
-                        detail: { imageId, productId, }
+                        detail: { imageId, productId }
                     }));
                 } else {
                     throw new Error(data.message || 'Failed to delete image');

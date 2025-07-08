@@ -261,12 +261,26 @@ const deleteProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
-  
+
 
     const product = await Product.findOne({ _id: id });
     console.log('Product found:', product ? 'Yes' : 'No');
 
-   
+    // Debug logging for variant data
+    if (product && product.variant) {
+      console.log('🔍 CONTROLLER DEBUG: Product variant data:');
+      console.log('🔍 CONTROLLER DEBUG: Variant array length:', product.variant.length);
+      product.variant.forEach((variant, index) => {
+        console.log(`🔍 CONTROLLER DEBUG: Variant ${index}:`, {
+          size: variant.size,
+          varientPrice: variant.varientPrice,
+          varientquantity: variant.varientquantity,
+          salePrice: variant.salePrice
+        });
+      });
+    } else {
+      console.log('🔍 CONTROLLER DEBUG: No variant data found');
+    }
 
     const category = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
@@ -325,7 +339,7 @@ const editProduct = async (req, res) => {
         const sharpInstance = sharp(originalImagePath)
           .resize({ width: 440, height: 440, fit: "cover" })
           .flatten({ background: "#ffffff" }); // Force white background
-        if (isPng) {
+        if (isPng) {   
           await sharpInstance.png({ quality: 90 }).toFile(resizedImagePath);
         } else {
           await sharpInstance.jpeg({ quality: 90 }).toFile(resizedImagePath);
