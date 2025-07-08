@@ -65,17 +65,33 @@ const userSchema = new Schema({
         type:Date,
         default:Date.now
     },
-    referalCode:{
-        // type:String
+    referralCode:{
+        type: String,
+        unique: true,
+        sparse: true
     },
-    redeemed:{
-        // type:Boolean
+    referredBy:{
+        type: Schema.Types.ObjectId,
+        ref: "User"
     },
-    redeemedUsers:{
-        type:Schema.Types.ObjectId,
-        ref:"User",
-        //required:true
+    referralCount:{
+        type: Number,
+        default: 0
     },
+    coupons:[{
+        couponId: {
+            type: Schema.Types.ObjectId,
+            ref: "Coupon"
+        },
+        isUsed: {
+            type: Boolean,
+            default: false
+        },
+        receivedDate: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     searchHistory:[{
         category:{
             type:Schema.Types.ObjectId,

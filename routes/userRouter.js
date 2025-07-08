@@ -10,6 +10,7 @@ const cartController=require("../controllers/user/cartController")
 const checkoutController=require("../controllers/user/checkoutController")
 const paymentController=require("../controllers/user/paymentController")
 const couponController=require("../controllers/user/couponController")
+const referralController=require("../controllers/user/referralController")
 const { userAuth } = require("../middlewares/auth"); // User authentication middleware
 const profileUpload = require("../helpers/profileMulter"); // Profile image upload helper
 
@@ -129,7 +130,8 @@ router.get("/wallet",userAuth,profileController.loadWallet)
 
 
 
-
-
+// Referral System Routes
+router.get("/referral/info", userAuth, referralController.getUserReferralInfo)
+router.get("/coupons", userAuth, profileController.loadCoupons)
 
 module.exports=router

@@ -25,19 +25,23 @@
       </div>
       <div class="divider">– OR –</div>
       <form  id="signform" action="/signup" method="POST">
-        
+
          <input type="text" name="name" id="name" placeholder="Full Name" value="<%= typeof name !== 'undefined' ? name : '' %>" />
         <div id="error1" class="error-message"></div>
-        
+
          <input name="email" id="email" placeholder="Email Address" value="<%= typeof email !== 'undefined' ? email : '' %>" />
         <div id="error2" class="error-message"></div>
-        
+
          <input type="text" name="phone" id="phone" placeholder="Phone" value="<%= typeof phone !== 'undefined' ? phone : '' %>" />
         <div id="error3" class="error-message"></div>
         <input type="password" name="password" id="password" placeholder="Password" />
         <div id="error4" class="error-message"></div>
         <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
         <div id="error5" class="error-message"></div>
+
+        <input type="text" name="referralCode" id="referralCode" placeholder="Referral Code (Optional)" value="<%= typeof referralCode !== 'undefined' ? referralCode : '' %>" />
+        <div id="error6" class="error-message"></div>
+
         <% if (message) { %>
     <div class="server-message text-center" style="margin-bottom: 10px;">
       <%= message %>

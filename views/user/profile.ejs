@@ -468,6 +468,163 @@
                 margin-bottom: 1rem;
             }
         }
+
+        /* Referral Section Styles */
+        .referral-info {
+            display: grid;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .referral-code-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .referral-code-display {
+            background: white;
+            border: 2px dashed #6366f1;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6366f1;
+            margin: 1rem 0;
+        }
+
+        .copy-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5856eb;
+        }
+
+        .referral-description {
+            color: #6b7280;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .referral-stats {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #6366f1;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Coupons Section Styles */
+        .coupons-container {
+            margin-top: 1rem;
+        }
+
+        .coupon-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #10b981;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .coupon-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-header h4 {
+            font-family: 'Courier New', monospace;
+            color: #374151;
+            margin: 0;
+        }
+
+        .coupon-discount {
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .coupon-details {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-details p {
+            margin: 0.25rem 0;
+        }
+
+        .copy-coupon-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .copy-coupon-btn:hover {
+            background: #5856eb;
+        }
+
+        .no-coupons {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .referral-info {
+                grid-template-columns: 1fr;
+            }
+
+            .coupon-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -495,6 +652,8 @@
                         Change Password
                     <% } else if (page === 'referral') { %>
                         Referral Program
+                    <% } else if (page === 'coupons') { %>
+                        My Coupons
                     <% } else { %>
                         Profile
                     <% } %>
@@ -510,20 +669,68 @@
                 </p>
             </div>
 
-            <div class="section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <div class="section-icon">👤</div>
-                        Profile Details
+            <% if (page === 'referral') { %>
+                <!-- Referral Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">🎁</div>
+                            Referral Program
+                        </div>
                     </div>
 
-                    <a href="/edit-profile">
-                        <button class="edit-btn">
-                            <i class="fas fa-edit"></i>
-                            <span>Edit Profile</span>
-                        </button>
-                    </a>
+                    <div class="referral-info" id="referralInfo">
+                        <div class="referral-code-section">
+                            <h4>Your Referral Code</h4>
+                            <div class="referral-code-display" id="referralCodeDisplay">
+                                Loading...
+                            </div>
+                            <button class="copy-btn" onclick="copyReferralCode()">
+                                <i class="fas fa-copy"></i> Copy Code
+                            </button>
+                            <p class="referral-description">
+                                Share this code with friends! When they sign up, you both get coupons.
+                            </p>
+                        </div>
+
+                        <div class="referral-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="referralCount">0</span>
+                                <span class="stat-label">Successful Referrals</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            <% } else if (page === 'coupons') { %>
+                <!-- Coupons Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">🎫</div>
+                            My Coupons
+                        </div>
+                    </div>
+
+                    <div class="coupons-container" id="couponsContainer">
+                        <div class="loading-message">Loading coupons...</div>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- Default Profile Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">👤</div>
+                            Profile Details
+                        </div>
+
+                        <a href="/edit-profile">
+                            <button class="edit-btn">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit Profile</span>
+                            </button>
+                        </a>
+                    </div>
 
                 <!-- Profile Image Section -->
                 <div class="form-group" style="text-align: center; margin-bottom: 2rem;">
@@ -617,14 +824,111 @@
                 </button></a>
 
             </div>
-        
+            <% } %>
+
         </main>
     </div>
 
 
 
     <script>
-    
+        // Referral and Coupons functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = '<%= typeof page !== "undefined" ? page : "profile" %>';
+
+            if (currentPage === 'referral') {
+                loadReferralInfo();
+            } else if (currentPage === 'coupons') {
+                loadCoupons();
+            }
+        });
+
+        // Load referral information
+        async function loadReferralInfo() {
+            try {
+                const response = await fetch('/referral/info');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('referralCodeDisplay').textContent = data.referralCode || 'Not Available';
+                    document.getElementById('referralCount').textContent = data.referralCount || 0;
+                } else {
+                    console.error('Failed to load referral info:', data.message);
+                }
+            } catch (error) {
+                console.error('Error loading referral info:', error);
+            }
+        }
+
+        // Load coupons
+        async function loadCoupons() {
+            try {
+                const response = await fetch('/referral/info');
+                const data = await response.json();
+
+                if (data.success) {
+                    displayCoupons(data.coupons || []);
+                } else {
+                    console.error('Failed to load coupons:', data.message);
+                }
+            } catch (error) {
+                console.error('Error loading coupons:', error);
+            }
+        }
+
+        // Display coupons
+        function displayCoupons(coupons) {
+            const container = document.getElementById('couponsContainer');
+
+            if (coupons.length === 0) {
+                container.innerHTML = `
+                    <div class="no-coupons">
+                        <i class="fas fa-ticket-alt fa-3x" style="color: #ccc; margin-bottom: 1rem;"></i>
+                        <p>No coupons available</p>
+                        <p style="color: #666; font-size: 0.9rem;">Refer friends to earn coupons!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = coupons.map(coupon => `
+                <div class="coupon-card">
+                    <div class="coupon-header">
+                        <h4>${coupon.code}</h4>
+                        <span class="coupon-discount">₹${coupon.discount} OFF</span>
+                    </div>
+                    <div class="coupon-details">
+                        <p>Minimum order: ₹${coupon.minimumOrder}</p>
+                        <p>Expires: ${new Date(coupon.expiryDate).toLocaleDateString()}</p>
+                        <p>Received: ${new Date(coupon.receivedDate).toLocaleDateString()}</p>
+                    </div>
+                    <button class="copy-coupon-btn" onclick="copyCouponCode('${coupon.code}')">
+                        <i class="fas fa-copy"></i> Copy Code
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Copy referral code
+        function copyReferralCode() {
+            const code = document.getElementById('referralCodeDisplay').textContent;
+            if (code && code !== 'Loading...' && code !== 'Not Available') {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Referral code copied to clipboard!');
+                }).catch(() => {
+                    alert('Failed to copy referral code');
+                });
+            }
+        }
+
+        // Copy coupon code
+        function copyCouponCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Coupon code copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy coupon code');
+            });
+        }
 
         // Add some interactive effects
         document.querySelectorAll('.wishlist-item').forEach(item => {

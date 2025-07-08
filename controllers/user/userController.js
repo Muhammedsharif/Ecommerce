@@ -2,6 +2,7 @@
     const Category = require("../../models/categorySchema")
     const Product = require("../../models/productSchema")
     const Wishlist = require("../../models/wishlistSchema")
+    const { createReferralCode, processReferral } = require("./referralController")
 
     const env=require("dotenv").config()
     const nodemailer = require("nodemailer")
@@ -121,11 +122,12 @@
 
         try{
             return res.render('signup',{
-                 message: null,
-                 name: "",
-                 email: "",
-                 phone: ""
-})
+                message: null,
+                name: "",
+                email: "",
+                phone: "",
+                referralCode: ""
+            })
         }catch(error){
             console.log('home page not loading:',error);
             res.status(500).send("server Error")
@@ -174,9 +176,9 @@
 
     const signup = async (req,res)=>{
         try{
-            const {name,phone,email,password,confirmPassword} = req.body
+            const {name,phone,email,password,confirmPassword,referralCode} = req.body
             console.log(req.body)
-            
+
             if(password !== confirmPassword){
                 return res.render("signup",{message:"Password do not match"})
             }
@@ -189,18 +191,29 @@
               
                 return res.render("signup",{
                     message:"User with this email already exists",
-                     name,
+                    name,
                     email,
                     phone,
+                    referralCode
 
                 })
             }
 
-            
-          
+            // Validate referral code if provided
+            if(referralCode && referralCode.trim()) {
+                const referrer = await User.findOne({ referralCode: referralCode.trim() });
+                if(!referrer) {
+                    return res.render("signup",{
+                        message:"Invalid referral code",
+                        name,
+                        email,
+                        phone,
+                        referralCode
+                    });
+                }
+            }
 
             const otp = generateOtp()
-
             const emailSent = await sendVerificationEmail(email,otp)
 
             if(!emailSent){
@@ -208,7 +221,7 @@
             }
 
             req.session.userOtp=otp
-            req.session.userData={name,phone,email,password}
+            req.session.userData={name,phone,email,password,referralCode}
             res.render("verify-otp")
             console.log("OTP Sent",otp)
 
@@ -216,7 +229,6 @@
 
             console.error("signup error",error)
             res.redirect("/pageNotFound")
-
         }
     }
 
@@ -232,15 +244,13 @@
 
     const verifyOtp = async (req,res)=>{
         try{
-
             const {otp}=req.body
-
             console.log(otp)
 
             if(otp===req.session.userOtp){
                 const user = req.session.userData
                 const passwordHash = await securePassword(user.password)
-                
+
                 const saveUserData = new User({
                     name:user.name,
                     email:user.email,
@@ -249,13 +259,24 @@
                 })
 
                 await saveUserData.save()
+
+                // Generate referral code for new user
+                const referralCode = await createReferralCode(saveUserData._id, user.name);
+                if(referralCode) {
+                    await User.findByIdAndUpdate(saveUserData._id, { referralCode });
+                }
+
+                // Process referral if user was referred
+                if(user.referralCode && user.referralCode.trim()) {
+                    await processReferral(saveUserData._id, user.referralCode.trim());
+                }
+
                 req.session.user = saveUserData._id
                 res.json({success:true, redirectUrl:"/"})
             }else {
                 res.status(400).json({success:false,message:"Invalid OTP, Please try again"})
             }
         } catch (error){
-
             console.error("Error Verifying OTP",error)
             res.status(500).json({success:false,message:"An error occured"})
         }

@@ -799,11 +799,32 @@ const loadReferral = async (req, res) => {
 
         res.render("profile", {
             user: userData,
-            page: 'referral',
-            message: 'Referral program coming soon!'
+            page: 'referral'
         });
     } catch (error) {
         console.error("Error loading referral page:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+const loadCoupons = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
+        res.render("profile", {
+            user: userData,
+            page: 'coupons'
+        });
+    } catch (error) {
+        console.error("Error loading coupons page:", error);
         res.redirect("/pageNotFound");
     }
 }
@@ -1307,6 +1328,7 @@ module.exports={
     loadWallet,
     loadChangePassword,
     loadReferral,
+    loadCoupons,
     sendEmailOTP,
     loadVerifyEmailOTP,
     verifyEmailOTP,
