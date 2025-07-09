@@ -7,6 +7,7 @@ const categoryController = require("../controllers/admin/categoryController");
 const orderController = require("../controllers/admin/orderController")
 const bannerController = require("../controllers/admin/bannerController")
 const couponController = require("../controllers/admin/couponController")
+const salesReportController = require("../controllers/admin/salesReportController")
 const multer = require("multer");
 const storage = require("../helpers/multer")
 const uploads = multer({storage:storage})
@@ -67,5 +68,11 @@ router.put("/edit-coupon/:id",adminAuth,couponController.editCoupon)
 router.delete("/delete-coupon/:id",adminAuth,couponController.deleteCoupon)
 router.get("/get-categories",adminAuth,couponController.getCategories)
 router.get("/get-products",adminAuth,couponController.getProducts)
+
+// Sales Report Routes
+router.get("/sales-report",adminAuth,salesReportController.getSalesReportDashboard)
+router.get("/sales-report/data",adminAuth,salesReportController.generateSalesReport)
+router.get("/sales-report/download/pdf",adminAuth,salesReportController.downloadPDFReport)
+router.get("/sales-report/download/excel",adminAuth,salesReportController.downloadExcelReport)
 
 module.exports = router;
