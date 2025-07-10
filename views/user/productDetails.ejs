@@ -1096,7 +1096,7 @@
                         // Calculate category and product offers for similar product
                         const productOfferPercent = currentProduct.productOffer || 0;
                         const categoryOfferPercent = currentProduct.category?.categoryOffer || 0;
-                        const totalOfferPercent = productOfferPercent + categoryOfferPercent;
+                        const totalOfferPercent = Math.max(productOfferPercent, categoryOfferPercent);
 
                         // Calculate discounted price
                         const discountedPrice = totalOfferPercent > 0 ?
@@ -1198,8 +1198,8 @@
                 // Get product data from server using EJS template injection
                 const variants = <%- JSON.stringify(product.variant || []) %>;
                 const productOffer = <%- product.productOffer || 0 %>;
-                const categoryOffer = <%- ((totalOffer || 0) - (product.productOffer || 0)) %>;
-                const totalOfferPercent = <%- totalOffer || 0 %>;
+                const categoryOffer = <%- (product.category && product.category.categoryOffer) || 0 %>;
+                const totalOfferPercent = Math.max(productOffer, categoryOffer);
 
                 // Sort variants by size for consistent ordering (same logic as server-side)
                 const sortedVariants = variants.sort((a, b) => {

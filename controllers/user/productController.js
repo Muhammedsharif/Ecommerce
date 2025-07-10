@@ -15,7 +15,7 @@ const loadProductDetails = async (req,res)=>{
         const findCategory = product.category
         const categoryOffer = findCategory ?.categoryOffer || 0
         const productOffer = product.productOffer || 0
-        const totalOffer = categoryOffer + productOffer
+        const totalOffer = Math.max(categoryOffer, productOffer)
 
          const similarProducts = await Product.find({
         category: product.category,
