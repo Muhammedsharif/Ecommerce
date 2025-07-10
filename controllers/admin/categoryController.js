@@ -277,6 +277,50 @@ const deleteCategory = async (req, res) => {
   }
 };
 
+const addCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId, offerPercentage, description } = req.body;
+
+        // Validate input
+        if (!categoryId || offerPercentage === undefined || offerPercentage < 0 || offerPercentage > 90) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid input. Offer percentage must be between 0 and 90.'
+            });
+        }
+
+        // Find and update the category
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found'
+            });
+        }
+
+        // Update category offer
+        category.categoryOffer = offerPercentage;
+        await category.save();
+
+        res.json({
+            success: true,
+            message: 'Category offer updated successfully',
+            data: {
+                categoryId: category._id,
+                categoryName: category.name,
+                offerPercentage: category.categoryOffer
+            }
+        });
+
+    } catch (error) {
+        console.error('Error adding category offer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
 
 
 module.exports ={
@@ -286,7 +330,8 @@ module.exports ={
     getUnlistCategory,
     geteditCategory,
     editCategory,
-    deleteCategory
+    deleteCategory,
+    addCategoryOffer
 }
 
 
