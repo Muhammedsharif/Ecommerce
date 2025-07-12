@@ -75,7 +75,10 @@ router.post("/edit-profile",userAuth,profileUpload.single('profileImage'),profil
 // Order Management Routes
 router.get("/order-details/:orderId",userAuth,profileController.loadOrderDetails)
 router.post("/cancel-order",userAuth,profileController.cancelOrder)
+router.post("/cancel-item",userAuth,profileController.cancelItem)
+router.post("/cancel-all-items",userAuth,profileController.cancelAllItems)
 router.post("/return-order",userAuth,profileController.returnOrder)
+router.post("/return-item",userAuth,profileController.returnItem)
 
 //Address Management
 router.get("/address",userAuth,profileController.loadAddress)

@@ -492,6 +492,27 @@
             font-size: 12px;
         }
 
+        .items-status-info {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .items-status-info.cancelled {
+            color: #dc2626;
+        }
+
+        .items-status-info.return-request {
+            color: #d97706;
+        }
+
+        .items-status-info.returned {
+            color: #2563eb;
+        }
+
         /* Amount Styles */
         .order-amount {
             font-weight: 700;
@@ -1055,6 +1076,27 @@
             margin-top: 8px;
         }
 
+        .summary-row.cancelled-items {
+            color: #dc2626;
+            font-style: italic;
+        }
+
+        .summary-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 8px;
+            background: #fef3c7;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #92400e;
+        }
+
+        .summary-note i {
+            color: #d97706;
+        }
+
         @media (max-width: 768px) {
             .order-info-grid {
                 grid-template-columns: 1fr;
@@ -1256,6 +1298,26 @@
                                                     <div class="order-items">
                                                         <div class="items-count"><%= order.orderedItems.length %> item(s)</div>
                                                         <div class="items-qty">Qty: <%= order.orderedItems.reduce((total, item) => total + item.quantity, 0) %></div>
+                                                        <%
+                                                            const cancelledItems = order.orderedItems.filter(item => item.itemStatus === 'Cancelled').length;
+                                                            const returnRequestItems = order.orderedItems.filter(item => item.itemStatus === 'Return Request').length;
+                                                            const returnedItems = order.orderedItems.filter(item => item.itemStatus === 'Returned').length;
+                                                        %>
+                                                        <% if (cancelledItems > 0) { %>
+                                                            <div class="items-status-info cancelled">
+                                                                <i class="fas fa-times-circle"></i> <%= cancelledItems %> cancelled
+                                                            </div>
+                                                        <% } %>
+                                                        <% if (returnRequestItems > 0) { %>
+                                                            <div class="items-status-info return-request">
+                                                                <i class="fas fa-undo"></i> <%= returnRequestItems %> return request
+                                                            </div>
+                                                        <% } %>
+                                                        <% if (returnedItems > 0) { %>
+                                                            <div class="items-status-info returned">
+                                                                <i class="fas fa-check-circle"></i> <%= returnedItems %> returned
+                                                            </div>
+                                                        <% } %>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -1522,43 +1584,7 @@
             }
         }
 
-        // View order details
-        function viewOrder(orderId) {
-            // Get order data from the row
-            const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
-            if (row) {
-                const customerName = row.querySelector('.customer-details h4').textContent;
-                const customerEmail = row.querySelector('.customer-details p:first-of-type').textContent;
-                const customerPhone = row.querySelector('.customer-details p:last-of-type').textContent;
-                const orderDate = row.querySelector('.order-date').textContent.trim();
-                const items = row.querySelector('.items-count').textContent;
-                const amount = row.querySelector('.order-amount').textContent;
-                const payment = row.querySelector('.payment-method').textContent;
-                const status = row.querySelector('.status-badge').textContent;
 
-                Swal.fire({
-                    title: `Order Details - ${orderId}`,
-                    html: `
-                        <div style="text-align: left; padding: 20px;">
-                            <h4>Customer Information</h4>
-                            <p><strong>Name:</strong> ${customerName}</p>
-                            <p><strong>Email:</strong> ${customerEmail}</p>
-                            <p><strong>Phone:</strong> ${customerPhone}</p>
-                            <hr>
-                            <h4>Order Information</h4>
-                            <p><strong>Date:</strong> ${orderDate}</p>
-                            <p><strong>Items:</strong> ${items}</p>
-                            <p><strong>Amount:</strong> ${amount}</p>
-                            <p><strong>Payment:</strong> ${payment}</p>
-                            <p><strong>Status:</strong> ${status}</p>
-                        </div>
-                    `,
-                    width: 600,
-                    confirmButtonText: 'Close',
-                    confirmButtonColor: '#3b82f6'
-                });
-            }
-        }
 
         // Update order status
         function updateStatus(orderId) {
@@ -1678,6 +1704,117 @@
                 });
         }
 
+        // Format currency helper function
+        const formatCurrency = (amount) => {
+            return `₹${amount.toLocaleString('en-IN')}`;
+        };
+
+        // Generate order summary with cancellation adjustments
+        function generateOrderSummary(order) {
+            // Calculate totals excluding cancelled items
+            let activeItemsSubtotal = 0;
+            let cancelledItemsSubtotal = 0;
+            let activeItemsCount = 0;
+            let cancelledItemsCount = 0;
+
+            order.orderedItems.forEach(item => {
+                const itemTotal = item.quantity * item.price;
+                if (item.itemStatus === 'Cancelled') {
+                    cancelledItemsSubtotal += itemTotal;
+                    cancelledItemsCount++;
+                } else {
+                    activeItemsSubtotal += itemTotal;
+                    activeItemsCount++;
+                }
+            });
+
+            // Calculate proportional discount for active items
+            const originalSubtotal = order.totalPrice || (activeItemsSubtotal + cancelledItemsSubtotal);
+            const discountAmount = order.discount || 0;
+            const proportionalDiscount = originalSubtotal > 0 ? (activeItemsSubtotal / originalSubtotal) * discountAmount : 0;
+
+            // Calculate tax (assuming 18% GST if not specified)
+            const taxRate = 0.18; // 18% GST - adjust as needed
+            const taxAmount = (activeItemsSubtotal - proportionalDiscount) * taxRate;
+
+            // Calculate adjusted final amount
+            const adjustedFinalAmount = activeItemsSubtotal - proportionalDiscount + taxAmount;
+
+            let summaryHtml = `
+                <div class="summary-row">
+                    <span>Original Subtotal:</span>
+                    <span>${formatCurrency(originalSubtotal)}</span>
+                </div>
+            `;
+
+            if (cancelledItemsCount > 0) {
+                summaryHtml += `
+                    <div class="summary-row cancelled-items">
+                        <span>Cancelled Items (${cancelledItemsCount}):</span>
+                        <span>-${formatCurrency(cancelledItemsSubtotal)}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Active Items Subtotal:</span>
+                        <span>${formatCurrency(activeItemsSubtotal)}</span>
+                    </div>
+                `;
+            } else {
+                summaryHtml += `
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>${formatCurrency(activeItemsSubtotal)}</span>
+                    </div>
+                `;
+            }
+
+            if (discountAmount > 0) {
+                if (cancelledItemsCount > 0) {
+                    summaryHtml += `
+                        <div class="summary-row">
+                            <span>Original Discount:</span>
+                            <span>-${formatCurrency(discountAmount)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Adjusted Discount:</span>
+                            <span>-${formatCurrency(proportionalDiscount)}</span>
+                        </div>
+                    `;
+                } else {
+                    summaryHtml += `
+                        <div class="summary-row">
+                            <span>Discount:</span>
+                            <span>-${formatCurrency(discountAmount)}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            summaryHtml += `
+                <div class="summary-row">
+                    <span>Tax Amount (18% GST):</span>
+                    <span>${formatCurrency(taxAmount)}</span>
+                </div>
+            `;
+
+            summaryHtml += `
+                <div class="summary-row total">
+                    <span>Total Amount:</span>
+                    <span>${formatCurrency(cancelledItemsCount > 0 ? adjustedFinalAmount : order.finalAmount)}</span>
+                </div>
+            `;
+
+            if (cancelledItemsCount > 0) {
+                summaryHtml += `
+                    <div class="summary-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Amount adjusted for ${cancelledItemsCount} cancelled item(s). Savings: ${formatCurrency(cancelledItemsSubtotal + (discountAmount - proportionalDiscount))}</span>
+                    </div>
+                `;
+            }
+
+            return summaryHtml;
+        }
+
         // Show order details in modal
         function showOrderDetailsModal(order) {
             const formatDate = (dateString) => {
@@ -1688,10 +1825,6 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-            };
-
-            const formatCurrency = (amount) => {
-                return `₹${amount.toLocaleString('en-IN')}`;
             };
 
             const getStatusBadge = (status) => {
@@ -1779,18 +1912,8 @@
                 </div>
 
                 <div class="order-summary">
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span>${formatCurrency(order.totalPrice)}</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Discount:</span>
-                        <span>-${formatCurrency(order.discount || 0)}</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Total Amount:</span>
-                        <span>${formatCurrency(order.finalAmount)}</span>
-                    </div>
+                    <h4><i class="fas fa-calculator"></i> Order Summary</h4>
+                    ${generateOrderSummary(order)}
                 </div>
             `;
 

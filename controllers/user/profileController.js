@@ -1308,6 +1308,216 @@ const returnOrder = async (req, res) => {
     }
 }
 
+// Cancel Individual Item
+const cancelItem = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId, itemId, cancellationReason } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        // Validate that cancellation reason is provided (mandatory)
+        if (!cancellationReason || cancellationReason.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason is required"
+            });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId }).populate('orderedItems.product');
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Find the specific item to cancel
+        const itemIndex = order.orderedItems.findIndex(item => item._id.toString() === itemId);
+
+        if (itemIndex === -1) {
+            return res.status(404).json({ success: false, message: "Item not found in order" });
+        }
+
+        const item = order.orderedItems[itemIndex];
+
+        // Check if item can be cancelled
+        if (item.itemStatus === 'Cancelled' || item.itemStatus === 'Return Request' || item.itemStatus === 'Returned') {
+            return res.status(400).json({
+                success: false,
+                message: "This item cannot be cancelled"
+            });
+        }
+
+        if (item.itemStatus === 'Delivered' || order.status === 'Delivered') {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot cancel delivered items. Please use return option instead."
+            });
+        }
+
+        // Update item status and add cancellation reason (pending admin approval)
+        order.orderedItems[itemIndex].itemStatus = 'Cancelled';
+        order.orderedItems[itemIndex].cancellationReason = cancellationReason.trim();
+        order.orderedItems[itemIndex].adminApprovalStatus = 'Pending';
+
+        await order.save();
+
+        res.json({ success: true, message: "Cancel request submitted successfully. Awaiting admin approval." });
+
+    } catch (error) {
+        console.error("Error cancelling item:", error);
+        res.status(500).json({ success: false, message: "Failed to submit cancel request" });
+    }
+}
+
+// Cancel All Items
+const cancelAllItems = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId, cancellationReason } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        // Validate that cancellation reason is provided (mandatory)
+        if (!cancellationReason || cancellationReason.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason is required"
+            });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId }).populate('orderedItems.product');
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Check if order can be cancelled
+        if (order.status === 'Delivered') {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot cancel delivered orders. Please use return option instead."
+            });
+        }
+
+        if (order.status === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: "Order is already cancelled"
+            });
+        }
+
+        // Update all eligible items
+        let itemsUpdated = 0;
+        for (let i = 0; i < order.orderedItems.length; i++) {
+            const item = order.orderedItems[i];
+
+            // Only cancel items that are not already cancelled, returned, or in return process
+            if (!item.itemStatus || item.itemStatus === 'Pending' || item.itemStatus === 'Processing') {
+                order.orderedItems[i].itemStatus = 'Cancelled';
+                order.orderedItems[i].cancellationReason = cancellationReason.trim();
+                order.orderedItems[i].adminApprovalStatus = 'Pending';
+                itemsUpdated++;
+            }
+        }
+
+        if (itemsUpdated === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No eligible items found to cancel"
+            });
+        }
+
+        // Update order status if all items are cancelled
+        const allItemsCancelled = order.orderedItems.every(item =>
+            item.itemStatus === 'Cancelled' || item.itemStatus === 'Returned'
+        );
+
+        if (allItemsCancelled) {
+            order.status = 'Cancelled';
+            order.cancellationReason = cancellationReason.trim();
+        }
+
+        await order.save();
+
+        res.json({
+            success: true,
+            message: `Cancel request submitted for ${itemsUpdated} item(s). Awaiting admin approval.`,
+            itemsUpdated: itemsUpdated
+        });
+
+    } catch (error) {
+        console.error("Error cancelling all items:", error);
+        res.status(500).json({ success: false, message: "Failed to submit cancel request" });
+    }
+}
+
+// Return Individual Item
+const returnItem = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId, itemId, returnReason } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        // Validate that return reason is provided (mandatory)
+        if (!returnReason || returnReason.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: "Return reason is required"
+            });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId }).populate('orderedItems.product');
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Find the specific item to return
+        const itemIndex = order.orderedItems.findIndex(item => item._id.toString() === itemId);
+
+        if (itemIndex === -1) {
+            return res.status(404).json({ success: false, message: "Item not found in order" });
+        }
+
+        const item = order.orderedItems[itemIndex];
+
+        // Check if item can be returned
+        if (item.itemStatus === 'Return Request' || item.itemStatus === 'Returned' || item.itemStatus === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: "This item cannot be returned"
+            });
+        }
+
+        if (order.status !== 'Delivered' && item.itemStatus !== 'Delivered') {
+            return res.status(400).json({
+                success: false,
+                message: "Only delivered items can be returned"
+            });
+        }
+
+        // Update item status and add return reason (pending admin approval)
+        order.orderedItems[itemIndex].itemStatus = 'Return Request';
+        order.orderedItems[itemIndex].returnReason = returnReason.trim();
+        order.orderedItems[itemIndex].adminApprovalStatus = 'Pending';
+
+        await order.save();
+
+        res.json({ success: true, message: "Return request submitted successfully. Awaiting admin approval." });
+
+    } catch (error) {
+        console.error("Error submitting return request:", error);
+        res.status(500).json({ success: false, message: "Failed to submit return request" });
+    }
+}
+
 module.exports={
     userProfile,
     loadForgotPassword,
@@ -1336,5 +1546,8 @@ module.exports={
     loadEditProfile,
     updateProfile,
     cancelOrder,
-    returnOrder
+    cancelItem,
+    cancelAllItems,
+    returnOrder,
+    returnItem
 }
