@@ -676,9 +676,6 @@
         }
 
         .discount-badge {
-            position: absolute;
-            top: 16px;
-            left: 16px;
             background: linear-gradient(45deg, #ff6b6b, #ff8e53);
             color: white;
             padding: 6px 12px;
@@ -892,18 +889,22 @@
                 <div class="products-grid">
                     <% for(let i=0; i < products.length; i++) { %>
                         <div class="product-card">
-                            <div class="product-header">
+                            <div class="product-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <button
                                     class="wishlist-btn <%= userWishlist.includes(products[i]._id.toString()) ? 'active' : '' %>"
                                     onclick="addToWishlist('<%=products[i]._id%>')">♡</button>
-
-                                    <div class="discount-badge">
-                            <%
-                            const productOffers = products[i].productOffer || 0;
-                        const categoryOffers = products[i].category?.categoryOffer || 0;
-                            const totalOfferr = Math.max(productOffers, categoryOffers);
-                            %>
-                            <%=totalOfferr%>%OFF</div>
+                                <div class="discount-badge" style="position: static; margin-left: auto;">
+                                    <%
+                                    const productOffers = products[i].productOffer || 0;
+                                    const categoryOffers = products[i].category?.categoryOffer || 0;
+                                    const totalOffer = Math.max(productOffers, categoryOffers);
+                                    %>
+                                    <% if (totalOffer > 0) { %>
+                                        <%= totalOffer %>% OFF
+                                    <% } else { %>
+                                        No Offers
+                                    <% } %>
+                                </div>
 
 
 
@@ -934,23 +935,18 @@
                         })[0];
 
                         // Calculate discounted price for first variant
-                        const variantPrice = firstVariant ? firstVariant.varientPrice : product.regularPrice;
+                        const variantPrice = firstVariant ? firstVariant.varientPrice : products[i].regularPrice;
                         const discountedPrice = totalOffer > 0 ?
                             Math.round(variantPrice - (variantPrice * totalOffer / 100)) :
                             variantPrice;
                         %>
-
-                        <span class="current-price" id="total-price">₹<%= discountedPrice %></span>
-                        <span class="original-price" id="total-price1">₹<%= variantPrice %></span>
-                        <span class="discount-badge">
-                            <%if(!totalOffer){%>
-                                No Offers
-                            <%}else{%>
-                                <%=totalOffer%> % Offer
-                            <%}%>
-                        </span>
+                        <% if (totalOffer > 0) { %>
+                            <span class="current-price" id="total-price">₹<%= discountedPrice %></span>
+                            <span class="original-price" id="total-price1" style="text-decoration: line-through; color: #888; margin-left: 8px;">₹<%= variantPrice %></span>
+                        <% } else { %>
+                            <span class="current-price" id="total-price">₹<%= variantPrice %></span>
+                        <% } %>
                     </div>
-
                             </p>
                             <div class="product-rating">
                                 <% for(let j=0; j < 5; j++) { %>
@@ -1114,20 +1110,33 @@
                         data.products.forEach(product => {
                             const isInWishlist = data.userWishlist && data.userWishlist.includes(product._id);
 
-                            // Calculate variant-based pricing (same logic as server-side template)
-                            let displayPrice = 0;
+                            // Calculate offer logic (same as EJS)
+                            const productOffers = product.productOffer || 0;
+                            const categoryOffers = product.category && product.category.categoryOffer || 0;
+                            const totalOffer = Math.max(productOffers, categoryOffers);
+
+                            // Get first variant for price
+                            let firstVariant = null;
                             if (product.variant && product.variant.length > 0) {
-                                // Use first variant price (consistent with server-side template)
-                                displayPrice = product.variant[0].varientPrice || 0;
-                            } else {
-                                // Fallback to regular price if no variants
-                                displayPrice = product.regularPrice || 0;
+                                firstVariant = product.variant.slice().sort((a, b) => {
+                                    const aNum = parseFloat(a.size);
+                                    const bNum = parseFloat(b.size);
+                                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                                        return aNum - bNum;
+                                    }
+                                    return a.size.localeCompare(b.size);
+                                })[0];
                             }
+                            const variantPrice = firstVariant ? firstVariant.varientPrice : product.regularPrice;
+                            const discountedPrice = totalOffer > 0 ? Math.round(variantPrice - (variantPrice * totalOffer / 100)) : variantPrice;
 
                             const productCard = `
                     <div class="product-card">
-                        <div class="product-header">
-                            <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="addToWishlist('${product._id}')" data-product-name="${product.productName}" data-product-price="${displayPrice}">♡</button>
+                        <div class="product-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <button class="wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="addToWishlist('${product._id}')" data-product-name="${product.productName}" data-product-price="${variantPrice}">♡</button>
+                            <div class="discount-badge" style="position: static; margin-left: auto;">
+                                ${totalOffer > 0 ? `${totalOffer}% OFF` : 'No Offers'}
+                            </div>
                         </div>
                         <div class="product-image">
                             <a href="/productDetails?id=${product._id}">
@@ -1138,7 +1147,12 @@
                             <a href="/productDetails?id=${product._id}">${product.productName}</a>
                         </h3>
                         <p class="product-price">
-                            ₹${displayPrice}
+                            <div class="price-container">
+                                ${totalOffer > 0
+                                    ? `<span class='current-price' id='total-price'>₹${discountedPrice}</span><span class='original-price' id='total-price1' style='text-decoration: line-through; color: #888; margin-left: 8px;'>₹${variantPrice}</span>`
+                                    : `<span class='current-price' id='total-price'>₹${variantPrice}</span>`
+                                }
+                            </div>
                         </p>
                         <div class="product-rating">
                             ${'<span class="star">★</span>'.repeat(product.rating || 5)}
