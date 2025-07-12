@@ -1418,7 +1418,7 @@ function hideToast() {
 
     $.ajax({
         url: '/addToWishlist',
-        method: 'POST',
+            method: 'POST',
         data: { productId: productId },
         success: (response) => {
             const btn = $(`button[onclick="addToWishlist('${productId}')"]`);
@@ -1432,7 +1432,7 @@ function hideToast() {
                         window.incrementWishlistCounter();
                     } else {
                         // Fallback: try again after a short delay
-                        setTimeout(() => {
+                setTimeout(() => {
                             if (typeof window.incrementWishlistCounter === 'function') {
                                 window.incrementWishlistCounter();
                             }
@@ -1440,7 +1440,7 @@ function hideToast() {
                     }
                 } else if (response.action === 'removed') {
                     btn.removeClass('active');
-                    showToast('Product removed from wishlist', 'info');
+                showToast('Product removed from wishlist', 'info');
                     // Update wishlist counter
                     if (typeof window.decrementWishlistCounter === 'function') {
                         window.decrementWishlistCounter();
@@ -1452,15 +1452,15 @@ function hideToast() {
                             }
                         }, 100);
                     }
-                }
-            } else {
-                showToast(response.message || 'Error processing wishlist request', 'error');
             }
+        } else {
+                showToast(response.message || 'Error processing wishlist request', 'error');
+        }
         },
         error: (jqXHR, textStatus, errorThrown) => {
             console.error('AJAX error:', textStatus, errorThrown, jqXHR.responseText);
-            showToast('Error processing wishlist request', 'error');
-        }
+        showToast('Error processing wishlist request', 'error');
+    }
     });
 }
 

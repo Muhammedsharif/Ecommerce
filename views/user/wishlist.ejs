@@ -677,7 +677,13 @@
                         
                     <div class="product-image">
                         <img src="/uploads/product-images/<%=product.productImage[0]%>" alt="Union La X Air Jordan 4">
-                        <div class="discount-badge">18% OFF</div>
+                        <div class="discount-badge">
+                            <%
+                            const productOffers = product.productOffer || 0;
+                        const categoryOffers = product.category?.categoryOffer || 0;
+                            const totalOfferr = Math.max(productOffers, categoryOffers);
+                            %>
+                            <%=totalOfferr%>%OFF</div>
                         <button class="remove-btn" onclick="confirmRemove('<%=product._id%>')">
                             <i class="fas fa-times"></i>
                         </button>
@@ -687,10 +693,10 @@
                         <h3 class="product-title"><%=product.productName%></h3>
 
                         <%
-                        // Calculate total offer (product + category)
+                        // Calculate maximum offer (product or category)
                         const productOffer = product.productOffer || 0;
                         const categoryOffer = product.category?.categoryOffer || 0;
-                        const totalOffer = productOffer + categoryOffer;
+                        const totalOffer = Math.max(productOffer, categoryOffer);
 
                         // Get first variant for initial pricing display (sorted by size)
                         const sortedVariants = product.variant.sort((a, b) => {
@@ -713,7 +719,7 @@
                         <div class="product-price" data-product-id="<%=product._id%>">
                             <% if (totalOffer > 0) { %>
                                 <span class="current-price">₹<%=initialDiscountedPrice.toLocaleString('en-IN')%></span>
-                                <span class="original-price" style="text-decoration: line-through; color: #999; margin-left: 8px; font-size: 16px;">₹<%=initialPrice.toLocaleString('en-IN')%></span>
+                               
                             <% } else { %>
                                 <span class="current-price">₹<%=initialPrice.toLocaleString('en-IN')%></span>
                             <% } %>
