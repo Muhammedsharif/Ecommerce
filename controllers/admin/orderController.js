@@ -98,8 +98,13 @@ const getOrderPage = async (req, res) => {
             stats.totalRevenue += stat.totalAmount;
         });
 
-        // Get return request count for notification badge
-        const returnRequestCount = await Order.countDocuments({ status: 'Return Request' });
+        // Get return request count for notification badge (order-level or any item-level)
+        const returnRequestCount = await Order.countDocuments({
+            $or: [
+                { status: 'Return Request' },
+                { 'orderedItems.status': 'Return Request' }
+            ]
+        });
 
         // Get recent orders for dashboard summary
         const recentOrders = await Order.find()
@@ -279,8 +284,13 @@ const getReturnRequestsPage = async (req, res) => {
         const sortBy = req.query.sortBy || "createdOn";
         const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
 
-        // Build search query for return requests only
-        let matchQuery = { status: 'Return Request' };
+        // Build search query for return requests: order-level or any item-level
+        let matchQuery = {
+            $or: [
+                { status: 'Return Request' },
+                { 'orderedItems.status': 'Return Request' }
+            ]
+        };
 
         // Search functionality - search by order ID or customer details
         let searchQuery = {};
@@ -313,6 +323,10 @@ const getReturnRequestsPage = async (req, res) => {
                 path: "userId",
                 select: "name email phone"
             })
+            .populate({
+                path: "orderedItems.product",
+                select: "productName productImage"
+            })
             .sort({ [sortBy]: sortOrder })
             .skip(skip)
             .limit(limit)
@@ -322,9 +336,16 @@ const getReturnRequestsPage = async (req, res) => {
         const totalReturnRequests = await Order.countDocuments(finalQuery);
         const totalPages = Math.ceil(totalReturnRequests / limit);
 
-        // Get return request statistics
+        // Get return request statistics (order-level or any item-level)
         const returnRequestStats = await Order.aggregate([
-            { $match: { status: 'Return Request' } },
+            {
+                $match: {
+                    $or: [
+                        { status: 'Return Request' },
+                        { 'orderedItems.status': 'Return Request' }
+                    ]
+                }
+            },
             {
                 $group: {
                     _id: null,

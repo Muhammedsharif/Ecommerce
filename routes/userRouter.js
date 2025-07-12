@@ -79,6 +79,7 @@ router.post("/cancel-item",userAuth,profileController.cancelItem)
 router.post("/cancel-all-items",userAuth,profileController.cancelAllItems)
 router.post("/return-order",userAuth,profileController.returnOrder)
 router.post("/return-item",userAuth,profileController.returnItem)
+router.post("/return-all-items", userAuth, profileController.returnAllItems);
 
 //Address Management
 router.get("/address",userAuth,profileController.loadAddress)

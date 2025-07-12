@@ -550,9 +550,17 @@
                         <div class="item-specs">
                             Quantity: <%= item.quantity %> |
                             Size: <%= item.size || 'N/A' %>
-                            <% if (item.status) { %>
-                                <span class="item-status <%= item.status.toLowerCase().replace(' ', '-') %>">
-                                    <%= item.status %>
+                            <% let displayStatus = item.status;
+                               if (
+                                   (!item.status || item.status === 'Pending' || item.status === 'Processing') &&
+                                   order.status === 'Delivered'
+                               ) {
+                                   displayStatus = 'Delivered';
+                               }
+                            %>
+                            <% if (displayStatus) { %>
+                                <span class="item-status <%= displayStatus.toLowerCase().replace(' ', '-') %>">
+                                    <%= displayStatus %>
                                 </span>
                             <% } %>
                             <% if (item.adminApprovalStatus && item.adminApprovalStatus !== 'Pending') { %>
@@ -579,19 +587,24 @@
 
                         <!-- Individual Item Actions -->
                         <div class="item-actions">
-                            <% if (order.status === 'Delivered' && (!item.status || item.status === 'Delivered') && (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')) { %>
-                                <button onclick="returnItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
-                                        class="btn-item-action btn-return-item">
-                                    <i class="fas fa-undo"></i>
-                                    Return Item
-                                </button>
-                            <% } else if ((order.status === 'Pending' || order.status === 'Processing') && (!item.status || item.status === 'Pending' || item.status === 'Processing') && (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')) { %>
-                                <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
-                                        class="btn-item-action btn-cancel-item">
-                                    <i class="fas fa-times"></i>
-                                    Cancel Item
-                                </button>
-                            <% } %>
+                            <% if (
+                                (!item.status || item.status === 'Pending' || item.status === 'Processing' || item.status === 'Delivered') &&
+                                (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')
+                            ) {
+                                if (order.status === 'Delivered') { %>
+                                    <button onclick="returnItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
+                                            class="btn-item-action btn-return-item">
+                                        <i class="fas fa-undo"></i>
+                                        Return Item
+                                    </button>
+                                <% } else if (order.status === 'Pending' || order.status === 'Processing') { %>
+                                    <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
+                                            class="btn-item-action btn-cancel-item">
+                                        <i class="fas fa-times"></i>
+                                        Cancel Item
+                                    </button>
+                                <% }
+                            } %>
                         </div>
                     </div>
                     <div class="item-price">₹<%= item.price.toLocaleString() %></div>
@@ -607,7 +620,23 @@
                     Cancel All Items
                 </button>
             </div>
+        <% } else if (order.status === 'Delivered' && order.orderedItems.some(item => !['Returned','Cancelled','Return Request'].includes(item.status))) { %>
+            <div class="bulk-actions">
+                <button onclick="returnAllItems('<%= order._id %>')" class="btn-cancel-all" style="background:#ffc107;color:#212529;">
+                    <i class="fas fa-undo"></i>
+                    Return All Items
+                </button>
+            </div>
         <% } %>
+        <script>
+        function returnAllItems(orderId) {
+            currentAction = 'returnAllItems';
+            currentOrderId = orderId;
+            currentItemId = null;
+            currentProductName = null;
+            openActionModal('return', 'Return All Items?', 'Are you sure you want to return <strong>all items</strong> in this order?');
+        }
+        </script>
 
         <!-- Order Summary -->
         <div class="order-summary">
@@ -1023,6 +1052,8 @@
                     await processReturnItem(currentOrderId, currentItemId, reasonSelect.value);
                 } else if (currentAction === 'cancelAllItems') {
                     await processCancelAllItems(currentOrderId, reasonSelect.value);
+                } else if (currentAction === 'returnAllItems') {
+                    await processReturnAllItems(currentOrderId, reasonSelect.value);
                 }
 
                 closeActionModal();
@@ -1033,6 +1064,36 @@
                 // Reset button
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = '<i class="fas fa-check"></i> Submit Request';
+            }
+        }
+
+        // Helper function to process return all items
+        async function processReturnAllItems(orderId, returnReason) {
+            try {
+                const response = await fetch('/return-all-items', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        returnReason: returnReason
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Return request submitted for all items. Awaiting admin approval.', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.message || 'Failed to submit return request', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting return all items request:', error);
+                showToast('An error occurred while submitting the return request', 'error');
             }
         }
 

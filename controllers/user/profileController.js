@@ -1518,6 +1518,53 @@ const returnItem = async (req, res) => {
     }
 }
 
+// Return All Items in an Order
+const returnAllItems = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId, returnReason } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login to continue" });
+        }
+
+        if (!returnReason || returnReason.trim() === '') {
+            return res.status(400).json({ success: false, message: "Return reason is required" });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId: userId }).populate('orderedItems.product');
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        let itemsUpdated = 0;
+        for (let i = 0; i < order.orderedItems.length; i++) {
+            const item = order.orderedItems[i];
+            if (
+                (item.status === 'Delivered' || !item.status) &&
+                item.status !== 'Return Request' &&
+                item.status !== 'Returned' &&
+                item.status !== 'Cancelled'
+            ) {
+                order.orderedItems[i].status = 'Return Request';
+                order.orderedItems[i].returnReason = returnReason.trim();
+                order.orderedItems[i].adminApprovalStatus = 'Pending';
+                itemsUpdated++;
+            }
+        }
+
+        if (itemsUpdated === 0) {
+            return res.status(400).json({ success: false, message: "No eligible items found to return" });
+        }
+
+        await order.save();
+        res.json({ success: true, message: `Return request submitted for ${itemsUpdated} item(s). Awaiting admin approval.`, itemsUpdated });
+    } catch (error) {
+        console.error("Error submitting return all items request:", error);
+        res.status(500).json({ success: false, message: "Failed to submit return all items request" });
+    }
+}
+
 module.exports={
     userProfile,
     loadForgotPassword,
@@ -1549,5 +1596,6 @@ module.exports={
     cancelItem,
     cancelAllItems,
     returnOrder,
-    returnItem
+    returnItem,
+    returnAllItems
 }
