@@ -59,14 +59,23 @@ const loadCart = async (req,res) =>{
                         unavailableReason = 'Out of stock';
                     }
                 }
-                // Don't mark as unavailable just because cart quantity > stock
-                // Let the quantity controls handle this validation
+                // Calculate display price using best offer (product/category)
+                let variant = null;
+                if (product && product.variant && item.size) {
+                    variant = product.variant.find(v => String(v.size) === String(item.size));
+                }
+                let productOffer = product.productOffer || 0;
+                let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                let bestOffer = Math.max(productOffer, categoryOffer);
+                let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
+                let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
 
                 return {
                     ...item.toObject(),
                     isAvailable,
                     unavailableReason,
-                    maxStock: product ? product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0) : 0
+                    maxStock: product ? product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0) : 0,
+                    displayPrice
                 };
             });
         }
@@ -203,8 +212,8 @@ const addToCart = async(req,res)=>{
                 }
 
                 cart.items[existingItemIndex].quantity += 1;
-                cart.items[existingItemIndex].totalPrice =
-                    cart.items[existingItemIndex].quantity * productPrice;
+                cart.items[existingItemIndex].price = productPrice;
+                cart.items[existingItemIndex].totalPrice = cart.items[existingItemIndex].quantity * productPrice;
                 // Ensure size and color are preserved/updated
                 cart.items[existingItemIndex].size = size || cart.items[existingItemIndex].size || 'N/A';
                 cart.items[existingItemIndex].color = color || cart.items[existingItemIndex].color || 'N/A';

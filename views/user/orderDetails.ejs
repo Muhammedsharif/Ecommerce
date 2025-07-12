@@ -658,10 +658,12 @@
         <!-- Order Actions -->
         <div class="order-actions">
             <% if (order.status === 'Pending' || order.status === 'Processing') { %>
-                <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
-                    <i class="fas fa-times"></i>
-                    Cancel Order
-                </button>
+        <button onclick="cancelAllItems('<%= order._id %>')" class="btn btn-danger">
+            <i class="fas fa-times"></i>
+            Cancel All Items
+        </button>
+        
+        
             <% } else if (order.status === 'Delivered') { %>
                 <button onclick="returnOrder('<%= order._id %>')" class="btn btn-warning">
                     <i class="fas fa-undo"></i>

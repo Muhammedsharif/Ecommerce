@@ -663,7 +663,20 @@
                             <div class="item-specs">
                                 Size: <%= item.size %> | Qty: <%= item.quantity %>
                             </div>
-                            <div class="item-price">₹<%= item.itemTotal.toLocaleString('en-IN') %></div>
+                            <div class="item-price">
+                                ₹<% 
+                                    let variant = null;
+                                    if (item.productId && item.productId.variant && item.size) {
+                                        variant = item.productId.variant.find(v => v.size == item.size);
+                                    }
+                                    let productOffer = item.productId.productOffer || 0;
+                                    let categoryOffer = (item.productId.category && item.productId.category.categoryOffer) || 0;
+                                    let bestOffer = Math.max(productOffer, categoryOffer);
+                                    let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.itemPrice === 'number' ? item.itemPrice : item.price);
+                                    let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                                    const itemTotal = displayPrice * item.quantity;
+                                %><%= itemTotal.toLocaleString('en-IN') %>
+                            </div>
                         </div>
                     </div>
                 <% }) %>
@@ -785,7 +798,21 @@
             <div class="order-summary">
                 <div class="summary-row">
                     <span>Subtotal (<%= cartItems.length %> items)</span>
-                    <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+                    <span>₹<%
+                        let summarySubtotal = 0;
+                        cartItems.forEach(item => {
+                            let variant = null;
+                            if (item.productId && item.productId.variant && item.size) {
+                                variant = item.productId.variant.find(v => v.size == item.size);
+                            }
+                            let productOffer = item.productId.productOffer || 0;
+                            let categoryOffer = (item.productId.category && item.productId.category.categoryOffer) || 0;
+                            let bestOffer = Math.max(productOffer, categoryOffer);
+                            let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.itemPrice === 'number' ? item.itemPrice : item.price);
+                            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                            summarySubtotal += displayPrice * item.quantity;
+                        });
+                    %><%= summarySubtotal.toLocaleString('en-IN') %></span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>

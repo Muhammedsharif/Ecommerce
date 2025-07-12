@@ -59,8 +59,12 @@ const loadCheckout = async (req, res) => {
                 continue; // Skip items with insufficient stock
             }
 
-            // Calculate item total using variant pricing
-            let itemPrice =  variant.varientPrice;
+            // Calculate item total using best offer (product/category)
+            let variantPrice = variant.varientPrice;
+            let productOffer = product.productOffer || 0;
+            let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
             let itemTotal = itemPrice * item.quantity;
             
             validItems.push({
@@ -201,11 +205,15 @@ const processCheckout = async (req, res) => {
                 });
             }
 
-            // Use salePrice from cart item if available, otherwise fallback to calculated price
-            let itemPrice = (typeof item.salePrice === 'number') ? item.salePrice : variant.varientPrice;
+            // Calculate item price using best offer (product/category)
+            let variantPrice = variant.varientPrice;
+            let productOffer = product.productOffer || 0;
+            let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
             let itemTotal = itemPrice * item.quantity;
-            let itemsize = variant.size
-            
+            let itemsize = variant.size;
+
             validItems.push({
                 product: product._id,
                 quantity: item.quantity,
@@ -223,7 +231,7 @@ const processCheckout = async (req, res) => {
             });
         }
 
-        // Calculate totals
+        // Calculate totals using correct subtotal
         const shippingCost = subtotal > 500 ? 0 : 50;
         const taxAmount = Math.round(subtotal * 0.18);
         let totalAmount = subtotal + shippingCost + taxAmount;
@@ -381,12 +389,26 @@ const loadThankYou = async (req, res) => {
             userId: userId
         }).populate({
             path: 'orderedItems.product',
-            select: 'productName productImage'
+            populate: { path: 'category', model: 'Category' }
         });
 
         if (!order) {
             return res.redirect("/pageNotFound");
         }
+
+        // For each ordered item, attach the correct display price using the best offer
+        order.orderedItems.forEach(item => {
+            let variant = null;
+            if (item.product && item.product.variant && item.size) {
+                variant = item.product.variant.find(v => String(v.size) === String(item.size));
+            }
+            let productOffer = item.product.productOffer || 0;
+            let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
+            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            item.displayPrice = displayPrice;
+        });
 
         // Get user data
         const userData = await User.findById(userId);
