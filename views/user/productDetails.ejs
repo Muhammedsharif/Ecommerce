@@ -1559,21 +1559,25 @@
                     return;
                 }
 
-                $.ajax({
-                    url: '/addToWishlist',
+                fetch('/addToWishlist', {
                     method: 'POST',
-                    data: { productId: productId },
-                    success: (response) => {
-                        if (response.success) {
-                            showToast(response.message || 'Product added to wishlist!', 'success');
-                        } else {
-                            showToast(response.message || 'Failed to add to wishlist', 'error');
-                        }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
-                    error: (xhr, status, error) => {
-                        console.error('Error adding to wishlist:', error);
-                        showToast('Failed to add to wishlist. Please try again.', 'error');
+                    body: JSON.stringify({ productId: productId })
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.status) {
+                        showToast(response.message || 'Product added to wishlist!', 'success');
+                    } else {
+                        showToast(response.message || 'Failed to add to wishlist', 'error');
                     }
+                })
+                .catch(error => {
+                    console.error('Error adding to wishlist:', error);
+                    showToast('Failed to add to wishlist. Please try again.', 'error');
                 });
             }
 
