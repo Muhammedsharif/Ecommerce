@@ -411,7 +411,9 @@
                                 <span>Size: <%= item.size || 'N/A' %></span>
                                 <span>Color: <%= item.color || 'N/A' %></span>
                             </div>
-                            <div class="item-price">₹<%= item.price.toFixed(2) %></div>
+                            <div class="item-price">
+                                <span style="color:#ef4444; font-weight:bold;">₹<%= item.price.toFixed(2) %></span>
+                            </div>
                         </div>
                         <div class="item-actions">
                             <div class="quantity-controls">
@@ -445,7 +447,16 @@
             
             <div class="summary-line">
                 <span>SUBTOTAL</span>
-                <span class="subtotal">₹<%= cart && cart.items ? cart.items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) : '0.00' %></span>
+                <span class="subtotal">
+                    ₹<%
+                    let subtotal = 0;
+                    if (cart && cart.items) {
+                        cart.items.forEach(item => {
+                            subtotal += item.price * item.quantity;
+                        });
+                    }   
+                    %><%= subtotal.toFixed(2) %>
+                </span>
             </div>
             
             <p class="shipping-note">
@@ -597,9 +608,10 @@
                     const item = cartItems.find(item => item.id === itemId);
                     if (item) {
                         item.quantity = quantity;
-                        updateUI();
                     }
                     showToast('Cart updated successfully', 'success');
+                    // Reload page to ensure price/subtotal is always correct from backend
+                    setTimeout(() => { window.location.reload(); }, 500);
 
                     // Update cart counter in header using the response cartCount
                     const cartCount = data.cartCount || cartItems.reduce((total, item) => total + item.quantity, 0);

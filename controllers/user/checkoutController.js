@@ -201,7 +201,8 @@ const processCheckout = async (req, res) => {
                 });
             }
 
-            let itemPrice =  variant.varientPrice;
+            // Use salePrice from cart item if available, otherwise fallback to calculated price
+            let itemPrice = (typeof item.salePrice === 'number') ? item.salePrice : variant.varientPrice;
             let itemTotal = itemPrice * item.quantity;
             let itemsize = variant.size
             
@@ -209,7 +210,7 @@ const processCheckout = async (req, res) => {
                 product: product._id,
                 quantity: item.quantity,
                 price: itemPrice,
-                size:itemsize
+                size: itemsize
             });
 
             subtotal += itemTotal;

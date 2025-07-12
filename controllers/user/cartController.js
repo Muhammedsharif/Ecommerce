@@ -215,6 +215,7 @@ const addToCart = async(req,res)=>{
                     productId: productId,
                     quantity: 1,
                     price: productPrice,
+                    salePrice: productPrice, // Store the per-variant discounted price
                     totalPrice: productPrice,
                     size: size || 'N/A',
                     color: color || 'N/A'
@@ -228,6 +229,7 @@ const addToCart = async(req,res)=>{
                     productId: productId,
                     quantity: 1,
                     price: productPrice,
+                    salePrice: productPrice, // Store the per-variant discounted price
                     totalPrice: productPrice,
                     size: size || 'N/A',
                     color: color || 'N/A'

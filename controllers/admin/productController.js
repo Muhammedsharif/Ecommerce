@@ -167,6 +167,7 @@ const addProducts = async (req, res) => {
         varientPrice = totalPrice / selectedSizes.length;
       }
 
+
       // Calculate sale price based on product offer using the calculated regular price
       salePrice = varientPrice;
       if (products.productOffer && products.productOffer > 0) {
@@ -175,12 +176,22 @@ const addProducts = async (req, res) => {
       }
 
       // Create variant array with quantities from size variants
-      const variantData = selectedSizes.map((size) => ({
-        size,
-        varientPrice: sizeVariants[size]?.price || varientPrice,
-        salePrice: salePrice,
-        varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
-      }));
+      const variantData = selectedSizes.map((size) => {
+        const variantPrice = parseFloat(sizeVariants[size]?.price) || varientPrice;
+        let variantSalePrice = variantPrice;
+        if (products.productOffer && products.productOffer > 0) {
+          const discountAmount = (variantPrice * products.productOffer) / 100;
+          variantSalePrice = variantPrice - discountAmount;
+        }
+        return {
+          size,
+          varientPrice: variantPrice,
+          salePrice: variantSalePrice,
+          varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
+        };
+      });
+
+      
 
       const newProduct = new Product({
         productName: products.productName,
@@ -391,12 +402,20 @@ const editProduct = async (req, res) => {
     }
 
     // Create variant array with data from form or defaults
-    const variantData = selectedSizes.map((size) => ({
-      size,
-      varientPrice: sizeVariants[size]?.price || varientPrice,
-      salePrice: salePrice,
-      varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
-    }));
+    const variantData = selectedSizes.map((size) => {
+      const variantPrice = parseFloat(sizeVariants[size]?.price) || varientPrice;
+      let variantSalePrice = variantPrice;
+      if (data.productOffer && data.productOffer > 0) {
+        const discountAmount = (variantPrice * data.productOffer) / 100;
+        variantSalePrice = variantPrice - discountAmount;
+      }
+      return {
+        size,
+        varientPrice: variantPrice,
+        salePrice: variantSalePrice,
+        varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
+      };
+    });
 
     const updateFields = {
       productName: data.productName,

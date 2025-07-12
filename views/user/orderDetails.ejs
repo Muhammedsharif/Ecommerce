@@ -551,7 +551,9 @@
                             Quantity: <%= item.quantity %> |
                             Size: <%= item.size || 'N/A' %>
                             <% let displayStatus = item.status;
-                               if (
+                               if (item.status === 'Cancelled') {
+                                   displayStatus = 'Cancelled';
+                               } else if (
                                    (!item.status || item.status === 'Pending' || item.status === 'Processing') &&
                                    order.status === 'Delivered'
                                ) {
