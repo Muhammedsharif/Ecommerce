@@ -262,7 +262,7 @@ const deleteCategory = async (req, res) => {
       });
     }
 
-    await Category.findByIdAndUpdate({id});
+   await Category.findByIdAndUpdate(id,{isListed:false})
 
     res.json({
       success: true,

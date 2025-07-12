@@ -306,6 +306,38 @@
             gap: 10px;
         }
 
+        /* Pagination Styles */
+        .pagination {
+    margin: 0 !important;
+    gap: 8px;
+}
+
+.page-item .page-link {
+    border: 2px solid #e0e0e0;
+    color: #667eea;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: white;
+    margin: 0;
+}
+
+.page-item .page-link:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border-color: #667eea !important;
+    color: white !important;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -444,6 +476,19 @@
             <% } %>
         </div>
     </div>
+
+    <div class="container mt-3">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= (i===currentPage)? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
+
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.all.min.js"></script>
 
     <script>

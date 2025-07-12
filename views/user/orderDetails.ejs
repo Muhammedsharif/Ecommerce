@@ -613,21 +613,7 @@
         </div>
 
         <!-- Bulk Actions -->
-        <% if ((order.status === 'Pending' || order.status === 'Processing') && order.orderedItems.some(item => !item.status || item.status === 'Pending' || item.status === 'Processing')) { %>
-            <div class="bulk-actions">
-                <button onclick="cancelAllItems('<%= order._id %>')" class="btn-cancel-all">
-                    <i class="fas fa-times-circle"></i>
-                    Cancel All Items
-                </button>
-            </div>
-        <% } else if (order.status === 'Delivered' && order.orderedItems.some(item => !['Returned','Cancelled','Return Request'].includes(item.status))) { %>
-            <div class="bulk-actions">
-                <button onclick="returnAllItems('<%= order._id %>')" class="btn-cancel-all" style="background:#ffc107;color:#212529;">
-                    <i class="fas fa-undo"></i>
-                    Return All Items
-                </button>
-            </div>
-        <% } %>
+        
         <script>
         function returnAllItems(orderId) {
             currentAction = 'returnAllItems';
@@ -1116,9 +1102,17 @@
 
                 if (result.success) {
                     showToast('Cancel request submitted successfully. Awaiting admin approval.', 'success');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
+                    // Update the item's status in the DOM immediately
+                    const itemCards = document.querySelectorAll('.item');
+                    itemCards.forEach(card => {
+                        if (card.innerHTML.includes(itemId)) {
+                            const statusSpan = card.querySelector('.item-status');
+                            if (statusSpan) {
+                                statusSpan.textContent = 'Cancelled';
+                                statusSpan.className = 'item-status cancelled';
+                            }
+                        }
+                    });
                 } else {
                     showToast(result.message || 'Failed to submit cancel request', 'error');
                 }

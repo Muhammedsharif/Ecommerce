@@ -659,7 +659,10 @@ const deleteAddress = async (req, res) => {
 
 const loadOrders = async (req, res) => {
     try {
-        
+        let search = req.query.search || "";
+        const page = parseInt(req.query.page)|| 1;
+        const limit = 4;
+
         const userId = req.session.user;
         if (!userId) {
             return res.redirect("/login");
@@ -672,12 +675,17 @@ const loadOrders = async (req, res) => {
 
         // Get user's orders with populated product details
         const orders = await Order.find({ userId: userId })
+            .limit(limit)
+            .skip((page-1)*limit)
             .populate({
                 path: 'orderedItems.product',
                 select: 'productName productImage salePrice'
             })
             .sort({ createdOn: -1 });
 
+            const count = await Order.countDocuments({userId:userId});
+
+            const totalPages = Math.ceil(count / limit);
           
             
 
@@ -686,7 +694,7 @@ const loadOrders = async (req, res) => {
 
             })
 
-            console.log("orderprice",orderprice.price )
+            
     
             
 
@@ -695,6 +703,9 @@ const loadOrders = async (req, res) => {
             orders: orders,
            orderprice :orderprice ,
             success: req.query.success,
+            totalPages:totalPages,
+            currentPage:page,
+            search,
             error: req.query.error
         });
     } catch (error) {
@@ -1538,20 +1549,20 @@ const returnAllItems = async (req, res) => {
         }
 
         let itemsUpdated = 0;
-        for (let i = 0; i < order.orderedItems.length; i++) {
-            const item = order.orderedItems[i];
-            if (
+            for (let i = 0; i < order.orderedItems.length; i++) {
+                const item = order.orderedItems[i];
+                if (
                 (item.status === 'Delivered' || !item.status) &&
-                item.status !== 'Return Request' &&
-                item.status !== 'Returned' &&
-                item.status !== 'Cancelled'
-            ) {
-                order.orderedItems[i].status = 'Return Request';
-                order.orderedItems[i].returnReason = returnReason.trim();
-                order.orderedItems[i].adminApprovalStatus = 'Pending';
-                itemsUpdated++;
+                    item.status !== 'Return Request' &&
+                    item.status !== 'Returned' &&
+                    item.status !== 'Cancelled'
+                ) {
+                    order.orderedItems[i].status = 'Return Request';
+                    order.orderedItems[i].returnReason = returnReason.trim();
+                    order.orderedItems[i].adminApprovalStatus = 'Pending';
+                    itemsUpdated++;
+                }
             }
-        }
 
         if (itemsUpdated === 0) {
             return res.status(400).json({ success: false, message: "No eligible items found to return" });

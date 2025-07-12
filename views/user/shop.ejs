@@ -675,6 +675,19 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
+        .discount-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -782,6 +795,7 @@
     <%- include("../partials/user/breadcrumb", { breadcrumbs: [{ name: "Shop", url: "/shop" }] }) %>
 
         <section class="hero-section" id="home">
+            
             <div class="floating-elements">
                 <img src="/images/close-up-futuristic-sneakers-showcase_23-2151005675.avif" alt="">
             </div>
@@ -883,6 +897,14 @@
                                     class="wishlist-btn <%= userWishlist.includes(products[i]._id.toString()) ? 'active' : '' %>"
                                     onclick="addToWishlist('<%=products[i]._id%>')">♡</button>
 
+                                    <div class="discount-badge">
+                            <%
+                            const productOffers = products[i].productOffer || 0;
+                        const categoryOffers = products[i].category?.categoryOffer || 0;
+                            const totalOfferr = Math.max(productOffers, categoryOffers);
+                            %>
+                            <%=totalOfferr%>%OFF</div>
+
 
 
                             </div>
@@ -899,7 +921,35 @@
                             </h3>
                            
                             <p class="product-price">
-                                ₹<%= products[i].variant && products[i].variant.length > 0 ? products[i].variant[0].varientPrice : (products[i].regularPrice || 0) %>
+                                <div class="price-container">
+                        <%
+                        // Get first variant for initial pricing display
+                        const firstVariant = products[i].variant.sort((a, b) => {
+                            const aNum = parseFloat(a.size);
+                            const bNum = parseFloat(b.size);
+                            if (!isNaN(aNum) && !isNaN(bNum)) {
+                                return aNum - bNum;
+                            }
+                            return a.size.localeCompare(b.size);
+                        })[0];
+
+                        // Calculate discounted price for first variant
+                        const variantPrice = firstVariant ? firstVariant.varientPrice : product.regularPrice;
+                        const discountedPrice = totalOffer > 0 ?
+                            Math.round(variantPrice - (variantPrice * totalOffer / 100)) :
+                            variantPrice;
+                        %>
+
+                        <span class="current-price" id="total-price">₹<%= discountedPrice %></span>
+                        <span class="original-price" id="total-price1">₹<%= variantPrice %></span>
+                        <span class="discount-badge">
+                            <%if(!totalOffer){%>
+                                No Offers
+                            <%}else{%>
+                                <%=totalOffer%> % Offer
+                            <%}%>
+                        </span>
+                    </div>
 
                             </p>
                             <div class="product-rating">

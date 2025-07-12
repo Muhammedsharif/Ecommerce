@@ -476,6 +476,7 @@ const loadShoppingPage = async (req, res) => {
         res.render("shop", {
             user: userData,
             products: currentProducts,
+            
             categories: categories,
             totalPages,
             currentPage,
