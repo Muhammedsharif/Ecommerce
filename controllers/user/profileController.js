@@ -1342,14 +1342,14 @@ const cancelItem = async (req, res) => {
         const item = order.orderedItems[itemIndex];
 
         // Check if item can be cancelled
-        if (item.itemStatus === 'Cancelled' || item.itemStatus === 'Return Request' || item.itemStatus === 'Returned') {
+        if (item.status === 'Cancelled' || item.status === 'Return Request' || item.status === 'Returned') {
             return res.status(400).json({
                 success: false,
                 message: "This item cannot be cancelled"
             });
         }
 
-        if (item.itemStatus === 'Delivered' || order.status === 'Delivered') {
+        if (item.status === 'Delivered' || order.status === 'Delivered') {
             return res.status(400).json({
                 success: false,
                 message: "Cannot cancel delivered items. Please use return option instead."
@@ -1357,7 +1357,7 @@ const cancelItem = async (req, res) => {
         }
 
         // Update item status and add cancellation reason (pending admin approval)
-        order.orderedItems[itemIndex].itemStatus = 'Cancelled';
+        order.orderedItems[itemIndex].status = 'Cancelled';
         order.orderedItems[itemIndex].cancellationReason = cancellationReason.trim();
         order.orderedItems[itemIndex].adminApprovalStatus = 'Pending';
 
@@ -1416,8 +1416,8 @@ const cancelAllItems = async (req, res) => {
             const item = order.orderedItems[i];
 
             // Only cancel items that are not already cancelled, returned, or in return process
-            if (!item.itemStatus || item.itemStatus === 'Pending' || item.itemStatus === 'Processing') {
-                order.orderedItems[i].itemStatus = 'Cancelled';
+            if (!item.status || item.status === 'Pending' || item.status === 'Processing') {
+                order.orderedItems[i].status = 'Cancelled';
                 order.orderedItems[i].cancellationReason = cancellationReason.trim();
                 order.orderedItems[i].adminApprovalStatus = 'Pending';
                 itemsUpdated++;
@@ -1433,7 +1433,7 @@ const cancelAllItems = async (req, res) => {
 
         // Update order status if all items are cancelled
         const allItemsCancelled = order.orderedItems.every(item =>
-            item.itemStatus === 'Cancelled' || item.itemStatus === 'Returned'
+            item.status === 'Cancelled' || item.status === 'Returned'
         );
 
         if (allItemsCancelled) {
@@ -1489,14 +1489,14 @@ const returnItem = async (req, res) => {
         const item = order.orderedItems[itemIndex];
 
         // Check if item can be returned
-        if (item.itemStatus === 'Return Request' || item.itemStatus === 'Returned' || item.itemStatus === 'Cancelled') {
+        if (item.status === 'Return Request' || item.status === 'Returned' || item.status === 'Cancelled') {
             return res.status(400).json({
                 success: false,
                 message: "This item cannot be returned"
             });
         }
 
-        if (order.status !== 'Delivered' && item.itemStatus !== 'Delivered') {
+        if (order.status !== 'Delivered' && item.status !== 'Delivered') {
             return res.status(400).json({
                 success: false,
                 message: "Only delivered items can be returned"
@@ -1504,7 +1504,7 @@ const returnItem = async (req, res) => {
         }
 
         // Update item status and add return reason (pending admin approval)
-        order.orderedItems[itemIndex].itemStatus = 'Return Request';
+        order.orderedItems[itemIndex].status = 'Return Request';
         order.orderedItems[itemIndex].returnReason = returnReason.trim();
         order.orderedItems[itemIndex].adminApprovalStatus = 'Pending';
 

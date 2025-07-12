@@ -550,9 +550,9 @@
                         <div class="item-specs">
                             Quantity: <%= item.quantity %> |
                             Size: <%= item.size || 'N/A' %>
-                            <% if (item.itemStatus) { %>
-                                <span class="item-status <%= item.itemStatus.toLowerCase().replace(' ', '-') %>">
-                                    <%= item.itemStatus %>
+                            <% if (item.status) { %>
+                                <span class="item-status <%= item.status.toLowerCase().replace(' ', '-') %>">
+                                    <%= item.status %>
                                 </span>
                             <% } %>
                             <% if (item.adminApprovalStatus && item.adminApprovalStatus !== 'Pending') { %>
@@ -579,13 +579,13 @@
 
                         <!-- Individual Item Actions -->
                         <div class="item-actions">
-                            <% if (order.status === 'Delivered' && (!item.itemStatus || item.itemStatus === 'Delivered') && (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')) { %>
+                            <% if (order.status === 'Delivered' && (!item.status || item.status === 'Delivered') && (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')) { %>
                                 <button onclick="returnItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
                                         class="btn-item-action btn-return-item">
                                     <i class="fas fa-undo"></i>
                                     Return Item
                                 </button>
-                            <% } else if ((order.status === 'Pending' || order.status === 'Processing') && (!item.itemStatus || item.itemStatus === 'Pending' || item.itemStatus === 'Processing') && (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')) { %>
+                            <% } else if ((order.status === 'Pending' || order.status === 'Processing') && (!item.status || item.status === 'Pending' || item.status === 'Processing') && (!item.adminApprovalStatus || item.adminApprovalStatus === 'Pending')) { %>
                                 <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
                                         class="btn-item-action btn-cancel-item">
                                     <i class="fas fa-times"></i>
@@ -600,7 +600,7 @@
         </div>
 
         <!-- Bulk Actions -->
-        <% if ((order.status === 'Pending' || order.status === 'Processing') && order.orderedItems.some(item => !item.itemStatus || item.itemStatus === 'Pending' || item.itemStatus === 'Processing')) { %>
+        <% if ((order.status === 'Pending' || order.status === 'Processing') && order.orderedItems.some(item => !item.status || item.status === 'Pending' || item.status === 'Processing')) { %>
             <div class="bulk-actions">
                 <button onclick="cancelAllItems('<%= order._id %>')" class="btn-cancel-all">
                     <i class="fas fa-times-circle"></i>

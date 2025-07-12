@@ -437,18 +437,7 @@
                                     <i class="fas fa-eye"></i>
                                     View Details
                                 </a>
-                                <% if (order.status === 'Pending' || order.status === 'Processing') { %>
-                                    <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
-                                        <i class="fas fa-times"></i>
-                                        Cancel Order
-                                    </button>
-                                <% } else if (order.status === 'Delivered') { %>
-                                    <button onclick="returnOrder('<%= order._id %>')" class="btn btn-warning">
-                                        <i class="fas fa-undo"></i>
-                                        Return Order
-                                    </button>
-                                <% } %>
-                            </div>
+                                                            </div>
                         </div>
                     </div>
                 <% }) %>

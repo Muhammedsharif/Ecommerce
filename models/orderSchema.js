@@ -14,7 +14,6 @@
             required:true
         },
         orderedItems:[{
-
             product:{
                 type:Schema.Types.ObjectId,
                 ref:"Product",
@@ -30,9 +29,13 @@
             },
             size:{
                 type: String,
-      required: true
+                required: true
+            },
+            status: {
+                type: String,
+                enum: ['Pending','Processing','Shipped','Delivered','Cancelled','Return Request','Returned'],
+                default: 'Pending'
             }
-
         }],
         totalPrice:{
             type:Number,

@@ -1243,10 +1243,10 @@
                                     <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
                                 </select>
 
-                                <button class="notification-btn" onclick="exportOrders()">
+                                <!-- <button class="notification-btn" onclick="exportOrders()">
                                     <i class="fas fa-download"></i>
                                     <span>Export</span>
-                                </button>
+                                </button> -->
                             </div>
                         </div>
 
@@ -1299,9 +1299,9 @@
                                                         <div class="items-count"><%= order.orderedItems.length %> item(s)</div>
                                                         <div class="items-qty">Qty: <%= order.orderedItems.reduce((total, item) => total + item.quantity, 0) %></div>
                                                         <%
-                                                            const cancelledItems = order.orderedItems.filter(item => item.itemStatus === 'Cancelled').length;
-                                                            const returnRequestItems = order.orderedItems.filter(item => item.itemStatus === 'Return Request').length;
-                                                            const returnedItems = order.orderedItems.filter(item => item.itemStatus === 'Returned').length;
+                                                            const cancelledItems = order.orderedItems.filter(item => item.status === 'Cancelled').length;
+                                                            const returnRequestItems = order.orderedItems.filter(item => item.status === 'Return Request').length;
+                                                            const returnedItems = order.orderedItems.filter(item => item.status === 'Returned').length;
                                                         %>
                                                         <% if (cancelledItems > 0) { %>
                                                             <div class="items-status-info cancelled">
@@ -1719,7 +1719,7 @@
 
             order.orderedItems.forEach(item => {
                 const itemTotal = item.quantity * item.price;
-                if (item.itemStatus === 'Cancelled') {
+                if (item.status === 'Cancelled') {
                     cancelledItemsSubtotal += itemTotal;
                     cancelledItemsCount++;
                 } else {
