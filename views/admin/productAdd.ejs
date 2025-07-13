@@ -1331,10 +1331,7 @@ img[src*="data:"] {
             if (!description || description.trim() === "") {
                 displayErrorMessage('description-error', 'Please enter a product description.');
                 isValid = false;
-            } else if (!/^[a-zA-Z0-9\s.,'"'""\-()\/:!&?—]+$/.test(description.trim())) {
-                displayErrorMessage('description-error', 'Product description should contain only valid characters.');
-                isValid = false;
-            }
+            } 
 
 
 

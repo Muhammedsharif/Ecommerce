@@ -675,7 +675,7 @@
                                     let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.itemPrice === 'number' ? item.itemPrice : item.price);
                                     let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
                                     const itemTotal = displayPrice * item.quantity;
-                                %><%= itemTotal.toLocaleString('en-IN') %>
+                                %><%= Math.round(itemTotal).toLocaleString('en-IN')  %>
                             </div>
                         </div>
                     </div>
@@ -812,7 +812,7 @@
                             let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
                             summarySubtotal += displayPrice * item.quantity;
                         });
-                    %><%= summarySubtotal.toLocaleString('en-IN') %></span>
+                    %><%= Math.round(summarySubtotal).toLocaleString('en-IN') %></span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>
@@ -822,7 +822,7 @@
                 <% if (appliedCoupon && couponDiscount > 0) { %>
                     <div class="summary-row original">
                         <span>Original Total</span>
-                        <span>₹<%= originalAmount.toLocaleString('en-IN') %></span>
+                        <span>₹<%= Math.round(originalAmount).toLocaleString('en-IN') %></span>
                     </div>
                     <div class="summary-row discount">
                         <span>Coupon Discount (<%= appliedCoupon.couponCode %>)</span>
@@ -832,7 +832,7 @@
 
                 <div class="summary-row" style="border-top: 2px solid #e5e7eb; padding-top: 1rem; font-weight: 700; font-size: 1.1rem;">
                     <span>Final Total</span>
-                    <span>₹<%= totalAmount.toLocaleString('en-IN') %></span>
+                    <span>₹<%= Math.round(totalAmount).toLocaleString('en-IN') %></span>
                 </div>
             </div>
             

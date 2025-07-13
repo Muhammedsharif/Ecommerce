@@ -126,7 +126,12 @@ const verifyPayment = async (req, res) => {
                 });
             }
 
-            let itemPrice = variant.varientPrice;
+            // Apply best offer (product/category) to get item price
+            let productOffer = product.productOffer || 0;
+            let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let variantPrice = variant.varientPrice;
+            let itemPrice = bestOffer > 0 ? variantPrice - (variantPrice * bestOffer / 100) : variantPrice;
             let itemTotal = itemPrice * item.quantity;
             
             validItems.push({

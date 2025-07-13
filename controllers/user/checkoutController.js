@@ -444,11 +444,28 @@ const loadPaymentSuccess = async (req, res) => {
         const order = await Order.findOne({
             orderId: orderId,
             userId: userId
-        }).populate('orderedItems.product');
+        }).populate({
+            path: 'orderedItems.product',
+            populate: { path: 'category', model: 'Category' }
+        });
 
         if (!order) {
             return res.redirect('/profile');
         }
+
+        // Attach offer-adjusted displayPrice to each ordered item
+        order.orderedItems.forEach(item => {
+            let variant = null;
+            if (item.product && item.product.variant && item.size) {
+                variant = item.product.variant.find(v => String(v.size) === String(item.size));
+            }
+            let productOffer = item.product.productOffer || 0;
+            let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
+            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            item.displayPrice = displayPrice;
+        });
 
         res.render('payment-success', {
             user: req.session.user,

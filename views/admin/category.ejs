@@ -580,21 +580,10 @@
                             <input type="hidden" id="categoryId" name="categoryId">
 
                             <div class="mb-3">
-                                <label for="categoryName" class="form-label">Category</label>
-                                <input type="text" class="form-control" id="categoryName" readonly>
-                            </div>
-
-                            <div class="mb-3">
                                 <label for="offerPercentage" class="form-label">Offer Percentage (%)</label>
                                 <input type="number" class="form-control" id="offerPercentage" name="offerPercentage"
                                        min="0" max="90" step="1" required>
                                 <div class="form-text">Enter a percentage between 0 and 90</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="offerDescription" class="form-label">Description (Optional)</label>
-                                <textarea class="form-control" id="offerDescription" name="offerDescription"
-                                          rows="3" placeholder="Brief description of the offer"></textarea>
                             </div>
                         </form>
                     </div>
@@ -610,9 +599,7 @@
         // Open offer modal
         function openOfferModal(categoryId, categoryName, currentOffer) {
             document.getElementById('categoryId').value = categoryId;
-            document.getElementById('categoryName').value = categoryName;
             document.getElementById('offerPercentage').value = currentOffer || '';
-            document.getElementById('offerDescription').value = '';
 
             // Update modal title based on whether it's adding or editing
             const modalTitle = document.getElementById('offerModalLabel');
@@ -628,11 +615,15 @@
             try {
                 const categoryId = document.getElementById('categoryId').value;
                 const offerPercentage = document.getElementById('offerPercentage').value;
-                const offerDescription = document.getElementById('offerDescription').value;
 
                 // Validate input
                 if (!offerPercentage || offerPercentage < 0 || offerPercentage > 90) {
-                    alert('Please enter a valid offer percentage between 0 and 90');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Input',
+                        text: 'Please enter a valid offer percentage between 0 and 90',
+                        confirmButtonColor: '#667eea'
+                    });
                     return;
                 }
 
@@ -643,8 +634,7 @@
                     },
                     body: JSON.stringify({
                         categoryId: categoryId,
-                        offerPercentage: parseFloat(offerPercentage),
-                        description: offerDescription
+                        offerPercentage: parseFloat(offerPercentage)
                     })
                 });
 
@@ -656,16 +646,31 @@
                     modal.hide();
 
                     // Show success message
-                    alert('Category offer saved successfully!');
-
-                    // Reload page to show updated offer
-                    window.location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Category offer saved successfully!',
+                        confirmButtonColor: '#667eea'
+                    }).then(() => {
+                        // Reload page to show updated offer
+                        window.location.reload();
+                    });
                 } else {
-                    alert(data.message || 'Failed to save offer');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to save offer',
+                        confirmButtonColor: '#ef4444'
+                    });
                 }
             } catch (error) {
                 console.error('Error saving offer:', error);
-                alert('Error saving offer. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error saving offer. Please try again.',
+                    confirmButtonColor: '#ef4444'
+                });
             }
         }
         </script>

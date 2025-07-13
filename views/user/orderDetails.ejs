@@ -641,10 +641,17 @@
                 <span class="summary-label">Shipping</span>
                 <span class="summary-value">Free</span>
             </div>
-            <div class="summary-row">
-                <span class="summary-label">Discount</span>
-                <span class="summary-value">0</span>
-            </div>
+            <% if (order.couponDiscount && order.couponDiscount > 0) { %>
+                <div class="summary-row">
+                    <span class="summary-label">Coupon Discount<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %></span>
+                    <span class="summary-value" style="color: #28a745;">-₹<%= order.couponDiscount.toLocaleString() %></span>
+                </div>
+            <% } else { %>
+                <div class="summary-row">
+                    <span class="summary-label">Discount</span>
+                    <span class="summary-value">0</span>
+                </div>
+            <% } %>
             
             <div class="summary-row">
                 <span class="summary-label">Total</span>
