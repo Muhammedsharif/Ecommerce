@@ -139,10 +139,10 @@ const addToCart = async(req,res)=>{
         let selectedVariant = null;
         let productPrice = 0;
 
-        // Calculate total offer (product + category)
+        // Calculate total offer (use only the higher of product or category offer)
         const productOffer = product.productOffer || 0;
         const categoryOffer = product.category?.categoryOffer || 0;
-        const totalOffer = productOffer + categoryOffer;
+        const totalOffer = Math.max(productOffer, categoryOffer);
 
         if (size && size !== 'N/A') {
             selectedVariant = product.variant.find(variant => variant.size === size);
@@ -324,10 +324,10 @@ const moveToCartFromWishlist = async(req, res) => {
         let selectedVariant = null;
         let productPrice = 0;
 
-        // Calculate total offer (product + category)
+        // Calculate total offer (use only the higher of product or category offer)
         const productOffer = product.productOffer || 0;
         const categoryOffer = product.category?.categoryOffer || 0;
-        const totalOffer = productOffer + categoryOffer;
+        const totalOffer = Math.max(productOffer, categoryOffer);
 
         console.log('💰 Pricing calculation for wishlist to cart:', {
             productId,

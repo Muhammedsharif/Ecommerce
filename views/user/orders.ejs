@@ -434,7 +434,7 @@
                                     <span class="order-value"><%= new Date(order.createdOn).toLocaleDateString() %></span>
                                 </div>
                                 <div class="order-detail">
-                                    <span class="order-label">Total Amount (Including Tax)</span>
+                                    <span class="order-label">Total Amount</span>
                                     <span class="order-value">₹<%= order.finalAmount.toLocaleString() %></span>
                                 </div>
                             </div>
@@ -459,7 +459,24 @@
                                                 
                                             </div>
                                         </div>
-                                        <div class="item-price">₹<%= item.price.toLocaleString() %></div>
+                                        <div class="item-price">
+                                            ₹<% 
+                                                let basePrice = (item.price && typeof item.price === 'number') ? item.price : (item.product && item.product.price ? item.product.price : 0);
+                                                let productOffer = (item.product && item.product.productOffer) ? item.product.productOffer : 0;
+                                                let categoryOffer = (item.product && item.product.category && item.product.category.categoryOffer) ? item.product.category.categoryOffer : 0;
+                                                let bestOffer = Math.max(productOffer, categoryOffer);
+                                                let displayPrice;
+                                                if (bestOffer > 0) {
+                                                    displayPrice = basePrice - (basePrice * bestOffer / 100);
+                                                } else if (item.product && item.product.salePrice) {
+                                                    displayPrice = item.product.salePrice;
+                                                } else if (item.product && item.product.price) {
+                                                    displayPrice = item.product.price;
+                                                } else {
+                                                    displayPrice = item.price;
+                                                }
+                                            %><%= (displayPrice * item.quantity).toLocaleString() %>
+                                        </div>
                                     </div>
                                 <% }) %>
                             </div>

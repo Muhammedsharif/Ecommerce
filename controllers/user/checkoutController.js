@@ -64,7 +64,7 @@ const loadCheckout = async (req, res) => {
             let productOffer = product.productOffer || 0;
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
-            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            let itemPrice = bestOffer > 0 ? variantPrice - (variantPrice * bestOffer / 100) : variantPrice;
             let itemTotal = itemPrice * item.quantity;
             
             validItems.push({
@@ -86,15 +86,13 @@ const loadCheckout = async (req, res) => {
         const addressData = await Address.findOne({ userId });
         const addresses = addressData ? addressData.adress : [];
 
-        // Calculate shipping and taxes
+        // Calculate shipping (no tax)
         const shippingCost = subtotal > 500 ? 0 : 50; // Free shipping above ₹500
-        const taxRate = 0.18; // 18% GST
-        const taxAmount = Math.round(subtotal * taxRate);
 
         // Get applied coupon from session
         const appliedCoupon = req.session.appliedCoupon || null;
         let couponDiscount = 0;
-        let finalAmount = subtotal + shippingCost + taxAmount;
+        let finalAmount = subtotal + shippingCost;
 
         // Apply coupon discount if available
         if (appliedCoupon) {
@@ -104,7 +102,7 @@ const loadCheckout = async (req, res) => {
 
             if (couponValidation.valid) {
                 const coupon = couponValidation.coupon;
-                const totalBeforeDiscount = subtotal + shippingCost + taxAmount;
+                const totalBeforeDiscount = subtotal + shippingCost;
 
                 if (coupon.discountType === 'percentage') {
                     couponDiscount = Math.min((totalBeforeDiscount * coupon.offerPrice) / 100, totalBeforeDiscount);
@@ -126,11 +124,10 @@ const loadCheckout = async (req, res) => {
             addresses: addresses,
             subtotal: subtotal,
             shippingCost: shippingCost,
-            taxAmount: taxAmount,
             totalAmount: finalAmount,
             appliedCoupon: appliedCoupon,
             couponDiscount: couponDiscount,
-            originalAmount: subtotal + shippingCost + taxAmount
+            originalAmount: subtotal + shippingCost
         });
 
     } catch (error) {
@@ -177,8 +174,14 @@ const processCheckout = async (req, res) => {
             });
         }
 
-        // Get cart items
-        const cart = await Cart.findOne({ userId }).populate('items.productId');
+        // Get cart items with product and category populated
+        const cart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            populate: {
+                path: 'category',
+                model: 'Category'
+            }
+        });
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ 
                 success: false, 
@@ -210,14 +213,15 @@ const processCheckout = async (req, res) => {
             let productOffer = product.productOffer || 0;
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
-            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            let itemPrice = bestOffer > 0 ? variantPrice - (variantPrice * bestOffer / 100) : variantPrice;
             let itemTotal = itemPrice * item.quantity;
             let itemsize = variant.size;
-
+console.log(productOffer,categoryOffer)
             validItems.push({
                 product: product._id,
                 quantity: item.quantity,
-                price: itemPrice,
+                price: itemPrice, // legacy
+                finalPrice: itemPrice, // explicit final price for clarity
                 size: itemsize
             });
 
@@ -231,10 +235,9 @@ const processCheckout = async (req, res) => {
             });
         }
 
-        // Calculate totals using correct subtotal
+        // Calculate totals using correct subtotal (no tax)
         const shippingCost = subtotal > 500 ? 0 : 50;
-        const taxAmount = Math.round(subtotal * 0.18);
-        let totalAmount = subtotal + shippingCost + taxAmount;
+        let totalAmount = subtotal + shippingCost;
 
         // Handle coupon validation and application
         let couponData = {
@@ -266,7 +269,7 @@ const processCheckout = async (req, res) => {
                     applied: true,
                     code: appliedCoupon.couponCode,
                     discount: discountAmount,
-                    originalAmount: subtotal + shippingCost + taxAmount,
+                    originalAmount: subtotal + shippingCost,
                     couponId: appliedCoupon.couponId
                 };
             } else {

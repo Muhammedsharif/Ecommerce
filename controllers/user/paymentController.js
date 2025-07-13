@@ -146,10 +146,9 @@ const verifyPayment = async (req, res) => {
             });
         }
 
-        // Calculate totals
+        // Calculate totals (no tax)
         const shippingCost = subtotal > 500 ? 0 : 50;
-        const taxAmount = Math.round(subtotal * 0.18);
-        let totalAmount = subtotal + shippingCost + taxAmount;
+        let totalAmount = subtotal + shippingCost;
 
         // Handle coupon validation and application
         let couponData = {
@@ -181,7 +180,7 @@ const verifyPayment = async (req, res) => {
                     applied: true,
                     code: appliedCoupon.couponCode,
                     discount: discountAmount,
-                    originalAmount: subtotal + shippingCost + taxAmount,
+                    originalAmount: subtotal + shippingCost,
                     couponId: appliedCoupon.couponId
                 };
             } else {

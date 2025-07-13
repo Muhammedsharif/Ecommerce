@@ -679,29 +679,37 @@ const loadOrders = async (req, res) => {
             .skip((page-1)*limit)
             .populate({
                 path: 'orderedItems.product',
-                select: 'productName productImage salePrice'
+                select: 'productName productImage salePrice price offerPrice discount isOfferActive'
             })
             .sort({ createdOn: -1 });
 
-            const count = await Order.countDocuments({userId:userId});
+        // Set displayPrice for each ordered item in each order
+        orders.forEach(order => {
+            order.orderedItems.forEach(item => {
+                let basePrice = (item.price && typeof item.price === 'number') ? item.price : (item.product && item.product.price ? item.product.price : 0);
+                let productOffer = (item.product && item.product.productOffer) ? item.product.productOffer : 0;
+                let categoryOffer = (item.product && item.product.category && item.product.category.categoryOffer) ? item.product.category.categoryOffer : 0;
+                let bestOffer = Math.max(productOffer, categoryOffer);
+                let displayPrice;
+                if (bestOffer > 0) {
+                    displayPrice =  (basePrice * bestOffer / 100);
+                } else if (item.product && item.product.salePrice) {
+                    displayPrice = item.product.salePrice;
+                } else if (item.product && item.product.price) {
+                    displayPrice = item.product.price;
+                } else {
+                    displayPrice = item.price;
+                }
+                item.displayPrice = Math.round(displayPrice);
+            });
+        });
 
-            const totalPages = Math.ceil(count / limit);
-          
-            
-
-            const orderprice = await Order.find({userId:userId}).populate({
-                path:'orderedItems.price',
-
-            })
-
-            
-    
-            
+        const count = await Order.countDocuments({userId:userId});
+        const totalPages = Math.ceil(count / limit);
 
         res.render("orders", {
             user: userData,
             orders: orders,
-           orderprice :orderprice ,
             success: req.query.success,
             totalPages:totalPages,
             currentPage:page,
@@ -1196,20 +1204,31 @@ const loadOrderDetails = async (req, res) => {
         const order = await Order.findOne({ _id: orderId, userId: userId })
             .populate({
                 path: 'orderedItems.product',
-                select: 'productName productImage salePrice'
+                select: 'productName productImage salePrice price offerPrice discount isOfferActive'
             });
 
         if (!order) {
             return res.redirect("/orders?error=" + encodeURIComponent("Order not found"));
         }
-        
-        const taxAmount = order.finalAmount * 0.18;
-        const totalAmount = order.finalAmount + taxAmount;
 
+        // Set displayPrice for each ordered item based on offer/discount
+        order.orderedItems.forEach(item => {
+            let displayPrice = item.product && item.product.salePrice;
+            // If you have a more complex offer logic, implement it here
+            if (item.product && item.product.isOfferActive && item.product.offerPrice) {
+                displayPrice = item.product.offerPrice;
+            } else if (item.product && item.product.discount && item.product.discount > 0) {
+                displayPrice = item.product.price - (item.product.price * item.product.discount / 100);
+            } else if (item.product && item.product.salePrice) {
+                displayPrice = item.product.salePrice;
+            } else if (item.product && item.product.price) {
+                displayPrice = item.product.price;
+            }
+            item.displayPrice = Math.round(displayPrice);
+        });
+        
         res.render("orderDetails", {
             user: userData,
-            taxAmount: taxAmount,
-            totalAmount: totalAmount,
             order: order,
             success: req.query.success,
             error: req.query.error

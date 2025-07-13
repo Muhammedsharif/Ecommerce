@@ -818,11 +818,7 @@
                     <span>Shipping</span>
                     <span><%= shippingCost === 0 ? 'FREE' : '₹' + shippingCost.toLocaleString('en-IN') %></span>
                 </div>
-                <div class="summary-row">
-                    <span>Tax (GST 18%)</span>
-                    <span>₹<%= taxAmount.toLocaleString('en-IN') %></span>
-                </div>
-
+                
                 <% if (appliedCoupon && couponDiscount > 0) { %>
                     <div class="summary-row original">
                         <span>Original Total</span>
