@@ -83,6 +83,7 @@ const loadCart = async (req,res) =>{
         res.render("cart", {
             user: userData,
             cartItems: cartItems,
+           
             cart: cart
         });
 
