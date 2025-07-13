@@ -561,7 +561,7 @@
                                }
                             %>
                             <% if (displayStatus) { %>
-                                <span class="item-status <%= displayStatus.toLowerCase().replace(' ', '-') %>">
+                                <span class="item-status <%= displayStatus.toLowerCase().replace(' ', '-') %> <%= displayStatus === 'Delivered' ? 'delivered' : '' %>">
                                     <%= displayStatus %>
                                 </span>
                             <% } %>
@@ -802,69 +802,25 @@
         }
 
         // Return order function
-        async function returnOrder(orderId) {
-            console.log('Return order function called for:', orderId);
-
-            try {
-                // Check if SweetAlert is loaded
-                if (typeof Swal === 'undefined') {
-                    console.error('SweetAlert2 is not loaded');
-                    if (confirm('Are you sure you want to return this order?')) {
-                        // Fallback to regular processing
-                        await processReturnOrder(orderId);
-                    }
-                    return;
+        function returnOrder(orderId) {
+            // Check for eligible items before opening the modal
+            const items = document.querySelectorAll('.item');
+            let eligibleCount = 0;
+            items.forEach(item => {
+                const statusSpan = item.querySelector('.item-status');
+                if (statusSpan && statusSpan.classList.contains('delivered')) {
+                    eligibleCount++;
                 }
-
-                console.log('SweetAlert2 is loaded, showing confirmation dialog');
-
-                // Show SweetAlert confirmation dialog with mandatory reason input
-                const result = await Swal.fire({
-                    title: 'Return Order?',
-                    html: `
-                        <p>Are you sure you want to return this order? A return request will be submitted for admin review.</p>
-                        <div style="margin-top: 15px;">
-                            <label for="return-reason" style="display: block; text-align: left; margin-bottom: 5px; font-weight: 500; color: #d33;">
-                                Reason for return (required):
-                            </label>
-                            <textarea
-                                id="return-reason"
-                                class="swal2-textarea"
-                                placeholder="Please provide a detailed reason for returning this order..."
-                                style="width: 100%; min-height: 100px; resize: vertical; border: 1px solid #d1d5db; border-radius: 4px; padding: 8px;"
-                                required
-                            ></textarea>
-                        </div>
-                    `,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Submit Return Request',
-                    cancelButtonText: 'Cancel',
-                    focusConfirm: false,
-                    preConfirm: () => {
-                        const reason = document.getElementById('return-reason').value.trim();
-                        if (!reason) {
-                            Swal.showValidationMessage('Return reason is required');
-                            return false;
-                        }
-                        return { reason: reason };
-                    }
-                });
-
-                console.log('SweetAlert result:', result);
-
-                if (!result.isConfirmed) {
-                    return;
-                }
-
-                const returnReason = result.value ? result.value.reason : '';
-                await processReturnOrder(orderId, returnReason);
-            } catch (error) {
-                console.error('Error in returnOrder:', error);
-                showToast('An error occurred while showing the confirmation dialog', 'error');
+            });
+            if (eligibleCount === 0) {
+                showToast('No eligible items found to return.', 'error');
+                return;
             }
+            currentAction = 'returnAllItems';
+            currentOrderId = orderId;
+            currentItemId = null;
+            currentProductName = null;
+            openActionModal('return', 'Return All Items?', 'Are you sure you want to return <strong>all items</strong> in this order?');
         }
 
         // Helper function to process return order

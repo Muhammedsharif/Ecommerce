@@ -35,6 +35,20 @@
                 type: String,
                 enum: ['Pending','Processing','Shipped','Delivered','Cancelled','Return Request','Returned'],
                 default: 'Pending'
+            },
+            cancellationReason: {
+                type: String
+            },
+            returnReason: {
+                type: String
+            },
+            adminApprovalStatus: {
+                type: String,
+                enum: ['Pending', 'Approved', 'Rejected'],
+                default: 'Pending'
+            },
+            adminRejectionReason: {
+                type: String
             }
         }],
         totalPrice:{

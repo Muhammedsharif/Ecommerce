@@ -525,7 +525,8 @@
                             <tr>
                                 <th>Order ID</th>
                                 <th>Customer</th>
-                                <th>Order Date</th>
+                                <th>Product</th>
+                                <th>Return Reason</th>
                                 <th>Return Date</th>
                                 <th>Amount</th>
                                 <th>Status</th>
@@ -535,60 +536,130 @@
                         <tbody id="returnRequestsTableBody">
                             <% if (returnRequests && returnRequests.length > 0) { %>
                                 <% returnRequests.forEach(request => { %>
-                                    <tr data-order-id="<%= request.orderId %>" data-customer="<%= request.userId ? request.userId.name : 'N/A' %>">
-                                        <td>
-                                            <div class="order-id"><%= request.orderId %></div>
-                                        </td>
-                                        <td>
-                                            <div class="customer-info">
-                                                <div class="customer-name"><%= request.userId ? request.userId.name : 'N/A' %></div>
-                                                <div class="customer-email"><%= request.userId ? request.userId.email : 'N/A' %></div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="order-date">
-                                                <%= new Date(request.createdOn).toLocaleDateString('en-IN', {
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                }) %>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="order-date">
-                                                <%= new Date(request.updatedAt || request.createdOn).toLocaleDateString('en-IN', {
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                }) %>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="order-amount">₹<%= request.finalAmount.toLocaleString('en-IN') %></div>
-                                        </td>
-                                        <td>
-                                            <span class="status-badge status-<%= request.status.toLowerCase().replace(' ', '-') %>">
-                                                <%= request.status.toUpperCase() %>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn view-btn" onclick="viewReturnRequest('<%= request.orderId %>')">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="action-btn approve-btn" onclick="approveReturn('<%= request.orderId %>')">
-                                                    <i class="fas fa-check"></i> Approve
-                                                </button>
-                                                <button class="action-btn reject-btn" onclick="rejectReturn('<%= request.orderId %>')">
-                                                    <i class="fas fa-times"></i> Reject
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <% if (request.status === 'Return Request') { %>
+                                        <!-- Order-level return request -->
+                                        <tr data-order-id="<%= request.orderId %>" data-customer="<%= request.userId ? request.userId.name : 'N/A' %>">
+                                            <td>
+                                                <div class="order-id"><%= request.orderId %></div>
+                                            </td>
+                                            <td>
+                                                <div class="customer-info">
+                                                    <div class="customer-name"><%= request.userId ? request.userId.name : 'N/A' %></div>
+                                                    <div class="customer-email"><%= request.userId ? request.userId.email : 'N/A' %></div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="color: #6c757d; font-style: italic;">All Items</div>
+                                            </td>
+                                            <td>
+                                                <div style="font-size: 13px; color: #495057;">
+                                                    <%= request.returnReason || 'No reason provided' %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="order-date">
+                                                    <%= new Date(request.updatedAt || request.createdOn).toLocaleDateString('en-IN', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    }) %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="order-amount">₹<%= request.refundAmount.toLocaleString('en-IN') %></div>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge status-<%= request.status.toLowerCase().replace(' ', '-') %>">
+                                                    <%= request.status.toUpperCase() %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="action-btn view-btn" onclick="viewReturnRequest('<%= request.orderId %>')">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                    <button class="action-btn approve-btn" onclick="approveReturn('<%= request.orderId %>')">
+                                                        <i class="fas fa-check"></i> Approve
+                                                    </button>
+                                                    <button class="action-btn reject-btn" onclick="rejectReturn('<%= request.orderId %>')">
+                                                        <i class="fas fa-times"></i> Reject
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                    
+                                    <!-- Individual item return requests -->
+                                    <% if (request.orderedItems && request.orderedItems.length > 0) { %>
+                                        <% request.orderedItems.forEach(item => { %>
+                                            <% if (item.status === 'Return Request') { %>
+                                                <tr data-order-id="<%= request.orderId %>" data-customer="<%= request.userId ? request.userId.name : 'N/A' %>" data-item-id="<%= item._id %>">
+                                                    <td>
+                                                        <div class="order-id"><%= request.orderId %></div>
+                                                        <div style="font-size: 11px; color: #6c757d;">Item Return</div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="customer-info">
+                                                            <div class="customer-name"><%= request.userId ? request.userId.name : 'N/A' %></div>
+                                                            <div class="customer-email"><%= request.userId ? request.userId.email : 'N/A' %></div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                                            <% if (item.product && item.product.productImage && item.product.productImage.length > 0) { %>
+                                                                <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                                                                     alt="<%= item.product.productName %>" 
+                                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                            <% } %>
+                                                            <div>
+                                                                <div style="font-weight: 500; font-size: 13px;"><%= item.product ? item.product.productName : 'Product' %></div>
+                                                                <div style="font-size: 11px; color: #6c757d;">Qty: <%= item.quantity %> | Size: <%= item.size %></div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-size: 13px; color: #495057;">
+                                                            <%= item.returnReason || 'No reason provided' %>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="order-date">
+                                                            <%= new Date(request.updatedAt || request.createdOn).toLocaleDateString('en-IN', {
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric'
+                                                            }) %>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="order-amount">₹<%= ((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN') %></div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="status-badge status-<%= item.status.toLowerCase().replace(' ', '-') %>">
+                                                            <%= item.status.toUpperCase() %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-buttons">
+                                                            <button class="action-btn view-btn" onclick="viewReturnRequest('<%= request.orderId %>')">
+                                                                <i class="fas fa-eye"></i> View
+                                                            </button>
+                                                            <button class="action-btn approve-btn" onclick="approveItemReturn('<%= request.orderId %>', '<%= item._id %>')">
+                                                                <i class="fas fa-check"></i> Approve
+                                                            </button>
+                                                            <button class="action-btn reject-btn" onclick="rejectItemReturn('<%= request.orderId %>', '<%= item._id %>')">
+                                                                <i class="fas fa-times"></i> Reject
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% } %>
+                                        <% }) %>
+                                    <% } %>
                                 <% }) %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="8" class="text-center py-4">
                                         <div style="color: #6c757d;">
                                             <i class="fas fa-inbox fa-3x mb-3"></i>
                                             <h5>No Return Requests Found</h5>
@@ -718,7 +789,7 @@
                 });
         }
 
-        // Approve return request
+        // Approve return request (order-level)
         function approveReturn(orderId) {
             Swal.fire({
                 title: 'Approve Return Request',
@@ -758,7 +829,9 @@
                                 icon: 'success',
                                 confirmButtonColor: '#28a745'
                             }).then(() => {
-                                window.location.reload();
+                                // Remove the row from the table
+                                const row = document.querySelector(`tr[data-order-id='${orderId}']:not([data-item-id])`);
+                                if (row) row.remove();
                             });
                         } else {
                             Swal.fire({
@@ -782,7 +855,73 @@
             });
         }
 
-        // Reject return request
+        // Approve individual item return
+        function approveItemReturn(orderId, itemId) {
+            Swal.fire({
+                title: 'Approve Item Return',
+                text: `Are you sure you want to approve the return request for this item? The amount will be credited to the customer's wallet.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Approve',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Approving item return request...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Call backend API
+                    fetch('/admin/approve-return-request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ orderId: orderId, itemId: itemId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Approved!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonColor: '#28a745'
+                            }).then(() => {
+                                // Remove the row from the table
+                                const row = document.querySelector(`tr[data-order-id='${orderId}'][data-item-id='${itemId}']`);
+                                if (row) row.remove();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Failed to approve item return request.',
+                                icon: 'error',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error approving item return request:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to approve item return request. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
+                }
+            });
+        }
+
+        // Reject return request (order-level)
         function rejectReturn(orderId) {
             Swal.fire({
                 title: 'Reject Return Request',
@@ -833,7 +972,9 @@
                                 icon: 'success',
                                 confirmButtonColor: '#dc3545'
                             }).then(() => {
-                                window.location.reload();
+                                // Remove the row from the table
+                                const row = document.querySelector(`tr[data-order-id='${orderId}']:not([data-item-id])`);
+                                if (row) row.remove();
                             });
                         } else {
                             Swal.fire({
@@ -849,6 +990,84 @@
                         Swal.fire({
                             title: 'Error',
                             text: 'Failed to reject return request. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
+                }
+            });
+        }
+
+        // Reject individual item return
+        function rejectItemReturn(orderId, itemId) {
+            Swal.fire({
+                title: 'Reject Item Return',
+                text: 'Please provide a reason for rejecting this item return request:',
+                input: 'textarea',
+                inputPlaceholder: 'Enter rejection reason...',
+                inputValidator: (value) => {
+                    if (!value || value.trim().length < 10) {
+                        return 'Please provide a detailed reason (minimum 10 characters)';
+                    }
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Reject Request',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const rejectionReason = result.value;
+
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Rejecting item return request...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Call backend API
+                    fetch('/admin/reject-return-request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            itemId: itemId,
+                            reason: rejectionReason
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Rejected!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonColor: '#dc3545'
+                            }).then(() => {
+                                // Remove the row from the table
+                                const row = document.querySelector(`tr[data-order-id='${orderId}'][data-item-id='${itemId}']`);
+                                if (row) row.remove();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Failed to reject item return request.',
+                                icon: 'error',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error rejecting item return request:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to reject item return request. Please try again.',
                             icon: 'error',
                             confirmButtonColor: '#dc3545'
                         });

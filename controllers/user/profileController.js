@@ -1526,7 +1526,7 @@ const returnItem = async (req, res) => {
             });
         }
 
-        if (order.status !== 'Delivered' && item.status !== 'Delivered') {
+        if (order.status !== 'Delivered' && item.status !== 'Delivered' && !(order.status === 'Delivered' && (!item.status || item.status === 'Pending' || item.status === 'Processing'))) {
             return res.status(400).json({
                 success: false,
                 message: "Only delivered items can be returned"
@@ -1554,6 +1554,8 @@ const returnAllItems = async (req, res) => {
         const userId = req.session.user;
         const { orderId, returnReason } = req.body;
 
+        console.log("Return all items request:", { orderId, returnReason, userId });
+
         if (!userId) {
             return res.status(401).json({ success: false, message: "Please login to continue" });
         }
@@ -1567,28 +1569,60 @@ const returnAllItems = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
+        console.log("Order found:", order.orderId, "Status:", order.status);
+        console.log("Items before update:", order.orderedItems.map(item => ({ 
+            id: item._id, 
+            status: item.status, 
+            productName: item.product?.productName 
+        })));
+
         let itemsUpdated = 0;
-            for (let i = 0; i < order.orderedItems.length; i++) {
-                const item = order.orderedItems[i];
-                if (
-                (item.status === 'Delivered' || !item.status) &&
-                    item.status !== 'Return Request' &&
-                    item.status !== 'Returned' &&
-                    item.status !== 'Cancelled'
-                ) {
-                    order.orderedItems[i].status = 'Return Request';
-                    order.orderedItems[i].returnReason = returnReason.trim();
-                    order.orderedItems[i].adminApprovalStatus = 'Pending';
-                    itemsUpdated++;
-                }
+        for (let i = 0; i < order.orderedItems.length; i++) {
+            const item = order.orderedItems[i];
+            
+            // Check if item is eligible for return
+            // Item is eligible if:
+            // 1. Order status is 'Delivered' AND item has no status, 'Pending', 'Processing', or 'Delivered' status
+            // 2. OR item status is explicitly 'Delivered'
+            // 3. AND item is not already in return/cancelled state
+            const isEligible = (
+                (order.status === 'Delivered' && (!item.status || item.status === 'Pending' || item.status === 'Processing' || item.status === 'Delivered')) ||
+                item.status === 'Delivered'
+            ) && 
+            item.status !== 'Return Request' &&
+            item.status !== 'Returned' &&
+            item.status !== 'Cancelled';
+
+            console.log(`Item ${i}:`, {
+                productName: item.product?.productName,
+                itemStatus: item.status,
+                orderStatus: order.status,
+                isEligible: isEligible
+            });
+
+            if (isEligible) {
+                order.orderedItems[i].status = 'Return Request';
+                order.orderedItems[i].returnReason = returnReason.trim();
+                order.orderedItems[i].adminApprovalStatus = 'Pending';
+                itemsUpdated++;
+                console.log(`Updated item ${i} to Return Request`);
             }
+        }
+
+        console.log("Items updated:", itemsUpdated);
 
         if (itemsUpdated === 0) {
             return res.status(400).json({ success: false, message: "No eligible items found to return" });
         }
 
         await order.save();
-        res.json({ success: true, message: `Return request submitted for ${itemsUpdated} item(s). Awaiting admin approval.`, itemsUpdated });
+        console.log("Order saved successfully");
+
+        res.json({ 
+            success: true, 
+            message: `Return request submitted for ${itemsUpdated} item(s). Awaiting admin approval.`, 
+            itemsUpdated 
+        });
     } catch (error) {
         console.error("Error submitting return all items request:", error);
         res.status(500).json({ success: false, message: "Failed to submit return all items request" });

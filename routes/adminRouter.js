@@ -54,6 +54,8 @@ router.get("/order-details/:orderId",adminAuth,orderController.getOrderDetails)
 router.get("/return-requests",adminAuth,orderController.getReturnRequestsPage)
 router.post("/approve-return-request",adminAuth,orderController.approveReturnRequest)
 router.post("/reject-return-request",adminAuth,orderController.rejectReturnRequest)
+router.post("/approve-item-cancellation",adminAuth,orderController.approveItemCancellation)
+router.post("/reject-item-cancellation",adminAuth,orderController.rejectItemCancellation)
 
 //Banner Management
 router.get("/banner",adminAuth,bannerController.getBannerPage)
