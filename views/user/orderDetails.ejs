@@ -1075,6 +1075,21 @@
                                 statusSpan.textContent = 'Cancelled';
                                 statusSpan.className = 'item-status cancelled';
                             }
+                            
+                            // Hide the cancel button since item is now cancelled
+                            const cancelButton = card.querySelector('.btn-cancel-item');
+                            if (cancelButton) {
+                                cancelButton.style.display = 'none';
+                            }
+                            
+                            // Also hide the entire item-actions div if no buttons are left
+                            const itemActions = card.querySelector('.item-actions');
+                            if (itemActions) {
+                                const visibleButtons = itemActions.querySelectorAll('button:not([style*="display: none"])');
+                                if (visibleButtons.length === 0) {
+                                    itemActions.style.display = 'none';
+                                }
+                            }
                         }
                     });
                 } else {
@@ -1105,9 +1120,33 @@
 
                 if (result.success) {
                     showToast('Return request submitted successfully. Awaiting admin approval.', 'success');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
+                    
+                    // Update the item's status in the DOM immediately
+                    const itemCards = document.querySelectorAll('.item');
+                    itemCards.forEach(card => {
+                        if (card.innerHTML.includes(itemId)) {
+                            const statusSpan = card.querySelector('.item-status');
+                            if (statusSpan) {
+                                statusSpan.textContent = 'Return Request';
+                                statusSpan.className = 'item-status return-request';
+                            }
+                            
+                            // Hide the return button since item is now in return request
+                            const returnButton = card.querySelector('.btn-return-item');
+                            if (returnButton) {
+                                returnButton.style.display = 'none';
+                            }
+                            
+                            // Also hide the entire item-actions div if no buttons are left
+                            const itemActions = card.querySelector('.item-actions');
+                            if (itemActions) {
+                                const visibleButtons = itemActions.querySelectorAll('button:not([style*="display: none"])');
+                                if (visibleButtons.length === 0) {
+                                    itemActions.style.display = 'none';
+                                }
+                            }
+                        }
+                    });
                 } else {
                     showToast(result.message || 'Failed to submit return request', 'error');
                 }

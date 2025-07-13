@@ -259,6 +259,22 @@ const getOrderDetails = async (req, res) => {
             });
         }
 
+        // Fetch user's address information
+        // Since the address field currently stores userId, we need to get the user's default address
+        const Address = require("../../models/addressSchema");
+        let userAddress = null;
+        
+        if (order.userId && order.userId._id) {
+            const addressDoc = await Address.findOne({ userId: order.userId._id }).lean();
+            if (addressDoc && addressDoc.adress && addressDoc.adress.length > 0) {
+                // Find default address or use the first one
+                userAddress = addressDoc.adress.find(addr => addr.isDefault) || addressDoc.adress[0];
+            }
+        }
+
+        // Add address information to the order object
+        order.addressInfo = userAddress;
+
         res.status(200).json({
             success: true,
             order: order

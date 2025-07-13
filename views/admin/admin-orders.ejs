@@ -1736,12 +1736,10 @@
             const discountAmount = order.discount || 0;
             const proportionalDiscount = originalSubtotal > 0 ? (activeItemsSubtotal / originalSubtotal) * discountAmount : 0;
 
-            // Calculate tax (assuming 18% GST if not specified)
-            const taxRate = 0.18; // 18% GST - adjust as needed
-            const taxAmount = (activeItemsSubtotal - proportionalDiscount) * taxRate;
+            
 
             // Calculate adjusted final amount
-            const adjustedFinalAmount = activeItemsSubtotal - proportionalDiscount + taxAmount;
+            
 
             let summaryHtml = `
                 <div class="summary-row">
@@ -1792,12 +1790,7 @@
                 }
             }
 
-            summaryHtml += `
-                <div class="summary-row">
-                    <span>Tax Amount (18% GST):</span>
-                    <span>${formatCurrency(taxAmount)}</span>
-                </div>
-            `;
+           
 
             summaryHtml += `
                 <div class="summary-row total">
@@ -1904,7 +1897,7 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Address:</span>
-                            <span class="info-value">${order.address ? `${order.address.addressType}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}` : 'N/A'}</span>
+                            <span class="info-value">${order.addressInfo ? `${order.addressInfo.name}, ${order.addressInfo.addressType}, ${order.addressInfo.city}, ${order.addressInfo.state} - ${order.addressInfo.pincode}` : 'N/A'}</span>
                         </div>
                     </div>
                 </div>
