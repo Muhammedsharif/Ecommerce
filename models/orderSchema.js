@@ -99,22 +99,13 @@
         },
         paymentMethod:{
             type:String,
-            enum:['COD','ONLINE','WALLET','MIXED'],
+            enum:['COD','ONLINE','WALLET'],
             required:true
         },
         paymentStatus:{
             type:String,
             enum:['Pending','Completed','Failed','Refunded'],
             default:'Pending'
-        },
-        // For mixed payments
-        walletAmountUsed:{
-            type:Number,
-            default:0
-        },
-        onlineAmountPaid:{
-            type:Number,
-            default:0
         },
         razorpayOrderId:{
             type:String

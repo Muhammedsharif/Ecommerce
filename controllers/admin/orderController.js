@@ -348,43 +348,17 @@ const getReturnRequestsPage = async (req, res) => {
             .limit(limit)
             .lean();
 
-        // For each order, calculate the refund amount considering coupon discounts
+        // For each order, calculate the refund amount as the sum of only the returned items
         returnRequests.forEach(order => {
-            let totalReturnedItemsValue = 0;
+            let refundAmount = 0;
             if (order.orderedItems && Array.isArray(order.orderedItems)) {
                 order.orderedItems.forEach(item => {
                     if (item.status === 'Return Request') {
-                        totalReturnedItemsValue += (item.price || 0) * (item.quantity || 1);
+                        refundAmount += (item.price || 0) * (item.quantity || 1);
                     }
                 });
             }
-            
-            let refundAmount = totalReturnedItemsValue;
-            
-            // If a coupon was applied, deduct proportional coupon discount
-            if (order.couponApplied && order.couponDiscount > 0 && totalReturnedItemsValue > 0) {
-                // Calculate the total order value (sum of all items)
-                const totalOrderValue = order.orderedItems.reduce((total, item) => {
-                    return total + ((item.price || 0) * (item.quantity || 1));
-                }, 0);
-
-                if (totalOrderValue > 0) {
-                    // Calculate the proportion of returned items to total order
-                    const returnProportion = totalReturnedItemsValue / totalOrderValue;
-                    
-                    // Calculate proportional coupon discount to deduct
-                    const proportionalCouponDiscount = order.couponDiscount * returnProportion;
-                    
-                    // Deduct the proportional coupon discount from refund amount
-                    refundAmount = totalReturnedItemsValue - proportionalCouponDiscount;
-                    
-                    // Ensure refund amount is not negative
-                    refundAmount = Math.max(0, refundAmount);
-                }
-            }
-            
             order.refundAmount = refundAmount;
-            order.originalReturnValue = totalReturnedItemsValue; // For display purposes
         });
 
         // Get total count for pagination
@@ -465,7 +439,6 @@ const approveReturnRequest = async (req, res) => {
 
         let refundAmount = 0;
         let itemsToUpdate = [];
-        let totalReturnedItemsValue = 0;
 
         if (itemId) {
             // Individual item return approval
@@ -485,7 +458,7 @@ const approveReturnRequest = async (req, res) => {
                 });
             }
 
-            totalReturnedItemsValue = (item.price || 0) * (item.quantity || 1);
+            refundAmount = (item.price || 0) * (item.quantity || 1);
             itemsToUpdate.push(itemIndex);
 
             // Update individual item status
@@ -503,11 +476,11 @@ const approveReturnRequest = async (req, res) => {
                 });
             }
 
-            // Calculate total value of returned items
+            // Calculate refund amount: sum of only returned items
             if (order.orderedItems && Array.isArray(order.orderedItems)) {
                 order.orderedItems.forEach((item, index) => {
                     if (item.status === 'Return Request') {
-                        totalReturnedItemsValue += (item.price || 0) * (item.quantity || 1);
+                        refundAmount += (item.price || 0) * (item.quantity || 1);
                         itemsToUpdate.push(index);
                     }
                 });
@@ -528,37 +501,7 @@ const approveReturnRequest = async (req, res) => {
             }
         }
 
-        // Calculate refund amount considering coupon discount
-        if (totalReturnedItemsValue > 0) {
-            refundAmount = totalReturnedItemsValue;
-
-            // If a coupon was applied, deduct proportional coupon discount
-            // Check if the order was originally delivered (before any status updates)
-            const wasDelivered = order.status === 'Delivered' || 
-                                order.orderedItems.some(item => item.status === 'Delivered') ||
-                                (order.status === 'Return Request' || order.orderedItems.some(item => item.status === 'Return Request'));
-            
-            if (order.couponApplied && order.couponDiscount > 0 && wasDelivered) {
-                // Calculate the total order value (sum of all items)
-                const totalOrderValue = order.orderedItems.reduce((total, item) => {
-                    return total + ((item.price || 0) * (item.quantity || 1));
-                }, 0);
-
-                if (totalOrderValue > 0) {
-                    // Calculate the proportion of returned items to total order
-                    const returnProportion = totalReturnedItemsValue / totalOrderValue;
-                    
-                    // Calculate proportional coupon discount to deduct
-                    const proportionalCouponDiscount = order.couponDiscount * returnProportion;
-                    
-                    // Deduct the proportional coupon discount from refund amount
-                    refundAmount = totalReturnedItemsValue - proportionalCouponDiscount;
-                    
-                    // Ensure refund amount is not negative
-                    refundAmount = Math.max(0, refundAmount);
-                }
-            }
-
+        if (refundAmount > 0) {
             const currentWalletBalance = user.wallet || 0;
             const newWalletBalance = currentWalletBalance + refundAmount;
 
@@ -568,61 +511,22 @@ const approveReturnRequest = async (req, res) => {
                 { wallet: newWalletBalance }
             );
 
-            // Create wallet transaction record with detailed metadata
-            const transactionMetadata = {
-                orderAmount: order.finalAmount,
-                returnApprovedBy: 'admin',
-                returnApprovedAt: new Date(),
-                itemId: itemId || null,
-                originalItemValue: totalReturnedItemsValue,
-                originalPaymentMethod: order.paymentMethod
-            };
-
-            // Add mixed payment metadata if applicable
-            if (order.paymentMethod === 'MIXED') {
-                transactionMetadata.mixedPayment = true;
-                transactionMetadata.originalWalletAmountUsed = order.walletAmountUsed || 0;
-                transactionMetadata.originalOnlineAmountPaid = order.onlineAmountPaid || 0;
-            }
-
-            // Add coupon-related metadata if applicable
-            if (order.couponApplied && order.couponDiscount > 0) {
-                const totalOrderValue = order.orderedItems.reduce((total, item) => {
-                    return total + ((item.price || 0) * (item.quantity || 1));
-                }, 0);
-                const returnProportion = totalReturnedItemsValue / totalOrderValue;
-                const proportionalCouponDiscount = order.couponDiscount * returnProportion;
-
-                transactionMetadata.couponApplied = true;
-                transactionMetadata.couponCode = order.couponCode;
-                transactionMetadata.totalCouponDiscount = order.couponDiscount;
-                transactionMetadata.proportionalCouponDiscount = proportionalCouponDiscount;
-                transactionMetadata.returnProportion = returnProportion;
-            }
-
-            // Create appropriate description based on payment method
-            let description = `Refund for returned ${itemId ? 'item' : 'order'} ${orderId}`;
-            if (order.paymentMethod === 'MIXED') {
-                description += ` - Mixed payment refund (Original: Online ₹${order.onlineAmountPaid}, Wallet ₹${order.walletAmountUsed})`;
-            } else if (order.paymentMethod === 'ONLINE') {
-                description += ` - Online payment refund`;
-            } else if (order.paymentMethod === 'WALLET') {
-                description += ` - Wallet payment refund`;
-            }
-            if (order.couponApplied) {
-                description += ` (coupon discount deducted proportionally)`;
-            }
-
+            // Create wallet transaction record
             await WalletTransaction.create({
                 userId: order.userId._id,
                 type: 'credit',
                 amount: refundAmount,
-                description: description,
+                description: `Refund for returned ${itemId ? 'item' : 'order'} ${orderId}`,
                 orderId: orderId,
                 source: 'return_refund',
                 balanceAfter: newWalletBalance,
                 status: 'completed',
-                metadata: transactionMetadata
+                metadata: {
+                    orderAmount: order.finalAmount,
+                    returnApprovedBy: 'admin',
+                    returnApprovedAt: new Date(),
+                    itemId: itemId || null
+                }
             });
         }
 
