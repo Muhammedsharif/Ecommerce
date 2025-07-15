@@ -148,8 +148,8 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-        // Find the order
-        const order = await Order.findOne({ orderId: orderId });
+        // Find the order with user details
+        const order = await Order.findOne({ orderId: orderId }).populate('userId').populate('orderedItems.product');
         if (!order) {
             return res.status(404).json({
                 success: false,
@@ -168,13 +168,88 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
+        // Handle special cases for status updates
+        let refundAmount = 0;
+        let message = `Order status updated to ${status}`;
+
+        // Handle cancellation by admin
+        if (status === 'Cancelled' && currentStatus !== 'Cancelled') {
+            // Restore stock for cancelled products
+            for (let item of order.orderedItems) {
+                const product = await Product.findById(item.product._id);
+                if (product) {
+                    const variantIndex = product.variant.findIndex(v => v.size === item.size);
+                    if (variantIndex !== -1) {
+                        product.variant[variantIndex].varientquantity += item.quantity;
+                        await product.save();
+                    }
+                }
+            }
+
+            // Handle immediate refund for ONLINE and WALLET payments (no admin approval needed for cancellations)
+            if (["ONLINE", "WALLET"].includes(order.paymentMethod)) {
+                const user = await User.findById(order.userId._id);
+                if (user) {
+                    refundAmount = order.finalAmount;
+                    if (refundAmount > 0) {
+                        const currentWalletBalance = user.wallet || 0;
+                        const newWalletBalance = currentWalletBalance + refundAmount;
+                        await User.findByIdAndUpdate(order.userId._id, { wallet: newWalletBalance });
+                        
+                        const transactionMetadata = {
+                            orderAmount: order.finalAmount,
+                            cancellationInitiatedBy: 'admin',
+                            cancellationAt: new Date(),
+                            originalPaymentMethod: order.paymentMethod,
+                            couponApplied: order.couponApplied || false,
+                            autoRefund: true, // Mark as automatic refund for cancellation
+                            adminApprovalRequired: false
+                        };
+                        
+                        // Add payment method specific metadata
+                        if (order.paymentMethod === 'ONLINE') {
+                            transactionMetadata.razorpayPayment = true;
+                            transactionMetadata.razorpayOrderId = order.razorpayOrderId || null;
+                            transactionMetadata.razorpayPaymentId = order.razorpayPaymentId || null;
+                        }
+                        
+                        if (order.couponApplied && order.couponCode) {
+                            transactionMetadata.couponCode = order.couponCode;
+                            transactionMetadata.couponDiscount = order.couponDiscount || 0;
+                        }
+                        
+                        let description = `Automatic refund for admin cancelled order ${orderId}`;
+                        if (order.paymentMethod === 'ONLINE') {
+                            description += ` - Online payment refund`;
+                        } else if (order.paymentMethod === 'WALLET') {
+                            description += ` - Wallet payment refund`;
+                        }
+                        
+                        await WalletTransaction.create({
+                            userId: order.userId._id,
+                            type: 'credit',
+                            amount: refundAmount,
+                            description: description,
+                            orderId: orderId,
+                            source: 'return_refund',
+                            balanceAfter: newWalletBalance,
+                            status: 'completed',
+                            metadata: transactionMetadata
+                        });
+                        
+                        message += `. ₹${refundAmount.toLocaleString('en-IN')} has been automatically credited to the customer's wallet.`;
+                    }
+                }
+            }
+        }
+
         // Update the order status
         order.status = status;
         await order.save();
 
         res.status(200).json({
             success: true,
-            message: `Order status updated to ${status}`,
+            message: message,
             newStatus: status
         });
 
@@ -644,8 +719,8 @@ const approveItemCancellation = async (req, res) => {
             });
         }
 
-        // Find the order
-        const order = await Order.findOne({ orderId: orderId }).populate('orderedItems.product');
+        // Find the order with user details
+        const order = await Order.findOne({ orderId: orderId }).populate('orderedItems.product').populate('userId');
         if (!order) {
             return res.status(404).json({
                 success: false,
@@ -680,13 +755,83 @@ const approveItemCancellation = async (req, res) => {
             }
         }
 
+        // Handle immediate refund for ONLINE and WALLET payments (no admin approval needed for cancellations)
+        let refundAmount = 0;
+        if (["ONLINE", "WALLET"].includes(order.paymentMethod)) {
+            const user = await User.findById(order.userId._id);
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found"
+                });
+            }
+            
+            // Calculate refund amount for this specific item
+            refundAmount = (item.price || 0) * (item.quantity || 1);
+            
+            if (refundAmount > 0) {
+                const currentWalletBalance = user.wallet || 0;
+                const newWalletBalance = currentWalletBalance + refundAmount;
+                await User.findByIdAndUpdate(order.userId._id, { wallet: newWalletBalance });
+                
+                const transactionMetadata = {
+                    orderAmount: order.finalAmount,
+                    itemRefund: true,
+                    itemPrice: item.price,
+                    itemQuantity: item.quantity,
+                    cancellationApprovedBy: 'admin',
+                    cancellationApprovedAt: new Date(),
+                    originalPaymentMethod: order.paymentMethod,
+                    couponApplied: order.couponApplied || false,
+                    autoRefund: true, // Mark as automatic refund for cancellation
+                    adminApprovalRequired: false
+                };
+                
+                // Add payment method specific metadata
+                if (order.paymentMethod === 'ONLINE') {
+                    transactionMetadata.razorpayPayment = true;
+                    transactionMetadata.razorpayOrderId = order.razorpayOrderId || null;
+                    transactionMetadata.razorpayPaymentId = order.razorpayPaymentId || null;
+                }
+                
+                if (order.couponApplied && order.couponCode) {
+                    transactionMetadata.couponCode = order.couponCode;
+                    transactionMetadata.couponDiscount = order.couponDiscount || 0;
+                }
+                
+                let description = `Automatic refund for admin approved cancelled item in order ${orderId}`;
+                if (order.paymentMethod === 'ONLINE') {
+                    description += ` - Online payment refund`;
+                } else if (order.paymentMethod === 'WALLET') {
+                    description += ` - Wallet payment refund`;
+                }
+                
+                await WalletTransaction.create({
+                    userId: order.userId._id,
+                    type: 'credit',
+                    amount: refundAmount,
+                    description: description,
+                    orderId: orderId,
+                    source: 'return_refund',
+                    balanceAfter: newWalletBalance,
+                    status: 'completed',
+                    metadata: transactionMetadata
+                });
+            }
+        }
+
         // Update item status
-        order.orderedItems[itemIndex].adminApprovalStatus = 'Approved';
+
         await order.save();
+
+        let message = "Item cancellation approved successfully. Stock has been restored.";
+        if (refundAmount > 0) {
+            message += ` ₹${refundAmount.toLocaleString('en-IN')} has been credited to the customer's wallet.`;
+        }
 
         res.json({
             success: true,
-            message: "Item cancellation approved successfully. Stock has been restored."
+            message: message
         });
 
     } catch (error) {
