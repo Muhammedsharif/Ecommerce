@@ -2,7 +2,7 @@ const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const WalletTransaction = require("../../models/walletTransactionSchema")
-const { calculateSingleItemCouponDiscount, calculateProportionalCouponDiscount, calculateEqualCouponDiscount, updateOrderCouponDiscount } = require("../../helpers/couponHelper")
+const { calculateEqualCouponDiscount, calculateSingleItemCouponDiscount } = require("../../helpers/couponHelper")
 
 // Enhanced admin orders page controller with pagination, filtering, and sorting
 const getOrderPage = async (req, res) => {
@@ -191,6 +191,7 @@ const updateOrderStatus = async (req, res) => {
             if (["ONLINE", "WALLET"].includes(order.paymentMethod)) {
                 const user = await User.findById(order.userId._id);
                 if (user) {
+                    // For full order cancellation, refund the final amount (already includes coupon discount)
                     refundAmount = order.finalAmount;
                     if (refundAmount > 0) {
                         const currentWalletBalance = user.wallet || 0;
@@ -199,6 +200,7 @@ const updateOrderStatus = async (req, res) => {
                         
                         const transactionMetadata = {
                             orderAmount: order.finalAmount,
+                            originalAmount: order.totalPrice || 0,
                             cancellationInitiatedBy: 'admin',
                             cancellationAt: new Date(),
                             originalPaymentMethod: order.paymentMethod,
@@ -217,6 +219,7 @@ const updateOrderStatus = async (req, res) => {
                         if (order.couponApplied && order.couponCode) {
                             transactionMetadata.couponCode = order.couponCode;
                             transactionMetadata.couponDiscount = order.couponDiscount || 0;
+                            transactionMetadata.couponCalculationMethod = 'full_order_cancellation';
                         }
                         
                         let description = `Automatic refund for admin cancelled order ${orderId}`;
@@ -515,7 +518,6 @@ const approveReturnRequest = async (req, res) => {
 
         let refundAmount = 0;
         let itemsToUpdate = [];
-        let couponCalculation = { proportionalDiscount: 0, adjustedRefundAmount: 0 };
 
         if (itemId) {
             // Individual item return approval
@@ -535,18 +537,19 @@ const approveReturnRequest = async (req, res) => {
                 });
             }
 
-            // Calculate equal coupon discount for this item
-            couponCalculation = calculateSingleItemCouponDiscount(order, item);
-            refundAmount = couponCalculation.adjustedRefundAmount;
+            // Calculate refund amount with proper coupon discount handling
+            if (order.couponApplied && order.couponDiscount > 0) {
+                const couponCalculation = calculateSingleItemCouponDiscount(order, item);
+                refundAmount = couponCalculation.adjustedRefundAmount;
+            } else {
+                refundAmount = (item.price || 0) * (item.quantity || 1);
+            }
+
             itemsToUpdate.push(itemIndex);
 
             // Update individual item status
             order.orderedItems[itemIndex].status = 'Returned';
             order.orderedItems[itemIndex].adminApprovalStatus = 'Approved';
-
-            // Update order coupon discount (using equal distribution)
-            const equalDiscount = couponCalculation.equalDiscount || couponCalculation.proportionalDiscount;
-            updateOrderCouponDiscount(order, equalDiscount);
         } else {
             // All items return approval (existing functionality)
             const hasOrderLevelReturn = order.status === 'Return Request';
@@ -559,32 +562,33 @@ const approveReturnRequest = async (req, res) => {
                 });
             }
 
-            // Collect all items being returned for coupon calculation
+            // Collect returned items for coupon calculation
             const returnedItems = [];
             if (order.orderedItems && Array.isArray(order.orderedItems)) {
                 order.orderedItems.forEach((item, index) => {
                     if (item.status === 'Return Request') {
                         returnedItems.push({
-                            price: item.price,
-                            quantity: item.quantity
+                            price: item.price || 0,
+                            quantity: item.quantity || 1
                         });
                         itemsToUpdate.push(index);
                     }
                 });
             }
 
-            // Calculate proportional coupon discount for all returned items
-            couponCalculation = calculateProportionalCouponDiscount(order, returnedItems);
-            refundAmount = couponCalculation.adjustedRefundAmount;
+            // Calculate refund amount with proper coupon discount handling
+            if (order.couponApplied && order.couponDiscount > 0 && returnedItems.length > 0) {
+                const couponCalculation = calculateEqualCouponDiscount(order, returnedItems);
+                refundAmount = couponCalculation.adjustedRefundAmount;
+            } else {
+                refundAmount = returnedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            }
 
             // Update all items in return request status
             itemsToUpdate.forEach(index => {
                 order.orderedItems[index].status = 'Returned';
                 order.orderedItems[index].adminApprovalStatus = 'Approved';
             });
-
-            // Update order coupon discount
-            updateOrderCouponDiscount(order, couponCalculation.proportionalDiscount);
 
             // Update order status if all items are returned/cancelled
             const allItemsProcessed = order.orderedItems.every(item => 
@@ -606,27 +610,20 @@ const approveReturnRequest = async (req, res) => {
             );
 
             // Create wallet transaction record
-            const equalDiscount = couponCalculation.equalDiscount || couponCalculation.proportionalDiscount;
             await WalletTransaction.create({
                 userId: order.userId._id,
                 type: 'credit',
                 amount: refundAmount,
-                description: `Refund for returned ${itemId ? 'item' : 'order'} ${orderId}${equalDiscount > 0 ? ` (adjusted for equal coupon discount: -₹${equalDiscount.toFixed(2)})` : ''}`,
+                description: `Refund for returned ${itemId ? 'item' : 'order'} ${orderId}`,
                 orderId: orderId,
                 source: 'return_refund',
                 balanceAfter: newWalletBalance,
                 status: 'completed',
                 metadata: {
                     orderAmount: order.finalAmount,
-                    originalItemValue: couponCalculation.returnedItemsValue || refundAmount,
-                    equalCouponDiscount: equalDiscount,
-                    discountPerProduct: couponCalculation.discountPerProduct,
-                    adjustedRefundAmount: refundAmount,
                     returnApprovedBy: 'admin',
                     returnApprovedAt: new Date(),
-                    itemId: itemId || null,
-                    couponApplied: order.couponApplied || false,
-                    couponCode: order.couponCode || null
+                    itemId: itemId || null
                 }
             });
         }
@@ -792,8 +789,13 @@ const approveItemCancellation = async (req, res) => {
                 });
             }
             
-            // Calculate refund amount for this specific item
-            refundAmount = (item.price || 0) * (item.quantity || 1);
+            // Calculate refund amount for this specific item with proper coupon discount handling
+            if (order.couponApplied && order.couponDiscount > 0) {
+                const couponCalculation = calculateSingleItemCouponDiscount(order, item);
+                refundAmount = couponCalculation.adjustedRefundAmount;
+            } else {
+                refundAmount = (item.price || 0) * (item.quantity || 1);
+            }
             
             if (refundAmount > 0) {
                 const currentWalletBalance = user.wallet || 0;

@@ -1215,7 +1215,7 @@
                                     <i class="fas fa-rupee-sign"></i>
                                 </div>
                                 <div class="stat-content">
-                                    <h3>₹<%= stats.totalRevenue.toLocaleString('en-IN') %></h3>
+                                    <h3>₹<%=Math.round(stats.totalRevenue).toLocaleString('en-IN') %></h3>
                                     <p>Total Revenue</p>
                                 </div>
                             </div>
@@ -1324,7 +1324,7 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div class="order-amount">₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+                                                    <div class="order-amount">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></div>
                                                 </td>
                                                 <td>
                                                     <div class="payment-method">

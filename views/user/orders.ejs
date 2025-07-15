@@ -358,6 +358,14 @@
                 padding: 0 1rem;
             }
         }
+
+        .coupon{
+            position: relative;
+            top: 10px;
+            font-size: 10px;
+            margin: 0;
+  line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -403,7 +411,7 @@
                     <div class="stat-label">Active Orders</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">₹<%= orders.reduce((total, order) => total + order.finalAmount, 0).toLocaleString() %></div>
+                    <div class="stat-number">₹<%= Math.round(orders.reduce((total, order) => total + order.finalAmount, 0)).toLocaleString() %></div>
                     <div class="stat-label">Total Spent</div>
                 </div>
             </div>
@@ -436,7 +444,11 @@
                                 </div>
                                 <div class="order-detail">
                                     <span class="order-label">Total Amount</span>
-                                    <span class="order-value">₹<%= (order.displayFinalAmount !== undefined ? order.displayFinalAmount : order.finalAmount).toLocaleString() %></span>
+                                    <span class="order-value">₹<%= Math.round((order.displayFinalAmount !== undefined ? order.displayFinalAmount : order.finalAmount)).toLocaleString() %></span>
+                                      <% if (order.couponApplied) { %>
+ <span class="order-label"><p class="coupon">Coupon Applied: <%= order.couponCode %></p></span>
+ <span class="order-label"><p class="coupon">Discount:-₹<%= order.couponDiscount %></p></span> 
+<% } %>
                                 </div>
                             </div>
                             <div class="order-status status-<%= order.status.toLowerCase() %>">
@@ -476,13 +488,15 @@
                                                 } else {
                                                     displayPrice = item.price;
                                                 }
-                                            %><%= (displayPrice * item.quantity).toLocaleString() %>
+                                            %><%= Math.round((displayPrice * item.quantity)).toLocaleString() %>
+ 
                                         </div>
                                     </div>
                                 <% }) %>
                             </div>
 
                             <div class="order-actions">
+
                                 <a href="/order-details/<%= order._id %>" class="btn btn-outline">
                                     <i class="fas fa-eye"></i>
                                     View Details

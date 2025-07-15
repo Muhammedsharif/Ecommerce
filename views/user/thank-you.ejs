@@ -387,7 +387,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Total Amount</div>
-                    <div class="info-value"> ₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+                    <div class="info-value"> ₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Payment Method</div>
@@ -435,7 +435,7 @@
                                     let bestOffer = Math.max(productOffer, categoryOffer);
                                     let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
                                     let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                                %><%= displayPrice.toLocaleString('en-IN') %>
+                                %><%= Math.round(displayPrice).toLocaleString('en-IN') %>
                             </div>
                 
                         </div>
