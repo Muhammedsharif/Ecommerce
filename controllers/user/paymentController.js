@@ -12,6 +12,10 @@ const createRazorpayOrder = async (req, res) => {
     try {
         const userId = req.session.user;
         const { addressId, totalAmount } = req.body;
+       
+        console.log('Creating Razorpay order for user:', userId);
+        console.log('Request body:', { addressId, totalAmount });
+        const roundedTotal = Math.round(totalAmount);
 
         if (!userId) {
             return res.status(401).json({ 
@@ -21,39 +25,56 @@ const createRazorpayOrder = async (req, res) => {
         }
 
         // Validate required fields
-        if (!addressId || !totalAmount) {
+        if (!addressId || !roundedTotal || roundedTotal <= 0) {
             return res.status(400).json({
                 success: false,
-                message: "Missing required fields"
+                message: "Missing required fields or invalid amount"
+            });
+        }
+
+        // Validate Razorpay credentials
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            console.error('Razorpay credentials not found in environment variables');
+            return res.status(500).json({
+                success: false,
+                message: 'Payment service configuration error'
             });
         }
 
         // Create Razorpay order
         const options = {
-            amount: totalAmount * 100, // Amount in paise
+            amount: Math.round(parseFloat(roundedTotal) * 100), // Amount in paise, ensure it's an integer
             currency: 'INR',
-            receipt: `order_${Date.now()}`,
+            receipt: `ord_${Date.now().toString().slice(-10)}`, // Keep receipt under 40 chars
             notes: {
-                userId: userId,
-                addressId: addressId
+                userId: userId.toString(),
+                addressId: addressId.toString()
             }
         };
 
+        console.log('Razorpay order options:', options);
+
         const razorpayOrder = await razorpay.orders.create(options);
+        
+        console.log('Razorpay order created successfully:', razorpayOrder.id);
 
         res.json({
             success: true,
             orderId: razorpayOrder.id,
-            amount: razorpayOrder.amount,
+            amount:Math.round(razorpayOrder.amount),
             currency: razorpayOrder.currency,
-            key: process.env.RAZORPAY_KEY_ID || 'rzp_test_your_key_id'
+            key: process.env.RAZORPAY_KEY_ID
         });
 
     } catch (error) {
         console.error('Error creating Razorpay order:', error);
+        console.error('Error details:', error.message);
+        console.error('Error stack:', error.stack);
+        
         res.status(500).json({
             success: false,
-            message: 'Failed to create payment order'
+            message: 'Failed to create payment order. Please try again.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
@@ -131,7 +152,7 @@ const verifyPayment = async (req, res) => {
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let variantPrice = variant.varientPrice;
-            let itemPrice = bestOffer > 0 ? variantPrice - (variantPrice * bestOffer / 100) : variantPrice;
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
             let itemTotal = itemPrice * item.quantity;
             
             validItems.push({
@@ -175,6 +196,7 @@ const verifyPayment = async (req, res) => {
 
                 if (coupon.discountType === 'percentage') {
                     discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
+                    
                 } else {
                     discountAmount = Math.min(coupon.offerPrice, totalAmount);
                 }

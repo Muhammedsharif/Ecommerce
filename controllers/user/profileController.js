@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 const session = require("express-session")
+const { calculateSingleItemCouponDiscount, calculateProportionalCouponDiscount, updateOrderCouponDiscount, getOrderDisplayTotals } = require("../../helpers/couponHelper")
 
 
 
@@ -683,7 +684,7 @@ const loadOrders = async (req, res) => {
             })
             .sort({ createdOn: -1 });
 
-        // Set displayPrice for each ordered item in each order
+        // Set displayPrice for each ordered item and calculate correct order totals
         orders.forEach(order => {
             order.orderedItems.forEach(item => {
                 let basePrice = (item.price && typeof item.price === 'number') ? item.price : (item.product && item.product.price ? item.product.price : 0);
@@ -702,6 +703,12 @@ const loadOrders = async (req, res) => {
                 }
                 item.displayPrice = Math.round(displayPrice);
             });
+            
+            // Calculate correct display totals considering returns/cancellations
+            const displayTotals = getOrderDisplayTotals(order);
+            order.displayFinalAmount = displayTotals.finalAmount;
+            order.displaySubtotal = displayTotals.subtotal;
+            order.displayCouponDiscount = displayTotals.couponDiscount;
         });
 
         const count = await Order.countDocuments({userId:userId});
@@ -760,9 +767,9 @@ const loadWallet = async (req, res) => {
 
         walletStats.forEach(stat => {
             if (stat._id === 'credit') {
-                totalAdded = stat.totalAmount;
+                totalAdded = Math.round(stat.totalAmount);
             } else if (stat._id === 'debit') {
-                totalSpent = stat.totalAmount;
+                totalSpent = Math.round(stat.totalAmount);
             }
         });
 
@@ -1227,6 +1234,12 @@ const loadOrderDetails = async (req, res) => {
             item.displayPrice = Math.round(displayPrice);
         });
         
+        // Calculate correct display totals considering returns/cancellations
+        const displayTotals = getOrderDisplayTotals(order);
+        order.displayFinalAmount = displayTotals.finalAmount;
+        order.displaySubtotal = displayTotals.subtotal;
+        order.displayCouponDiscount = displayTotals.couponDiscount;
+        
         res.render("orderDetails", {
             user: userData,
             order: order,
@@ -1467,13 +1480,18 @@ const cancelItem = async (req, res) => {
                 return res.status(404).json({ success: false, message: "User not found" });
             }
             
-            // Calculate refund amount for this specific item
-            refundAmount = (item.price || 0) * (item.quantity || 1);
+            // Calculate equal coupon discount for this item
+            const couponCalculation = calculateSingleItemCouponDiscount(order, item);
+            refundAmount = couponCalculation.adjustedRefundAmount;
             
             if (refundAmount > 0) {
                 const currentWalletBalance = user.wallet || 0;
                 const newWalletBalance = currentWalletBalance + refundAmount;
                 await User.findByIdAndUpdate(userId, { wallet: newWalletBalance });
+                
+                // Update order coupon discount (using equal distribution)
+                const equalDiscount = couponCalculation.equalDiscount || couponCalculation.proportionalDiscount;
+                updateOrderCouponDiscount(order, equalDiscount);
                 
                 const WalletTransaction = require("../../models/walletTransactionSchema");
                 const transactionMetadata = {
@@ -1481,6 +1499,10 @@ const cancelItem = async (req, res) => {
                     itemRefund: true,
                     itemPrice: item.price,
                     itemQuantity: item.quantity,
+                    originalItemValue: couponCalculation.returnedItemsValue,
+                    equalCouponDiscount: equalDiscount,
+                    discountPerProduct: couponCalculation.discountPerProduct,
+                    adjustedRefundAmount: refundAmount,
                     cancellationInitiatedBy: 'user',
                     cancellationAt: new Date(),
                     originalPaymentMethod: order.paymentMethod,
@@ -1498,10 +1520,13 @@ const cancelItem = async (req, res) => {
                 
                 if (order.couponApplied && order.couponCode) {
                     transactionMetadata.couponCode = order.couponCode;
-                    transactionMetadata.couponDiscount = order.couponDiscount || 0;
+                    transactionMetadata.originalCouponDiscount = order.couponDiscount || 0;
                 }
                 
-                let description = `Automatic refund for cancelled item in order ${order.orderId || orderId}`;
+                let description = `Refund for cancelled item in order ${order.orderId || orderId}`;
+                if (equalDiscount > 0) {
+                    description += ` (adjusted for equal coupon discount: -₹${equalDiscount.toFixed(2)})`;
+                }
                 if (order.paymentMethod === 'ONLINE') {
                     description += ` - Online payment refund`;
                 } else if (order.paymentMethod === 'WALLET') {

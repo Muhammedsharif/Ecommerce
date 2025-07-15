@@ -527,7 +527,7 @@
                 </div>
                 <div class="info-card">
                     <div class="info-label">Total Amount</div>
-                    <div class="info-value">₹<%= order.finalAmount.toLocaleString() %></div>
+                    <div class="info-value">₹<%= Math.round((order.displayFinalAmount !== undefined ? order.displayFinalAmount : order.finalAmount)).toLocaleString() %></div>
                 </div>
             </div>
         </div>
@@ -609,7 +609,7 @@
                             } %>
                         </div>
                     </div>
-                    <div class="item-price">₹<%= item.price.toLocaleString() %></div>
+                    <div class="item-price">₹<%= Math.round(item.price).toLocaleString() %></div>
                 </div>
             <% }) %>
         </div>
@@ -635,16 +635,19 @@
             
             <div class="summary-row">
                 <span class="summary-label">Subtotal</span>
-                <span class="summary-value">₹<%= order.totalPrice.toLocaleString() %></span>
+                <span class="summary-value">₹<%= Math.round((order.displaySubtotal !== undefined ? order.displaySubtotal : order.totalPrice)).toLocaleString() %></span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">Shipping</span>
                 <span class="summary-value">Free</span>
             </div>
-            <% if (order.couponDiscount && order.couponDiscount > 0) { %>
+            <% 
+                let displayCouponDiscount = order.displayCouponDiscount !== undefined ? order.displayCouponDiscount : order.couponDiscount;
+            %>
+            <% if (displayCouponDiscount && displayCouponDiscount > 0) { %>
                 <div class="summary-row">
                     <span class="summary-label">Coupon Discount<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %></span>
-                    <span class="summary-value" style="color: #28a745;">-₹<%= order.couponDiscount.toLocaleString() %></span>
+                    <span class="summary-value" style="color: #28a745;">-₹<%= displayCouponDiscount.toLocaleString() %></span>
                 </div>
             <% } else { %>
                 <div class="summary-row">
@@ -655,7 +658,7 @@
             
             <div class="summary-row">
                 <span class="summary-label">Total</span>
-                <span class="summary-value">₹<%= order.finalAmount.toLocaleString() %></span>
+                <span class="summary-value">₹<%= Math.round((order.displayFinalAmount !== undefined ? order.displayFinalAmount : order.finalAmount)).toLocaleString() %></span>
             </div>
         </div>
 

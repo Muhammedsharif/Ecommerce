@@ -494,7 +494,7 @@
                             <i class="fas fa-rupee-sign"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>₹<%= stats.totalAmount.toLocaleString('en-IN') %></h3>
+                            <h3>₹<%= Math.round(stats.totalAmount).toLocaleString('en-IN') %></h3>
                             <p>Total Return Amount</p>
                         </div>
                     </div>
@@ -566,7 +566,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="order-amount">₹<%= request.refundAmount.toLocaleString('en-IN') %></div>
+                                                <div class="order-amount">₹<%= Math.round(request.refundAmount).toLocaleString('en-IN') %></div>
                                             </td>
                                             <td>
                                                 <span class="status-badge status-<%= request.status.toLowerCase().replace(' ', '-') %>">

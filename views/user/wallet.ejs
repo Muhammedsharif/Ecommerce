@@ -277,7 +277,7 @@
                     <div class="stat-header">
                         <div class="stat-label">Total Balance</div>
                     </div>
-                    <div class="stat-amount">₹<%= walletStats.currentBalance.toLocaleString('en-IN') %></div>
+                    <div class="stat-amount">₹<%= Math.round(walletStats.currentBalance).toLocaleString('en-IN') %></div>
                     <div class="stat-status">
                         <div class="status-indicator"></div>
                         Ready to use
@@ -293,7 +293,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="stat-amount">₹<%= walletStats.totalSpent.toLocaleString('en-IN') %></div>
+                    <div class="stat-amount">₹<%= Math.round(walletStats.totalSpent).toLocaleString('en-IN') %></div>
                 </div>
 
                 <div class="stat-card secondary">
@@ -305,7 +305,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="stat-amount">₹<%= walletStats.totalAdded.toLocaleString('en-IN') %></div>
+                    <div class="stat-amount">₹<%= Math.round(walletStats.totalAdded).toLocaleString('en-IN') %></div>
                 </div>
             </div>
 
@@ -345,7 +345,7 @@
                             </div>
                             <div class="transaction-amount">
                                 <div class="amount <%= transaction.type === 'credit' ? 'credit-amount' : 'debit-amount' %>">
-                                    <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= transaction.amount.toLocaleString('en-IN') %>
+                                    <%= transaction.type === 'credit' ? '+' : '-' %>₹<%= Math.round(transaction.amount).toLocaleString('en-IN') %>
                                 </div>
                                 <div class="transaction-date">
                                     <%= new Date(transaction.createdAt).toLocaleDateString('en-IN', {

@@ -455,7 +455,7 @@
                             subtotal += item.displayPrice * item.quantity;
                         });
                     }   
-                    %><%= subtotal.toFixed(0) %>
+                    %><%= Math.round(subtotal).toFixed(0) %>
                 </span>
             </div>
             
