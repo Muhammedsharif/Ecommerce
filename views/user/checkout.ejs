@@ -664,7 +664,7 @@
                                 Size: <%= item.size %> | Qty: <%= item.quantity %>
                             </div>
                             <div class="item-price">
-                                ₹<% 
+                                <% 
                                     let variant = null;
                                     if (item.productId && item.productId.variant && item.size) {
                                         variant = item.productId.variant.find(v => v.size == item.size);
@@ -675,7 +675,11 @@
                                     let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.itemPrice === 'number' ? item.itemPrice : item.price);
                                     let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
                                     const itemTotal = displayPrice * item.quantity;
-                                %><%= Math.round(itemTotal).toLocaleString('en-IN')  %>
+                                %>
+                                <div style="color:#6b7280; font-size:0.875rem; margin-bottom:0.25rem;">
+                                    Price: ₹<%= Math.round(displayPrice).toLocaleString('en-IN') %>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -796,9 +800,10 @@
 
             <h3 class="section-title">Order Summary</h3>
             <div class="order-summary">
-                <div class="summary-row">
-                    <span>Subtotal (<%= cartItems.length %> items)</span>
-                    <span>₹<%
+                <!-- Individual Product Breakdown -->
+                <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb;">
+                    <h4 style="font-size: 0.9rem; color: #6b7280; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Item Details</h4>
+                    <% 
                         let summarySubtotal = 0;
                         cartItems.forEach(item => {
                             let variant = null;
@@ -810,9 +815,44 @@
                             let bestOffer = Math.max(productOffer, categoryOffer);
                             let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.itemPrice === 'number' ? item.itemPrice : item.price);
                             let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                            summarySubtotal += displayPrice * item.quantity;
-                        });
-                    %><%= Math.round(summarySubtotal).toLocaleString('en-IN') %></span>
+                            let itemTotal = displayPrice * item.quantity;
+                            summarySubtotal += itemTotal;
+                    %>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem 0; gap: 0.75rem;">
+                            <!-- Product Image -->
+                            <div style="flex-shrink: 0;">
+                                <% if (item.productId.productImage && item.productId.productImage.length > 0) { %>
+                                    <img src="/uploads/product-images/<%= item.productId.productImage[0] %>" 
+                                         alt="<%= item.productId.productName %>" 
+                                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <% } else { %>
+                                    <div style="width: 40px; height: 40px; background: #f3f4f6; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-image" style="color: #9ca3af; font-size: 0.75rem;"></i>
+                                    </div>
+                                <% } %>
+                            </div>
+                            
+                            <!-- Product Details -->
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; line-height: 1.2;">
+                                    <%= item.productId.productName.length > 20 ? item.productId.productName.substring(0, 20) + '...' : item.productId.productName %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #6b7280;">
+                                    ₹<%= Math.round(displayPrice).toLocaleString('en-IN') %> × <%= item.quantity %>
+                                </div>
+                            </div>
+                            
+                            <!-- Product Total -->
+                            <div style="font-weight: 600; color: #ef4444; font-size: 0.85rem; flex-shrink: 0;">
+                                ₹<%= Math.round(itemTotal).toLocaleString('en-IN') %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="summary-row">
+                    <span>Subtotal (<%= cartItems.length %> items)</span>
+                    <span>₹<%= Math.round(summarySubtotal).toLocaleString('en-IN') %></span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>

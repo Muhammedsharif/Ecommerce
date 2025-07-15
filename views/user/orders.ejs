@@ -446,9 +446,9 @@
                                     <span class="order-label">Total Amount</span>
                                     <span class="order-value">₹<%= Math.round((order.displayFinalAmount !== undefined ? order.displayFinalAmount : order.finalAmount)).toLocaleString() %></span>
                                       <% if (order.couponApplied) { %>
- <span class="order-label"><p class="coupon">Coupon Applied: <%= order.couponCode %></p></span>
- <span class="order-label"><p class="coupon">Discount:-₹<%= order.couponDiscount %></p></span> 
-<% } %>
+                                    <span class="order-label"><p class="coupon">Coupon Applied: <%= order.couponCode %></p></span>
+                                    <span class="order-label"><p class="coupon">Discount:-₹<%= order.couponDiscount %></p></span> 
+                                     <% } %>
                                 </div>
                             </div>
                             <div class="order-status status-<%= order.status.toLowerCase() %>">
