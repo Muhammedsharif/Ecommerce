@@ -8,6 +8,7 @@ const ExcelJS = require('exceljs');
 // Get sales report dashboard
 const getSalesReportDashboard = async (req, res) => {
     try {
+        
         res.render("admin-sales-report", {
             title: "Sales Report Dashboard"
         });
@@ -21,6 +22,9 @@ const getSalesReportDashboard = async (req, res) => {
 const generateSalesReport = async (req, res) => {
     try {
         const { reportType, startDate, endDate, customDays } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
         
         // Calculate date range based on report type
         let dateFilter = {};
@@ -106,24 +110,42 @@ const generateSalesReport = async (req, res) => {
                 break;
         }
 
-        // Get orders with the date filter
+        // Get total count for pagination
+        const totalOrders = await Order.countDocuments({
+            ...dateFilter,
+            status: { $in: ['Pending', 'Processing', 'Shipped', 'Delivered'] }
+        });
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        // Get orders with pagination
         const orders = await Order.find({
             ...dateFilter,
             status: { $in: ['Pending', 'Processing', 'Shipped', 'Delivered'] }
         }).populate('userId', 'name email')
           .populate('orderedItems.product', 'productName')
           .populate('couponApplied', 'name offerPrice discountType')
+          .skip(skip)
+          .limit(limit)
           .sort({ createdOn: -1 });
 
-        // Calculate report metrics
-        const totalSalesCount = orders.length;
-        const totalOrderAmount = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
-        const totalDiscountAmount = orders.reduce((sum, order) => sum + (order.discount || 0), 0);
+        // Get all orders for summary calculations (without pagination)
+        const allOrders = await Order.find({
+            ...dateFilter,
+            status: { $in: ['Pending', 'Processing', 'Shipped', 'Delivered'] }
+        }).populate('couponApplied', 'name offerPrice discountType')
+          .sort({ createdOn: -1 });
+
+        // Calculate report metrics using all orders
+        const totalSalesCount = allOrders.length;
+        const totalOrderAmount = allOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+        const totalDiscountAmount = allOrders.reduce((sum, order) => sum + (order.discount || 0), 0);
         const netRevenue = totalOrderAmount - totalDiscountAmount;
 
         // Coupon usage summary
         const couponUsage = {};
-        orders.forEach(order => {
+        allOrders.forEach(order => {
             if (order.couponApplied) {
                 const couponName = order.couponApplied.name;
                 if (!couponUsage[couponName]) {
@@ -140,7 +162,7 @@ const generateSalesReport = async (req, res) => {
 
         // Daily sales breakdown for charts
         const dailySales = {};
-        orders.forEach(order => {
+        allOrders.forEach(order => {
             const date = order.createdOn.toISOString().split('T')[0];
             if (!dailySales[date]) {
                 dailySales[date] = {
@@ -175,7 +197,15 @@ const generateSalesReport = async (req, res) => {
                 date,
                 ...data
             })).sort((a, b) => new Date(a.date) - new Date(b.date)),
-            orders: orders.slice(0, 100) // Limit to 100 orders for display
+            orders: orders, // Return paginated orders
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalOrders: totalOrders,
+                limit: limit,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            }
         };
 
         res.json({
