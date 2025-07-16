@@ -252,7 +252,6 @@
                         <div class="card-body">
                             <div id="couponUsageList">
                                 <!-- Coupon usage will be populated here -->
-                                 
                             </div>
                         </div>
                     </div>
@@ -283,11 +282,14 @@
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Customer</th>
+                                    <th>Products</th>
+                                    <th>Quantity</th>
                                     <th>Amount</th>
+                                    <th>Coupon</th>
                                     <th>Discount</th>
                                     <th>Net Amount</th>
+                                    <th>Payment</th>
                                     <th>Date</th>
-                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -549,12 +551,12 @@
             `).join('');
         }
 
-        // Update orders table
+        // Update orders table with new columns
         function updateOrdersTable(orders) {
             const tbody = document.querySelector('#ordersTable tbody');
 
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No orders found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No orders found</td></tr>';
                 return;
             }
 
@@ -562,11 +564,14 @@
                 <tr>
                     <td>#${order.orderId || order._id.slice(-6)}</td>
                     <td>${order.userId?.name || 'N/A'}</td>
+                    <td title="${order.productNames || 'N/A'}">${(order.productNames || 'N/A').substring(0, 30)}${(order.productNames || '').length > 30 ? '...' : ''}</td>
+                    <td>${order.totalQuantity || 0}</td>
                     <td>₹${(order.totalPrice || 0).toFixed(0)}</td>
-                    <td>₹${(order.discount || 0).toFixed(0)}</td>
-                    <td>₹${((order.totalPrice || 0) - (order.discount || 0)).toFixed(0)}</td>
+                    <td>${order.couponCode || 'None'}</td>
+                    <td>₹${(order.couponDiscount || 0).toFixed(0)}</td>
+                    <td>₹${((order.totalPrice || 0) - (order.couponDiscount || 0)).toFixed(0)}</td>
+                    <td>${order.paymentMethod || 'N/A'}</td>
                     <td>${new Date(order.createdOn).toLocaleDateString()}</td>
-                    <td><span class="badge bg-primary">${order.status}</span></td>
                 </tr>
             `).join('');
         }
