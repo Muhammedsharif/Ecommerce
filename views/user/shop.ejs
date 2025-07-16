@@ -1060,18 +1060,21 @@
                     try {
                         console.log('Fetching products with:', { searchQuery, page, filters });
                         const queryParams = new URLSearchParams({ page });
-                        if (searchQuery) queryParams.append('search', searchQuery);
+                        
+                        // Always add filters to query params, including sort
                         if (filters.category) queryParams.append('category', filters.category);
                         if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
                         if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
-
-                        if (filters.sort && filters.sort !== 'default') queryParams.append('sort', filters.sort);
+                        // Always include sort parameter, even if it's 'default'
+                        queryParams.append('sort', filters.sort || 'default');
 
                         const endpoint = searchQuery ? '/search' : '/filter';
                         const method = searchQuery ? 'POST' : 'GET';
                         const body = searchQuery ? JSON.stringify({ search: searchQuery }) : null;
 
                         console.log('Request URL:', `${endpoint}?${queryParams.toString()}`);
+                        console.log('Sort parameter being sent:', filters.sort || 'default');
+                        
                         const response = await fetch(`${endpoint}?${queryParams.toString()}`, {
                             method: method,
                             headers: {
@@ -1086,6 +1089,7 @@
 
                         const data = await response.json();
                         console.log('Response data:', data);
+                        console.log('Sort applied in response:', data.query?.sort);
                         const productsGrid = document.querySelector('.products-grid');
                         const pagination = document.querySelector('.pagination');
                         const productsCount = document.querySelector('.products-count');
@@ -1219,12 +1223,12 @@
                         const sortElement = document.getElementById('sort');
                         const sortValue = sortElement ? sortElement.value : 'default';
 
-                        currentFilters = { category: '', minPrice: '', maxPrice: '', sort: sortValue };
-                        document.getElementById('categoryDropdown').value = '';
-                        document.getElementById('min-price').value = '';
-                        document.getElementById('max-price').value = '';
+                        // Preserve the current category filter when searching
+                        currentFilters.sort = sortValue;
+                        // Don't clear category, minPrice, maxPrice - preserve them
 
                         console.log('Search query:', currentSearchQuery);
+                        console.log('Preserved filters:', currentFilters);
                         await fetchProducts(currentSearchQuery, 1, currentFilters);
                     });
 

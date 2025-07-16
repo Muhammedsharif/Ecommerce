@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ancizar+Serif:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -565,39 +568,76 @@
         }
 
         .applied-coupon {
-            background: #d1fae5;
-            border: 1px solid #10b981;
-            border-radius: 6px;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: nowrap;
-            min-height: 60px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+        }
+
+        .applied-coupon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0ea5e9, #06b6d4, #0ea5e9);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
         .applied-coupon-info {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            flex: 1;
-            min-width: 0;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .applied-coupon-code {
-            font-weight: 600;
-            color: #059669;
+            font-weight: 700;
+            color: #0369a1;
             text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
         .applied-coupon-discount {
-            color: #059669;
-            font-weight: 500;
+            color: #0c4a6e;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: rgba(14, 165, 233, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .applied-coupon .remove-coupon-btn {
+            width: 100%;
+            margin-left: 0;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .summary-row.discount {
-            color: #10b981;
-            font-weight: 600;
+             font-family: "Ancizar Serif", serif;
+  font-optical-sizing: auto;
+  font-weight:600;
+  font-style: normal;
+  color: #00b386; /* matching your green */
+  display: flex;
+  justify-content: space-between;
         }
 
         .summary-row.original {
@@ -768,9 +808,7 @@
                         <div class="applied-coupon-info">
                             <i class="fas fa-check-circle" style="color: #10b981;"></i>
                             <span class="applied-coupon-code"><%= appliedCoupon.couponCode %></span>
-                            <span class="applied-coupon-discount">
-                                -₹<%= appliedCoupon.discountAmount.toLocaleString('en-IN') %>
-                            </span>
+                           
                         </div>
                         <button class="coupon-btn remove-coupon-btn" onclick="removeCoupon()">
                             <i class="fas fa-times"></i> Remove
