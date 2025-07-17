@@ -1,21 +1,18 @@
 // Import required models and modules for product management
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const Brand = require("../../models/brandSchema");
 const User = require("../../models/userSchema");
 const fs = require("fs"); // File system operations
 const path = require("path"); // Path manipulation utilities
 const sharp = require("sharp"); // Image processing library
 
-// Controller function to render the add product page with categories and brands
+// Controller function to render the add product page with categories
 const getProductAddPage = async (req, res) => {
   try {
-    // Fetch active categories and brands for the form dropdowns
+    // Fetch active categories for the form dropdown
     const category = await Category.find({ isListed: true });
-    const brands = await Brand.find({ isBlocked: false });
     res.render("productAdd", {
       cat: category,
-      brands: brands,
     });
   } catch (error) {
     // Redirect to error page if database operations fail
@@ -129,8 +126,7 @@ const addProducts = async (req, res) => {
         return res.status(400).json({ error: "Invalid category ID" });
       }
 
-      // 🟡 Handle selected sizes
-      
+      // Handle selected sizes
       let selectedSizes = req.body.sizes;
       if (!selectedSizes) {
         selectedSizes = [];
@@ -191,12 +187,9 @@ const addProducts = async (req, res) => {
         };
       });
 
-      
-
       const newProduct = new Product({
         productName: products.productName,
         description: products.description,
-        brand: products.brand || null,
         category: categoryId._id,
         salePrice: salePrice,
         varientPrice: varientPrice,
@@ -273,7 +266,6 @@ const getEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
 
-
     const product = await Product.findOne({ _id: id });
     console.log('Product found:', product ? 'Yes' : 'No');
 
@@ -294,12 +286,10 @@ const getEditProduct = async (req, res) => {
     }
 
     const category = await Category.find({ isListed: true });
-    const brands = await Brand.find({ isBlocked: false });
 
     res.render("editProduct", {
       product: product,
       cat: category,
-      brands: brands,
     });
   } catch (error) {
     console.error('Error in getEditProduct:', error);
@@ -444,6 +434,7 @@ const editProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const deleteSingleImage = async (req, res) => {
   try {
     const { imageNameToServer, productIdToServer } = req.body;

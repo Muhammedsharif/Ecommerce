@@ -33,11 +33,7 @@ const productSchema=new Schema({
         type:String,
         required:true
     },
-    brand:{
-        type:String,
-        required:false
-    },
-    category:{
+        category:{
         type:Schema.Types.ObjectId,
         ref:"Category",
         required:true

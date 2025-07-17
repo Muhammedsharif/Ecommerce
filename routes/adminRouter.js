@@ -79,7 +79,6 @@ router.get("/dashboard-analytics/stats",adminAuth,dashboardController.getDashboa
 router.get("/dashboard-analytics/sales-chart",adminAuth,dashboardController.getSalesChartData)
 router.get("/dashboard-analytics/top-products",adminAuth,dashboardController.getTopProducts)
 router.get("/dashboard-analytics/top-categories",adminAuth,dashboardController.getTopCategories)
-router.get("/dashboard-analytics/top-brands",adminAuth,dashboardController.getTopBrands)
 router.get("/dashboard-analytics/ledger",adminAuth,dashboardController.getLedgerData)
 
 // Sales Report Routes

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Product</title>
+    <title>Edit Product</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -747,18 +747,18 @@ body {
         </ol>
     </nav>
         <div class="header">
-            <h1><i class="fas fa-plus-circle"></i> Edit Product</h1>
-            <p>Create and manage your product inventory with ease</p>
+            <h1><i class="fas fa-edit"></i> Edit Product</h1>
+            <p>Update and manage your product inventory with ease</p>
         </div>
 
         <div class="form-container">
             <div class="form-header">
                 <h2>Product Information</h2>
-                <p>Fill in the details below to add a new product to your store</p>
+                <p>Update the details below to modify your product</p>
             </div>
 
             <div class="form-body">
-                <form method="post" action="/admin/editProduct/<%product._id%>" enctype="multipart/form-data" id="productForm">
+                <form method="post" action="/admin/editProduct/<%=product._id%>" enctype="multipart/form-data" id="productForm">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="product_name" class="form-label">
@@ -767,22 +767,9 @@ body {
                             <input type="text" placeholder="Enter product name" name="productName" value="<%=product.productName%>" class="form-control" id="product_name">
                             <div id="productName-error" class="error-message"></div>
                         </div>
-                         <input type="hidden" id="productId" value="<%=product._id%>">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-tag"></i> Brand
-                            </label>
-                            <select class="form-control form-select" name="brand">
-                                <option value="">Select a brand</option>
-                                <% if (typeof brands !== 'undefined') { %>
-                                    <% for(let i = 0; i < brands.length; i++) { %>
-                                        <option value="<%=brands[i].brandName%>" <%= product.brand === brands[i].brandName ? 'selected' : '' %>><%=brands[i].brandName%></option>
-                                    <% } %>
-                                <% } %>
-                            </select>
-                            <div id="brand-error" class="error-message"></div>
-                        </div>
-
+                        
+                        <input type="hidden" id="productId" value="<%=product._id%>">
+                        
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-align-left"></i> Full Description
@@ -824,7 +811,6 @@ body {
                                 <div id="category-error" class="error-message"></div>
                             </div>
                         </div>
-                    </div>
 
                         <div class="form-group">
                             <label class="form-label">
@@ -840,7 +826,6 @@ body {
                 type="checkbox"
                 name="sizes"
                 value="<%= size %>"
-                value="<%= size.varientPrice %>"
                 onchange="toggleSizeVariant('<%= size %>', this.checked)"
                 <%= selectedSizes.includes(size) ? 'checked' : '' %> >
             <span>Size <%= size %></span>
@@ -871,8 +856,6 @@ body {
                             </div>
                         </div>
                     </div>
-
-
 
                     <!-- Product Variants Section -->
                     <div class="product-variants-section" id="productVariantsSection" style="display: none;">
@@ -980,7 +963,7 @@ body {
 
                     <div class="submit-section">
                         <button class="submit-button" type="button" onclick="validateAndSubmit()">
-                            <i class="fas fa-rocket"></i> Update Product
+                            <i class="fas fa-save"></i> Update Product
                         </button>
                     </div>
                 </form>
@@ -1376,7 +1359,6 @@ function validateForm() {
     clearErrorMessages();
     const name = document.getElementsByName('productName')[0].value;
     const description = document.getElementById('descriptionid').value;
-    const brand = document.getElementsByName('brand')[0].value;
     const productOffer = document.getElementsByName('productOffer')[0].value;
     const color = document.getElementsByName('color')[0].value;
     const category = document.getElementsByName('category')[0].value;
@@ -1394,7 +1376,7 @@ function validateForm() {
     if (!description || description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
-    } else if (!/^[a-zA-Z0-9\s.,'"’“”\-()\/:!&?—]+$/.test(description.trim())) {
+    } else if (!/^[a-zA-Z0-9\s.,'"'""\-()\/:!&?—]+$/.test(description.trim())) {
         displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
         isValid = false;
     }

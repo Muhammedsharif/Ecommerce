@@ -779,21 +779,6 @@ img[src*="data:"] {
                             <div id="productName-error" class="error-message"></div>
                         </div>
 
-                        <!-- <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-tag"></i> Brand
-                            </label>
-                            <select class="form-control form-select" name="brand">
-                                <option value="">Select a brand</option>
-                                <% if (typeof brands !== 'undefined') { %>
-                                    <% for(let i = 0; i < brands.length; i++) { %>
-                                        <option value="<%=brands[i].brandName%>"><%=brands[i].brandName%></option>
-                                    <% } %>
-                                <% } %>
-                            </select>
-                            <div id="brand-error" class="error-message"></div>
-                        </div> -->
-
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-align-left"></i> Full Description
@@ -1311,7 +1296,6 @@ img[src*="data:"] {
 
             const name = document.getElementsByName('productName')[0].value;
             const description = document.getElementById('descriptionid').value;
-            const brand = document.getElementsByName('brand')[0].value;
             const productOffer = document.getElementsByName('productOffer')[0].value;
             const color = document.getElementsByName('color')[0].value;
             const category = document.getElementsByName('category')[0].value;
@@ -1332,8 +1316,6 @@ img[src*="data:"] {
                 displayErrorMessage('description-error', 'Please enter a product description.');
                 isValid = false;
             } 
-
-
 
             if (productOffer && (!/^\d+$/.test(productOffer) || parseInt(productOffer) < 0 || parseInt(productOffer) > 100)) {
                 displayErrorMessage('productOffer-error', 'Product offer must be between 0 and 100.');

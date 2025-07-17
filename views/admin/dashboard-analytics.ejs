@@ -6,6 +6,7 @@
     <title>Admin Dashboard - Analytics</title>
     <link rel="stylesheet" href="/styles/admin/sidebar.css">
     <link rel="stylesheet" href="/styles/admin/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .analytics-container {
@@ -23,6 +24,18 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-text {
+            flex: 1;
+        }
+        
         .dashboard-title {
             font-size: 2.5rem;
             font-weight: 700;
@@ -32,6 +45,50 @@
         .dashboard-subtitle {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .quick-nav-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .nav-btn span {
+            font-size: 0.9rem;
+            font-weight: 500;
         }
         
         .stats-grid {
@@ -221,11 +278,36 @@
         
         .ledger-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
             flex-wrap: wrap;
             gap: 15px;
+        }
+        
+        .ledger-title-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
         }
         
         .ledger-filters {
@@ -290,6 +372,7 @@
         
         .status-delivered { background: #d4edda; color: #155724; }
         .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #cce5ff; color: #004085; }
         .status-cancelled { background: #f8d7da; color: #721c24; }
         .status-returned { background: #d1ecf1; color: #0c5460; }
         
@@ -337,6 +420,21 @@
                 padding: 15px;
             }
             
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .quick-nav-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                min-width: auto;
+            }
+            
             .dashboard-title {
                 font-size: 2rem;
             }
@@ -354,9 +452,15 @@
                 grid-template-columns: 1fr;
             }
             
+            .ledger-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
             .ledger-filters {
                 flex-direction: column;
                 align-items: stretch;
+                width: 100%;
             }
         }
     </style>
@@ -368,29 +472,53 @@
         <main class="analytics-container">
             <!-- Dashboard Header -->
             <div class="dashboard-header">
-                <h1 class="dashboard-title"> Analytics Dashboard</h1>
-                <p class="dashboard-subtitle">Comprehensive insights into your e-commerce performance</p>
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1 class="dashboard-title">📊 Analytics Dashboard</h1>
+                        <p class="dashboard-subtitle">Comprehensive insights into your e-commerce performance</p>
+                    </div>
+                    <div class="header-actions">
+                        <div class="quick-nav-buttons">
+                            <a href="/admin/products" class="nav-btn products-btn">
+                                <i class="fas fa-box"></i>
+                                <span>Products</span>
+                            </a>
+                            <a href="/admin/category" class="nav-btn categories-btn">
+                                <i class="fas fa-tags"></i>
+                                <span>Categories</span>
+                            </a>
+                            <a href="/admin/users" class="nav-btn customers-btn">
+                                <i class="fas fa-users"></i>
+                                <span>Customers</span>
+                            </a>
+                            <a href="/admin/sales-report" class="nav-btn sales-btn">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Sales Report</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats Overview -->
             <div class="stats-grid">
                 <div class="stat-card revenue">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">💰</div>
                     <div class="stat-value" id="totalRevenue">₹0</div>
                     <div class="stat-label">Total Revenue</div>
                 </div>
                 <div class="stat-card orders">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">📦</div>
                     <div class="stat-value" id="totalOrders">0</div>
                     <div class="stat-label">Total Orders</div>
                 </div>
                 <div class="stat-card users">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">👥</div>
                     <div class="stat-value" id="totalUsers">0</div>
                     <div class="stat-label">Total Users</div>
                 </div>
                 <div class="stat-card products">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">🛍️</div>
                     <div class="stat-value" id="totalProducts">0</div>
                     <div class="stat-label">Total Products</div>
                 </div>
@@ -399,7 +527,7 @@
             <!-- Sales Chart -->
             <div class="chart-section">
                 <div class="chart-header">
-                    <h2 class="chart-title"> Sales Trends</h2>
+                    <h2 class="chart-title">📈 Sales Trends</h2>
                     <div class="chart-filters">
                         <button class="filter-btn active" data-period="daily">Daily</button>
                         <button class="filter-btn" data-period="weekly">Weekly</button>
@@ -417,7 +545,7 @@
                 <!-- Top Products -->
                 <div class="top-items-card">
                     <div class="top-items-header">
-                        <span class="top-items-icon"></span>
+                        <span class="top-items-icon">🏆</span>
                         <h3 class="top-items-title">Top 10 Products</h3>
                     </div>
                     <div id="topProducts" class="loading">Loading...</div>
@@ -426,20 +554,23 @@
                 <!-- Top Categories -->
                 <div class="top-items-card">
                     <div class="top-items-header">
-                        <span class="top-items-icon"></span>
+                        <span class="top-items-icon">📂</span>
                         <h3 class="top-items-title">Top 10 Categories</h3>
                     </div>
                     <div id="topCategories" class="loading">Loading...</div>
                 </div>
-
-                <!-- Top Brands -->
-                
             </div>
 
             <!-- Ledger Book -->
             <div class="ledger-section">
                 <div class="ledger-header">
-                    <h2 class="chart-title"> Transaction Ledger</h2>
+                    <div class="ledger-title-section">
+                        <h2 class="chart-title">📋 Transaction Ledger</h2>
+                        <button class="download-btn" onclick="downloadLedger()">
+                            <i class="fas fa-download"></i>
+                            <span>Download Ledger</span>
+                        </button>
+                    </div>
                     <div class="ledger-filters">
                         <div class="filter-group">
                             <label class="filter-label">Start Date</label>
@@ -498,14 +629,15 @@
     <script>
         let salesChart;
         let currentPage = 1;
+        let allLedgerData = []; // Store all ledger data for download
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initializing...');
             loadDashboardStats();
             loadSalesChart('daily');
             loadTopProducts();
             loadTopCategories();
-            loadTopBrands();
             loadLedgerData();
             
             // Set default date range (last 30 days)
@@ -520,14 +652,18 @@
         // Load dashboard statistics
         async function loadDashboardStats() {
             try {
+                console.log('Loading dashboard stats...');
                 const response = await fetch('/admin/dashboard-analytics/stats');
                 const data = await response.json();
                 
                 if (data.success) {
-                    document.getElementById('totalRevenue').textContent = `₹${Math.round(data.stats.totalRevenue).toLocaleString()}`;
+                    document.getElementById('totalRevenue').textContent = `₹${Math.round(data.stats.totalRevenue).toLocaleString('en-IN')}`;
                     document.getElementById('totalOrders').textContent = data.stats.totalOrders.toLocaleString();
                     document.getElementById('totalUsers').textContent = data.stats.totalUsers.toLocaleString();
                     document.getElementById('totalProducts').textContent = data.stats.totalProducts.toLocaleString();
+                    console.log('Dashboard stats loaded successfully');
+                } else {
+                    console.error('Failed to load dashboard stats:', data.message);
                 }
             } catch (error) {
                 console.error('Error loading dashboard stats:', error);
@@ -537,11 +673,15 @@
         // Load sales chart
         async function loadSalesChart(period) {
             try {
+                console.log(`Loading sales chart for period: ${period}`);
                 const response = await fetch(`/admin/dashboard-analytics/sales-chart?period=${period}`);
                 const data = await response.json();
                 
                 if (data.success) {
+                    console.log('Sales chart data received:', data.data);
                     updateSalesChart(data.data, period);
+                } else {
+                    console.error('Failed to load sales chart:', data.message);
                 }
             } catch (error) {
                 console.error('Error loading sales chart:', error);
@@ -556,49 +696,115 @@
                 salesChart.destroy();
             }
             
+            // Format sales data for display
+            const formattedData = data.map(item => ({
+                ...item,
+                sales: Math.round(item.sales || 0),
+                orders: item.orders || 0
+            }));
+            
+            console.log('Updating chart with formatted data:', formattedData);
+            
             salesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.map(item => item.label),
+                    labels: formattedData.map(item => item.label),
                     datasets: [{
                         label: 'Sales (₹)',
-                        data: data.map(item => item.sales),
+                        data: formattedData.map(item => item.sales),
                         borderColor: '#007bff',
                         backgroundColor: 'rgba(0, 123, 255, 0.1)',
                         borderWidth: 3,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        pointBackgroundColor: '#007bff',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
                     }, {
                         label: 'Orders',
-                        data: data.map(item => item.orders),
+                        data: formattedData.map(item => item.orders),
                         borderColor: '#28a745',
                         backgroundColor: 'rgba(40, 167, 69, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
+                        pointBackgroundColor: '#28a745',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
                             position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
                         },
                         title: {
                             display: true,
-                            text: `Sales Trends - ${period.charAt(0).toUpperCase() + period.slice(1)} View`
+                            text: `Sales Trends - ${period.charAt(0).toUpperCase() + period.slice(1)} View`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: 20
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#007bff',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Sales: ₹${context.parsed.y.toLocaleString('en-IN')}`;
+                                    } else {
+                                        return `Orders: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
                         }
                     },
                     scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: period.charAt(0).toUpperCase() + period.slice(1),
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
                         y: {
                             type: 'linear',
                             display: true,
                             position: 'left',
                             title: {
                                 display: true,
-                                text: 'Sales Amount (₹)'
+                                text: 'Sales Amount (₹)',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
                             }
                         },
                         y1: {
@@ -607,22 +813,34 @@
                             position: 'right',
                             title: {
                                 display: true,
-                                text: 'Number of Orders'
+                                text: 'Number of Orders',
+                                font: {
+                                    weight: 'bold'
+                                }
                             },
                             grid: {
                                 drawOnChartArea: false,
                             },
+                            ticks: {
+                                stepSize: 1
+                            }
                         }
                     }
                 }
             });
+            
+            console.log('Chart updated successfully');
         }
         
         // Chart filter buttons
         document.querySelectorAll('.filter-btn[data-period]').forEach(btn => {
             btn.addEventListener('click', function() {
+                console.log(`Filter button clicked: ${this.dataset.period}`);
+                // Remove active class from all filter buttons
                 document.querySelectorAll('.filter-btn[data-period]').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
                 this.classList.add('active');
+                // Load chart data for selected period
                 loadSalesChart(this.dataset.period);
             });
         });
@@ -657,9 +875,6 @@
             }
         }
         
-        // Load top brands
-        
-        
         // Render top items
         function renderTopItems(containerId, items, type) {
             const container = document.getElementById(containerId);
@@ -677,33 +892,29 @@
                     image = item.productImage ? `/uploads/product-images/${item.productImage}` : '/images/placeholder.jpg';
                 } else if (type === 'category') {
                     name = item.categoryName;
-                    
                 } 
+                
                 if(type === 'product'){
-                return `
-                    <div class="top-item">
-                        
-                        <img src="${image}" alt="${name}" class="item-image" onerror="this.src='/images/placeholder.jpg'">
-                       
-                        <div class="item-info">
-                            <div class="item-name">${name}</div>
-                            <div class="item-stats">Qty: ${item.totalQuantity}</div>
-                        </div>
-                        <div class="item-value">₹${Math.round(item.totalRevenue).toLocaleString()}</div>
-                    </div>
-                `;}else if(type === 'category'){
                     return `
-                    <div class="top-item">
-                        
-                        <div class="item-info">
-                            <div class="item-name">${name}</div>
-                            <div class="item-stats">Qty: ${item.totalQuantity}</div>
+                        <div class="top-item">
+                            <img src="${image}" alt="${name}" class="item-image" onerror="this.src='/images/placeholder.jpg'">
+                            <div class="item-info">
+                                <div class="item-name">${name}</div>
+                                <div class="item-stats">Qty: ${item.totalQuantity}</div>
+                            </div>
+                            <div class="item-value">₹${Math.round(item.totalRevenue).toLocaleString()}</div>
                         </div>
-                       
-                        
-                        <div class="item-value">₹${Math.round(item.totalRevenue).toLocaleString()}</div>
-                    </div>
-                `;
+                    `;
+                } else if(type === 'category'){
+                    return `
+                        <div class="top-item">
+                            <div class="item-info">
+                                <div class="item-name">${name}</div>
+                                <div class="item-stats">Qty: ${item.totalQuantity}</div>
+                            </div>
+                            <div class="item-value">₹${Math.round(item.totalRevenue).toLocaleString()}</div>
+                        </div>
+                    `;
                 }
             }).join('');
             
@@ -734,11 +945,150 @@
                 if (data.success) {
                     renderLedgerTable(data.data.transactions);
                     renderLedgerPagination(data.data.pagination);
+                    
+                    // Store current page data for download
+                    if (page === 1) {
+                        allLedgerData = data.data.transactions;
+                    }
                 }
             } catch (error) {
                 console.error('Error loading ledger data:', error);
                 document.getElementById('ledgerTableBody').innerHTML = '<tr><td colspan="9" class="error">Error loading transactions</td></tr>';
             }
+        }
+        
+        // Download ledger functionality
+        async function downloadLedger() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const status = document.getElementById('statusFilter').value;
+                const customer = document.getElementById('customerFilter').value;
+                
+                const params = new URLSearchParams({
+                    download: 'true'
+                });
+                
+                if (startDate) params.append('startDate', startDate);
+                if (endDate) params.append('endDate', endDate);
+                if (status && status !== 'all') params.append('status', status);
+                if (customer) params.append('customer', customer);
+                
+                // Show loading state
+                const downloadBtn = document.querySelector('.download-btn');
+                const originalText = downloadBtn.innerHTML;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Downloading...</span>';
+                downloadBtn.disabled = true;
+                
+                const response = await fetch(`/admin/dashboard-analytics/ledger?${params}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Create CSV content
+                    const csvContent = generateCSV(data.data.transactions);
+                    
+                    // Create and trigger download
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    
+                    // Generate filename with current date
+                    const now = new Date();
+                    const filename = `ledger_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.csv`;
+                    link.setAttribute('download', filename);
+                    
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show success message
+                    showToast('Ledger downloaded successfully!', 'success');
+                } else {
+                    showToast('Failed to download ledger', 'error');
+                }
+                
+                // Reset button state
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Error downloading ledger:', error);
+                showToast('Error downloading ledger', 'error');
+                
+                // Reset button state
+                const downloadBtn = document.querySelector('.download-btn');
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i><span>Download Ledger</span>';
+                downloadBtn.disabled = false;
+            }
+        }
+        
+        // Generate CSV content
+        function generateCSV(transactions) {
+            const headers = ['Transaction ID', 'Date', 'Customer', 'Type', 'Description', 'Amount', 'Discount', 'Net Amount', 'Status'];
+            const csvRows = [headers.join(',')];
+            
+            transactions.forEach(transaction => {
+                const row = [
+                    `"${transaction.transactionId}"`,
+                    `"${new Date(transaction.date).toLocaleDateString()}"`,
+                    `"${transaction.customer}"`,
+                    `"${transaction.type}"`,
+                    `"${transaction.description.replace(/"/g, '""')}"`,
+                    `"₹${transaction.amount.toLocaleString()}"`,
+                    `"₹${transaction.discount.toLocaleString()}"`,
+                    `"₹${transaction.netAmount.toLocaleString()}"`,
+                    `"${transaction.status}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Add CSS animations for toast
+        if (!document.getElementById('toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'toast-styles';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
         }
         
         // Render ledger table

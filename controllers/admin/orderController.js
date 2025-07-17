@@ -327,7 +327,7 @@ const getOrderDetails = async (req, res) => {
             })
             .populate({
                 path: "orderedItems.product",
-                select: "productName productImage brand category"
+                select: "productName productImage category"
             })
             .lean();
 
