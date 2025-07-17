@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin/adminController');
+const dashboardController = require('../controllers/admin/dashboardController');
 const customerController = require("../controllers/admin/customerController");
 const productController = require("../controllers/admin/productController");
 const categoryController = require("../controllers/admin/categoryController");
@@ -71,6 +72,15 @@ router.put("/edit-coupon/:id",adminAuth,couponController.editCoupon)
 router.delete("/delete-coupon/:id",adminAuth,couponController.deleteCoupon)
 router.get("/get-categories",adminAuth,couponController.getCategories)
 router.get("/get-products",adminAuth,couponController.getProducts)
+
+// Dashboard Analytics Routes
+router.get("/dashboard-analytics",adminAuth,dashboardController.getDashboard)
+router.get("/dashboard-analytics/stats",adminAuth,dashboardController.getDashboardStats)
+router.get("/dashboard-analytics/sales-chart",adminAuth,dashboardController.getSalesChartData)
+router.get("/dashboard-analytics/top-products",adminAuth,dashboardController.getTopProducts)
+router.get("/dashboard-analytics/top-categories",adminAuth,dashboardController.getTopCategories)
+router.get("/dashboard-analytics/top-brands",adminAuth,dashboardController.getTopBrands)
+router.get("/dashboard-analytics/ledger",adminAuth,dashboardController.getLedgerData)
 
 // Sales Report Routes
 router.get("/sales-report",adminAuth,salesReportController.getSalesReportDashboard)

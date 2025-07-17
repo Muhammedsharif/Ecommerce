@@ -62,8 +62,8 @@ const loadDashboard = async (req,res) =>{
     
     if(req.session.admin){
         try {
-           
-            res.render("dashboard");
+            // Redirect to the new dashboard controller
+            res.redirect("/admin/dashboard-analytics");
         } catch (error) {
             res.redirect("/pageerror");
         }
