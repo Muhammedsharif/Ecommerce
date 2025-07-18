@@ -480,10 +480,10 @@
         </div>
 
         <div class="action-buttons">
-            <a href="/checkout" class="btn btn-danger">
+            <button id="retryPaymentBtn" class="btn btn-danger">
                 <i class="fas fa-redo"></i>
                 Retry Payment
-            </a>
+            </button>
             <a href="/cart" class="btn btn-primary">
                 <i class="fas fa-shopping-cart"></i>
                 Back to Cart
@@ -495,10 +495,12 @@
         </div>
     </div>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         // Get error from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const errorMessage = urlParams.get('error');
+        const failedOrderId = urlParams.get('orderId');
         
         if (errorMessage && !document.querySelector('.error-info')) {
             const errorDiv = document.createElement('div');
@@ -512,10 +514,99 @@
             failureMessage.parentNode.insertBefore(errorDiv, failureMessage.nextSibling);
         }
 
+        // Retry payment functionality - opens Razorpay directly
+        document.getElementById('retryPaymentBtn').addEventListener('click', async function() {
+            try {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                // Get retry payment order details
+                const response = await fetch('/retry-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        failedOrderId: failedOrderId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to initiate payment');
+                }
+
+                // Initialize Razorpay directly on this page
+                const options = {
+                    key: result.key,
+                    amount: result.amount,
+                    currency: result.currency,
+                    name: '1NOTONE',
+                    description: 'Retry Payment',
+                    order_id: result.orderId,
+                    handler: async function(response) {
+                        try {
+                            // Verify payment
+                            const verifyResponse = await fetch('/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    addressId: result.addressId
+                                })
+                            });
+
+                            const verifyResult = await verifyResponse.json();
+
+                            if (verifyResult.success) {
+                                // Redirect to success page
+                                window.location.href = verifyResult.redirectUrl;
+                            } else {
+                                throw new Error(verifyResult.message || 'Payment verification failed');
+                            }
+                        } catch (error) {
+                            console.error('Payment verification error:', error);
+                            alert('Payment verification failed. Please contact support.');
+                        }
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            // Re-enable button when modal is dismissed
+                            document.getElementById('retryPaymentBtn').disabled = false;
+                            document.getElementById('retryPaymentBtn').innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                        }
+                    },
+                    theme: {
+                        color: '#667eea'
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function(response) {
+                    console.error('Payment failed:', response.error);
+                    // Stay on the same page and show the error
+                    window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
+                });
+
+                rzp.open();
+
+            } catch (error) {
+                console.error('Error initiating retry payment:', error);
+                alert(error.message || 'Failed to initiate payment. Please try again.');
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+            }
+        });
+
         // Auto-focus on retry button for better UX
         window.addEventListener('load', () => {
-            const retryButton = document.querySelector('.btn-danger');
-            if (retryButton) {
+            const retryButton = document.querySelector('#retryPaymentBtn');
+             if (retryButton) {
                 retryButton.focus();
             }
         });

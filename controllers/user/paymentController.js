@@ -304,8 +304,169 @@ const handlePaymentFailure = async (req, res) => {
     }
 };
 
+// Retry payment for failed orders
+const retryPayment = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { failedOrderId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ 
+                success: false, 
+                message: "Please login to continue" 
+            });
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "User not found" 
+            });
+        }
+
+        // Get cart items for retry payment
+        const cart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            populate: {
+                path: 'category',
+                model: 'Category'
+            }
+        });
+
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Cart is empty. Please add items to cart before retrying payment." 
+            });
+        }
+
+        // Validate cart items and calculate totals
+        let validItems = [];
+        let subtotal = 0;
+
+        for (let item of cart.items) {
+            const product = item.productId;
+            
+            if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                continue;
+            }
+
+            const variant = product.variant.find(v => v.size === item.size);
+            if (!variant || variant.varientquantity < item.quantity) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                });
+            }
+
+            // Apply best offer (product/category) to get item price
+            let productOffer = product.productOffer || 0;
+            let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let variantPrice = variant.varientPrice;
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            let itemTotal = itemPrice * item.quantity;
+            
+            validItems.push({
+                product: product._id,
+                quantity: item.quantity,
+                price: itemPrice,
+                size: variant.size
+            });
+
+            subtotal += itemTotal;
+        }
+
+        if (validItems.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "No valid items in cart" 
+            });
+        }
+
+        // Calculate totals (no tax)
+        const shippingCost = subtotal > 500 ? 0 : 50;
+        let totalAmount = subtotal + shippingCost;
+
+        // Handle coupon validation and application
+        const appliedCoupon = req.session.appliedCoupon;
+        if (appliedCoupon) {
+            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+
+            if (couponValidation.valid) {
+                const coupon = couponValidation.coupon;
+                let discountAmount;
+
+                if (coupon.discountType === 'percentage') {
+                    discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
+                } else {
+                    discountAmount = Math.min(coupon.offerPrice, totalAmount);
+                }
+
+                totalAmount = totalAmount - discountAmount;
+            } else {
+                // Remove invalid coupon from session
+                delete req.session.appliedCoupon;
+            }
+        }
+
+        const roundedTotal = Math.round(totalAmount);
+
+        // Validate Razorpay credentials
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            console.error('Razorpay credentials not found in environment variables');
+            return res.status(500).json({
+                success: false,
+                message: 'Payment service configuration error'
+            });
+        }
+
+        // Create Razorpay order for retry
+        const options = {
+            amount: Math.round(parseFloat(roundedTotal) * 100), // Amount in paise
+            currency: 'INR',
+            receipt: `retry_${Date.now().toString().slice(-10)}`,
+            notes: {
+                userId: userId.toString(),
+                retryPayment: 'true'
+            }
+        };
+
+        console.log('Creating Razorpay order for retry payment:', options);
+
+        const razorpayOrder = await razorpay.orders.create(options);
+        
+        console.log('Razorpay retry order created successfully:', razorpayOrder.id);
+
+        // Get user's default address or first available address
+        const addressData = await Address.findOne({ userId });
+        const defaultAddress = addressData && addressData.adress && addressData.adress.length > 0 
+            ? addressData.adress[0]._id 
+            : null;
+
+        res.json({
+            success: true,
+            orderId: razorpayOrder.id,
+            amount: Math.round(razorpayOrder.amount),
+            currency: razorpayOrder.currency,
+            key: process.env.RAZORPAY_KEY_ID,
+            addressId: defaultAddress
+        });
+
+    } catch (error) {
+        console.error('Error creating retry payment order:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create retry payment order. Please try again.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
 module.exports = {
     createRazorpayOrder,
     verifyPayment,
-    handlePaymentFailure
+    handlePaymentFailure,
+    retryPayment
 };

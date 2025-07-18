@@ -682,7 +682,8 @@
                             const productOffers = product.productOffer || 0;
                         const categoryOffers = product.category?.categoryOffer || 0;
                             const totalOfferr = Math.max(productOffers, categoryOffers);
-                            %<%=totalOfferr%>%OFF</div>
+
+                            %><%=totalOfferr%>%OFF</div>
                         <button class="remove-btn" onclick="confirmRemove('<%=product._id%>')">
                             <i class="fas fa-times"></i>
                         </button>
