@@ -127,6 +127,7 @@ router.post("/handle-payment-failure",userAuth,paymentController.handlePaymentFa
 router.get("/retry-payment/:orderId",userAuth,checkoutController.loadRetryPayment)
 router.get("/payment-success/:orderId",userAuth,checkoutController.loadPaymentSuccess)
 router.get("/payment-failure",checkoutController.loadPaymentFailure)
+router.get("/download-invoice/:orderId",userAuth,profileController.downloadInvoice)
 
 //Wallet Management
 router.get("/wallet",userAuth,profileController.loadWallet)

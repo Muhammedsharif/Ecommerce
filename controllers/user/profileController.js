@@ -1875,6 +1875,238 @@ const returnAllItems = async (req, res) => {
     }
 }
 
+// Download Invoice PDF
+const downloadInvoice = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId } = req.params;
+
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        // Find the order
+        const order = await Order.findOne({
+            orderId: orderId,
+            userId: userId
+        }).populate({
+            path: 'orderedItems.product',
+            populate: { path: 'category', model: 'Category' }
+        });
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        // Get user data
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.status(404).send('User not found');
+        }
+
+        // Get user address
+        const addressData = await Address.findOne({ userId: userId });
+        let deliveryAddress = null;
+        if (addressData && addressData.adress.length > 0) {
+            // Find default address or use first address
+            deliveryAddress = addressData.adress.find(addr => addr.isDefault) || addressData.adress[0];
+        }
+
+        // Import PDFKit
+        const PDFDocument = require('pdfkit');
+        const fs = require('fs');
+        const path = require('path');
+
+        // Create a new PDF document
+        const doc = new PDFDocument({ margin: 50 });
+
+        // Set response headers for PDF download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="Invoice-${order.orderId}.pdf"`);
+
+        // Pipe the PDF to the response
+        doc.pipe(res);
+
+        // Company Header
+        doc.fontSize(24)
+           .fillColor('#667eea')
+           .text('1NOTONE', 50, 50)
+           .fontSize(10)
+           .fillColor('#666666')
+           .text('Premium Fashion Store', 50, 80)
+           .text('Email: support@1notone.com', 50, 95)
+           .text('Phone: +91-XXXXXXXXXX', 50, 110);
+
+        // Invoice Title
+        doc.fontSize(20)
+           .fillColor('#333333')
+           .text('INVOICE', 400, 50);
+
+        // Invoice Details
+        doc.fontSize(10)
+           .fillColor('#666666')
+           .text(`Invoice #: ${order.orderId}`, 400, 80)
+           .text(`Date: ${new Date(order.createdOn).toLocaleDateString('en-IN')}`, 400, 95)
+           .text(`Status: ${order.status}`, 400, 110)
+           .text(`Payment: ${order.paymentMethod}`, 400, 125);
+
+        // Line separator
+        doc.moveTo(50, 150)
+           .lineTo(550, 150)
+           .strokeColor('#cccccc')
+           .stroke();
+
+        // Customer Information
+        let yPosition = 170;
+        doc.fontSize(12)
+           .fillColor('#333333')
+           .text('Bill To:', 50, yPosition);
+
+        yPosition += 20;
+        doc.fontSize(10)
+           .fillColor('#666666')
+           .text(`Name: ${userData.name}`, 50, yPosition)
+           .text(`Email: ${userData.email}`, 50, yPosition + 15);
+
+        if (userData.phone) {
+            doc.text(`Phone: ${userData.phone}`, 50, yPosition + 30);
+            yPosition += 45;
+        } else {
+            yPosition += 30;
+        }
+
+        // Delivery Address
+        if (deliveryAddress) {
+            doc.fontSize(12)
+               .fillColor('#333333')
+               .text('Ship To:', 300, 170);
+
+            doc.fontSize(10)
+               .fillColor('#666666')
+               .text(`${deliveryAddress.name}`, 300, 190)
+               .text(`${deliveryAddress.landmark}`, 300, 205)
+               .text(`${deliveryAddress.city}, ${deliveryAddress.state}`, 300, 220)
+               .text(`${deliveryAddress.pincode}`, 300, 235)
+               .text(`Phone: ${deliveryAddress.phone}`, 300, 250);
+        }
+
+        yPosition = Math.max(yPosition, 280);
+
+        // Table Header
+        doc.rect(50, yPosition, 500, 25)
+           .fillColor('#f8f9fa')
+           .fill();
+
+        doc.fontSize(10)
+           .fillColor('#333333')
+           .text('Product', 60, yPosition + 8)
+           .text('Qty', 300, yPosition + 8)
+           .text('Price', 350, yPosition + 8)
+           .text('Total', 450, yPosition + 8);
+
+        yPosition += 25;
+
+        // Table Content
+        let subtotal = 0;
+        order.orderedItems.forEach((item, index) => {
+            // Calculate item price with offers
+            let variant = null;
+            if (item.product && item.product.variant && item.size) {
+                variant = item.product.variant.find(v => v.size == item.size);
+            }
+            let productOffer = item.product.productOffer || 0;
+            let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
+            let bestOffer = Math.max(productOffer, categoryOffer);
+            let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
+            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            let itemTotal = displayPrice * item.quantity;
+            subtotal += itemTotal;
+
+            // Add new page if needed
+            if (yPosition > 700) {
+                doc.addPage();
+                yPosition = 50;
+            }
+
+            // Alternate row background
+            if (index % 2 === 0) {
+                doc.rect(50, yPosition, 500, 20)
+                   .fillColor('#f8f9fa')
+                   .fill();
+            }
+
+            doc.fontSize(9)
+               .fillColor('#333333')
+               .text(item.product.productName.substring(0, 35), 60, yPosition + 5)
+               .text(item.quantity.toString(), 300, yPosition + 5)
+               .text(`₹${Math.round(displayPrice).toLocaleString('en-IN')}`, 350, yPosition + 5)
+               .text(`₹${Math.round(itemTotal).toLocaleString('en-IN')}`, 450, yPosition + 5);
+
+            if (item.size) {
+                doc.fontSize(8)
+                   .fillColor('#666666')
+                   .text(`Size: ${item.size}`, 60, yPosition + 15);
+            }
+
+            yPosition += 25;
+        });
+
+        // Summary Section
+        yPosition += 20;
+        
+        // Line separator
+        doc.moveTo(300, yPosition)
+           .lineTo(550, yPosition)
+           .strokeColor('#cccccc')
+           .stroke();
+
+        yPosition += 15;
+
+        // Subtotal
+        doc.fontSize(10)
+           .fillColor('#333333')
+           .text('Subtotal:', 350, yPosition)
+           .text(`₹${Math.round(subtotal).toLocaleString('en-IN')}`, 450, yPosition);
+
+        yPosition += 15;
+
+        // Shipping
+        doc.text('Shipping:', 350, yPosition)
+           .text('Free', 450, yPosition);
+
+        yPosition += 15;
+
+        // Coupon Discount
+        if (order.couponApplied && order.couponDiscount > 0) {
+            doc.fillColor('#28a745')
+               .text(`Discount (${order.couponCode}):`, 350, yPosition)
+               .text(`-₹${order.couponDiscount.toLocaleString('en-IN')}`, 450, yPosition);
+            yPosition += 15;
+        }
+
+        // Total
+        doc.fontSize(12)
+           .fillColor('#333333')
+           .text('Total:', 350, yPosition)
+           .text(`₹${Math.round(order.finalAmount).toLocaleString('en-IN')}`, 450, yPosition);
+
+        // Footer
+        yPosition += 50;
+        doc.fontSize(8)
+           .fillColor('#666666')
+           .text('Thank you for shopping with 1NOTONE!', 50, yPosition)
+           .text('For any queries, contact us at support@1notone.com', 50, yPosition + 15)
+           .text('This is a computer generated invoice.', 50, yPosition + 30);
+
+        // Finalize the PDF
+        doc.end();
+
+    } catch (error) {
+        console.error('Error generating invoice:', error);
+        res.status(500).send('Error generating invoice');
+    }
+}
+
 module.exports={
     userProfile,
     loadForgotPassword,
@@ -1907,5 +2139,6 @@ module.exports={
     cancelAllItems,
     returnOrder,
     returnItem,
-    returnAllItems
+    returnAllItems,
+    downloadInvoice
 }
