@@ -1275,10 +1275,37 @@
 
                         const rzp = new Razorpay(options);
 
-                        rzp.on('payment.failed', function (response) {
+                        rzp.on('payment.failed', async function (response) {
                             // Payment failed
                             console.error('Payment failed:', response.error);
-                            window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description)}`;
+                            
+                            try {
+                                // Call backend to handle payment failure and create failed order record
+                                const failureResponse = await fetch('/handle-payment-failure', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        error: response.error,
+                                        orderId: razorpayResult.orderId
+                                    })
+                                });
+
+                                const failureResult = await failureResponse.json();
+                                
+                                // Redirect to payment failure page with the URL from backend
+                                if (failureResult.redirectUrl) {
+                                    window.location.href = failureResult.redirectUrl;
+                                } else {
+                                    // Fallback to basic failure page
+                                    window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description)}`;
+                                }
+                            } catch (error) {
+                                console.error('Error handling payment failure:', error);
+                                // Fallback to basic failure page
+                                window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description)}`;
+                            }
                         });
 
                         rzp.open();

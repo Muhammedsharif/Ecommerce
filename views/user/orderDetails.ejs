@@ -6,6 +6,7 @@
     <title>Order Details - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         // Test SweetAlert loading
         document.addEventListener('DOMContentLoaded', function() {
@@ -664,6 +665,12 @@
 
         <!-- Order Actions -->
         <div class="order-actions">
+            <% if (order.paymentStatus === 'Failed' || (order.paymentMethod === 'ONLINE' && order.paymentStatus === 'Pending')) { %>
+                <a href="/retry-payment/<%= order.orderId %>" class="btn btn-danger">
+                    <i class="fas fa-redo"></i>
+                    Retry Payment
+                </a>
+            <% } %>
             <% if (order.status === 'Pending' || order.status === 'Processing') { %>
         <button onclick="cancelAllItems('<%= order._id %>')" class="btn btn-danger">
             <i class="fas fa-times"></i>
@@ -1203,6 +1210,104 @@
                 closeActionModal();
             }
         });
+
+        // Retry payment functionality for order details page
+        const retryPaymentBtn = document.getElementById('retryPaymentBtn');
+        if (retryPaymentBtn) {
+            retryPaymentBtn.addEventListener('click', async function() {
+                try {
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                    // Get retry payment order details
+                    const response = await fetch('/retry-payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            failedOrderId: '<%= order.orderId %>'
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to initiate payment');
+                    }
+
+                    // Initialize Razorpay directly on this page
+                    const options = {
+                        key: result.key,
+                        amount: result.amount,
+                        currency: result.currency,
+                        name: '1NOTONE',
+                        description: 'Retry Payment for Order #<%= order.orderId %>',
+                        order_id: result.orderId,
+                        handler: async function(response) {
+                            try {
+                                // Verify payment
+                                const verifyResponse = await fetch('/verify-payment', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        addressId: result.addressId
+                                    })
+                                });
+
+                                const verifyResult = await verifyResponse.json();
+
+                                if (verifyResult.success) {
+                                    // Show success message and redirect
+                                    showToast('Payment successful! Redirecting...', 'success');
+                                    setTimeout(() => {
+                                        window.location.href = verifyResult.redirectUrl;
+                                    }, 1500);
+                                } else {
+                                    throw new Error(verifyResult.message || 'Payment verification failed');
+                                }
+                            } catch (error) {
+                                console.error('Payment verification error:', error);
+                                showToast('Payment verification failed. Please contact support.', 'error');
+                                retryPaymentBtn.disabled = false;
+                                retryPaymentBtn.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                            }
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                // Re-enable button when modal is dismissed
+                                retryPaymentBtn.disabled = false;
+                                retryPaymentBtn.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                            }
+                        },
+                        theme: {
+                            color: '#667eea'
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function(response) {
+                        console.error('Payment failed:', response.error);
+                        showToast('Payment failed: ' + (response.error.description || 'Unknown error'), 'error');
+                        retryPaymentBtn.disabled = false;
+                        retryPaymentBtn.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                    });
+
+                    rzp.open();
+
+                } catch (error) {
+                    console.error('Error initiating retry payment:', error);
+                    showToast(error.message || 'Failed to initiate payment. Please try again.', 'error');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                }
+            });
+        }
     </script>
 
     <!-- Show messages if any -->

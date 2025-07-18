@@ -480,10 +480,21 @@
         </div>
 
         <div class="action-buttons">
+            <% if (typeof failedOrderId !== 'undefined' && failedOrderId) { %>
+            <a href="/retry-payment/<%= failedOrderId %>" class="btn btn-danger">
+                <i class="fas fa-redo"></i>
+                Retry Payment
+            </a>
+            <a href="/order-details/<%= failedOrderId %>" class="btn btn-primary">
+                <i class="fas fa-receipt"></i>
+                View Orders
+            </a>
+            <% } else { %>
             <button id="retryPaymentBtn" class="btn btn-danger">
                 <i class="fas fa-redo"></i>
                 Retry Payment
             </button>
+            <% } %>
             <a href="/cart" class="btn btn-primary">
                 <i class="fas fa-shopping-cart"></i>
                 Back to Cart
@@ -512,6 +523,29 @@
             
             const failureMessage = document.querySelector('.failure-message');
             failureMessage.parentNode.insertBefore(errorDiv, failureMessage.nextSibling);
+        }
+
+        // Add "View Orders" button if failedOrderId is available in URL and button doesn't exist
+        if (failedOrderId && !document.querySelector('a[href*="/order-details/"]')) {
+            const actionButtons = document.querySelector('.action-buttons');
+            const retryButton = document.getElementById('retryPaymentBtn');
+            
+            const viewOrdersButton = document.createElement('a');
+            viewOrdersButton.href = `/order-details/${failedOrderId}`;
+            viewOrdersButton.className = 'btn btn-primary';
+            viewOrdersButton.innerHTML = `
+                <i class="fas fa-receipt"></i>
+                View Orders
+            `;
+            
+            // Insert the View Orders button after the Retry Payment button
+            if (retryButton && retryButton.nextSibling) {
+                actionButtons.insertBefore(viewOrdersButton, retryButton.nextSibling);
+            } else if (retryButton) {
+                retryButton.parentNode.insertBefore(viewOrdersButton, retryButton.nextSibling);
+            } else {
+                actionButtons.insertBefore(viewOrdersButton, actionButtons.firstChild);
+            }
         }
 
         // Retry payment functionality - opens Razorpay directly

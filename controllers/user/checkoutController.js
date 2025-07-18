@@ -482,10 +482,14 @@ const loadPaymentSuccess = async (req, res) => {
 const loadPaymentFailure = async (req, res) => {
     try {
         const error = req.query.error || 'Payment failed. Please try again.';
+        const failedOrderId = req.query.orderId || null;
         console.log('Payment failed:', error);
+        console.log('Failed order ID:', failedOrderId);
+        
         res.render('payment-failure', {
             user: req.session.user || null,
-            error: error
+            error: error,
+            failedOrderId: failedOrderId
         });
 
     } catch (error) {
@@ -494,10 +498,52 @@ const loadPaymentFailure = async (req, res) => {
     }
 };
 
+// Load retry payment page
+const loadRetryPayment = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId } = req.params;
+
+        if (!userId) {
+            return res.redirect('/login');
+        }
+
+        // Find the failed order
+        const order = await Order.findOne({
+            orderId: orderId,
+            userId: userId,
+            paymentStatus: 'Failed'
+        }).populate({
+            path: 'orderedItems.product',
+            populate: { path: 'category', model: 'Category' }
+        });
+
+        if (!order) {
+            return res.redirect('/orders');
+        }
+
+        // Get user data
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect('/login');
+        }
+
+        res.render('retry-payment', {
+            user: userData,
+            order: order
+        });
+
+    } catch (error) {
+        console.error('Error loading retry payment page:', error);
+        res.redirect('/orders');
+    }
+};
+
 module.exports = {
     loadCheckout,
     processCheckout,
     loadThankYou,
     loadPaymentSuccess,
-    loadPaymentFailure
+    loadPaymentFailure,
+    loadRetryPayment
 };

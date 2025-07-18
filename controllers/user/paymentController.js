@@ -217,32 +217,66 @@ const verifyPayment = async (req, res) => {
             }
         }
 
-        // Generate unique order ID
-        const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+        // Check if this is a retry payment by looking for existing failed order
+        let existingOrder = null;
+        try {
+            // Try to find a failed order with the same Razorpay order ID
+            const razorpayOrderData = await razorpay.orders.fetch(razorpay_order_id);
+            const failedOrderId = razorpayOrderData.notes?.failedOrderId;
+            
+            if (failedOrderId && failedOrderId !== 'cart_retry') {
+                existingOrder = await Order.findOne({
+                    orderId: failedOrderId,
+                    userId: userId,
+                    paymentStatus: 'Failed'
+                });
+            }
+        } catch (fetchError) {
+            console.log('Could not fetch Razorpay order details:', fetchError.message);
+        }
 
-        // Create order with coupon information
-        const newOrder = new Order({
-            orderId: orderId,
-            userId: userId,
-            orderedItems: validItems,
-            totalPrice: subtotal,
-            discount: couponData.discount,
-            finalAmount: totalAmount,
-            address: userId,
-            status: 'Processing',
-            paymentMethod: 'ONLINE',
-            paymentStatus: 'Completed',
-            razorpayOrderId: razorpay_order_id,
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-            couponApplied: couponData.applied,
-            couponCode: couponData.code,
-            couponDiscount: couponData.discount,
-            originalAmount: couponData.originalAmount,
-            createdOn: new Date()
-        });
+        let orderId;
+        
+        if (existingOrder) {
+            // Update existing failed order
+            console.log('Updating existing failed order:', existingOrder.orderId);
+            orderId = existingOrder.orderId;
+            
+            existingOrder.status = 'Processing';
+            existingOrder.paymentStatus = 'Completed';
+            existingOrder.razorpayOrderId = razorpay_order_id;
+            existingOrder.razorpayPaymentId = razorpay_payment_id;
+            existingOrder.razorpaySignature = razorpay_signature;
+            
+            await existingOrder.save();
+        } else {
+            // Generate unique order ID for new order
+            orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
 
-        await newOrder.save();
+            // Create new order with coupon information
+            const newOrder = new Order({
+                orderId: orderId,
+                userId: userId,
+                orderedItems: validItems,
+                totalPrice: subtotal,
+                discount: couponData.discount,
+                finalAmount: totalAmount,
+                address: userId,
+                status: 'Processing',
+                paymentMethod: 'ONLINE',
+                paymentStatus: 'Completed',
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature,
+                couponApplied: couponData.applied,
+                couponCode: couponData.code,
+                couponDiscount: couponData.discount,
+                originalAmount: couponData.originalAmount,
+                createdOn: new Date()
+            });
+
+            await newOrder.save();
+        }
 
         // Mark coupon as used if applied
         if (couponData.applied && couponData.couponId) {
@@ -286,13 +320,138 @@ const verifyPayment = async (req, res) => {
 const handlePaymentFailure = async (req, res) => {
     try {
         const { error, orderId } = req.body;
+        const userId = req.session.user;
         
         console.log('Payment failed:', error);
+        console.log('Failed Razorpay order ID:', orderId);
+        
+        let failedOrderId = null;
+        
+        // Create a failed order record if user is logged in and we have cart data
+        if (userId) {
+            try {
+                const userData = await User.findById(userId);
+                const cart = await Cart.findOne({ userId }).populate({
+                    path: 'items.productId',
+                    populate: {
+                        path: 'category',
+                        model: 'Category'
+                    }
+                });
+
+                if (cart && cart.items.length > 0) {
+                    // Calculate order details similar to successful order creation
+                    let validItems = [];
+                    let subtotal = 0;
+
+                    for (let item of cart.items) {
+                        const product = item.productId;
+                        
+                        if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                            continue;
+                        }
+
+                        const variant = product.variant.find(v => v.size === item.size);
+                        if (!variant) {
+                            continue;
+                        }
+
+                        // Apply best offer (product/category) to get item price
+                        let productOffer = product.productOffer || 0;
+                        let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                        let bestOffer = Math.max(productOffer, categoryOffer);
+                        let variantPrice = variant.varientPrice;
+                        let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                        let itemTotal = itemPrice * item.quantity;
+                        
+                        validItems.push({
+                            product: product._id,
+                            quantity: item.quantity,
+                            price: itemPrice,
+                            size: variant.size
+                        });
+
+                        subtotal += itemTotal;
+                    }
+
+                    if (validItems.length > 0) {
+                        // Calculate totals
+                        const shippingCost = subtotal > 500 ? 0 : 50;
+                        let totalAmount = subtotal + shippingCost;
+
+                        // Handle coupon if applied
+                        let couponData = {
+                            applied: false,
+                            code: null,
+                            discount: 0,
+                            originalAmount: totalAmount
+                        };
+
+                        const appliedCoupon = req.session.appliedCoupon;
+                        if (appliedCoupon) {
+                            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+                            if (couponValidation.valid) {
+                                const coupon = couponValidation.coupon;
+                                let discountAmount;
+
+                                if (coupon.discountType === 'percentage') {
+                                    discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
+                                } else {
+                                    discountAmount = Math.min(coupon.offerPrice, totalAmount);
+                                }
+
+                                totalAmount = totalAmount - discountAmount;
+
+                                couponData = {
+                                    applied: true,
+                                    code: appliedCoupon.couponCode,
+                                    discount: discountAmount,
+                                    originalAmount: subtotal + shippingCost
+                                };
+                            }
+                        }
+
+                        // Generate unique order ID for failed order
+                        failedOrderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+
+                        // Create failed order record
+                        const failedOrder = new Order({
+                            orderId: failedOrderId,
+                            userId: userId,
+                            orderedItems: validItems,
+                            totalPrice: subtotal,
+                            discount: couponData.discount,
+                            finalAmount: totalAmount,
+                            address: userId,
+                            status: 'Pending',
+                            paymentMethod: 'ONLINE',
+                            paymentStatus: 'Failed',
+                            razorpayOrderId: orderId,
+                            couponApplied: couponData.applied,
+                            couponCode: couponData.code,
+                            couponDiscount: couponData.discount,
+                            originalAmount: couponData.originalAmount,
+                            createdOn: new Date()
+                        });
+
+                        await failedOrder.save();
+                        console.log('Failed order record created:', failedOrderId);
+                    }
+                }
+            } catch (orderError) {
+                console.error('Error creating failed order record:', orderError);
+                // Continue without failing the entire request
+            }
+        }
+        
+        const redirectUrl = failedOrderId 
+            ? `/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}&orderId=${failedOrderId}`
+            : `/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}`;
         
         res.json({
             success: false,
             message: 'Payment failed',
-            redirectUrl: `/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}`
+            redirectUrl: redirectUrl
         });
 
     } catch (error) {
@@ -325,89 +484,130 @@ const retryPayment = async (req, res) => {
             });
         }
 
-        // Get cart items for retry payment
-        const cart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-            populate: {
-                path: 'category',
-                model: 'Category'
-            }
-        });
+        let totalAmount;
+        let addressId = null;
 
-        if (!cart || cart.items.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Cart is empty. Please add items to cart before retrying payment." 
+        // If we have a failed order ID, use that order's data
+        if (failedOrderId) {
+            const failedOrder = await Order.findOne({
+                orderId: failedOrderId,
+                userId: userId,
+                paymentStatus: 'Failed'
+            }).populate('orderedItems.product');
+
+            if (failedOrder) {
+                console.log('Found failed order for retry:', failedOrderId);
+                totalAmount = failedOrder.finalAmount;
+                
+                // Validate that all items are still available
+                for (let item of failedOrder.orderedItems) {
+                    const product = await Product.findById(item.product);
+                    if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                        return res.status(400).json({ 
+                            success: false, 
+                            message: `Product ${product ? product.productName : 'Unknown'} is no longer available` 
+                        });
+                    }
+
+                    const variant = product.variant.find(v => v.size === item.size);
+                    if (!variant || variant.varientquantity < item.quantity) {
+                        return res.status(400).json({ 
+                            success: false, 
+                            message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                        });
+                    }
+                }
+            } else {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: "Failed order not found" 
+                });
+            }
+        } else {
+            // Fallback to cart-based retry payment
+            const cart = await Cart.findOne({ userId }).populate({
+                path: 'items.productId',
+                populate: {
+                    path: 'category',
+                    model: 'Category'
+                }
             });
-        }
 
-        // Validate cart items and calculate totals
-        let validItems = [];
-        let subtotal = 0;
-
-        for (let item of cart.items) {
-            const product = item.productId;
-            
-            if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
-                continue;
-            }
-
-            const variant = product.variant.find(v => v.size === item.size);
-            if (!variant || variant.varientquantity < item.quantity) {
+            if (!cart || cart.items.length === 0) {
                 return res.status(400).json({ 
                     success: false, 
-                    message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                    message: "Cart is empty. Please add items to cart before retrying payment." 
                 });
             }
 
-            // Apply best offer (product/category) to get item price
-            let productOffer = product.productOffer || 0;
-            let categoryOffer = (product.category && product.category.categoryOffer) || 0;
-            let bestOffer = Math.max(productOffer, categoryOffer);
-            let variantPrice = variant.varientPrice;
-            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-            let itemTotal = itemPrice * item.quantity;
-            
-            validItems.push({
-                product: product._id,
-                quantity: item.quantity,
-                price: itemPrice,
-                size: variant.size
-            });
+            // Validate cart items and calculate totals
+            let validItems = [];
+            let subtotal = 0;
 
-            subtotal += itemTotal;
-        }
-
-        if (validItems.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "No valid items in cart" 
-            });
-        }
-
-        // Calculate totals (no tax)
-        const shippingCost = subtotal > 500 ? 0 : 50;
-        let totalAmount = subtotal + shippingCost;
-
-        // Handle coupon validation and application
-        const appliedCoupon = req.session.appliedCoupon;
-        if (appliedCoupon) {
-            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
-
-            if (couponValidation.valid) {
-                const coupon = couponValidation.coupon;
-                let discountAmount;
-
-                if (coupon.discountType === 'percentage') {
-                    discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
-                } else {
-                    discountAmount = Math.min(coupon.offerPrice, totalAmount);
+            for (let item of cart.items) {
+                const product = item.productId;
+                
+                if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                    continue;
                 }
 
-                totalAmount = totalAmount - discountAmount;
-            } else {
-                // Remove invalid coupon from session
-                delete req.session.appliedCoupon;
+                const variant = product.variant.find(v => v.size === item.size);
+                if (!variant || variant.varientquantity < item.quantity) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                    });
+                }
+
+                // Apply best offer (product/category) to get item price
+                let productOffer = product.productOffer || 0;
+                let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                let bestOffer = Math.max(productOffer, categoryOffer);
+                let variantPrice = variant.varientPrice;
+                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                let itemTotal = itemPrice * item.quantity;
+                
+                validItems.push({
+                    product: product._id,
+                    quantity: item.quantity,
+                    price: itemPrice,
+                    size: variant.size
+                });
+
+                subtotal += itemTotal;
+            }
+
+            if (validItems.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "No valid items in cart" 
+                });
+            }
+
+            // Calculate totals (no tax)
+            const shippingCost = subtotal > 500 ? 0 : 50;
+            totalAmount = subtotal + shippingCost;
+
+            // Handle coupon validation and application
+            const appliedCoupon = req.session.appliedCoupon;
+            if (appliedCoupon) {
+                const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+
+                if (couponValidation.valid) {
+                    const coupon = couponValidation.coupon;
+                    let discountAmount;
+
+                    if (coupon.discountType === 'percentage') {
+                        discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
+                    } else {
+                        discountAmount = Math.min(coupon.offerPrice, totalAmount);
+                    }
+
+                    totalAmount = totalAmount - discountAmount;
+                } else {
+                    // Remove invalid coupon from session
+                    delete req.session.appliedCoupon;
+                }
             }
         }
 
@@ -429,7 +629,8 @@ const retryPayment = async (req, res) => {
             receipt: `retry_${Date.now().toString().slice(-10)}`,
             notes: {
                 userId: userId.toString(),
-                retryPayment: 'true'
+                retryPayment: 'true',
+                failedOrderId: failedOrderId || 'cart_retry'
             }
         };
 
