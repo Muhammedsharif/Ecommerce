@@ -872,7 +872,7 @@ body {
                     <div class="image-upload-section">
                         <div class="image-upload-header">
                             <h3><i class="fas fa-images"></i> Product Images</h3>
-                            <p>Upload up to 3 high-quality images of your product</p>
+                            <p>Maintain exactly 3 images total. You can delete existing images and upload new ones.</p>
                         </div>
 
                         <div class="thumbnails-container" id="addedImagesContainer">
@@ -1413,6 +1413,27 @@ function validateForm() {
             displayErrorMessage(`variant-quantity-${size}-error`, 'Please enter a valid quantity for this size.');
             isValid = false;
         }
+    }
+
+    // Validate that total images (existing + new) equals 3
+    const imageInputs = ['input1', 'input2', 'input3'];
+    let newImageCount = 0;
+    
+    imageInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input && input.files && input.files.length > 0) {
+            newImageCount++;
+        }
+    });
+
+    // Count existing images that are still displayed (not deleted)
+    const existingImages = document.querySelectorAll('[data-image-id]');
+    const existingImageCount = existingImages.length;
+    const totalImageCount = existingImageCount + newImageCount;
+
+    if (totalImageCount !== 3) {
+        displayErrorMessage('images-error', `Total images must be exactly 3. You have ${existingImageCount} existing images and ${newImageCount} new images selected (total: ${totalImageCount}).`);
+        isValid = false;
     }
 
     if (!isValid) {

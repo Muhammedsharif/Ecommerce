@@ -154,10 +154,10 @@
                             </td>
                             <td>
                                 <div class="action-buttons-container">
-                                    <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-edit">
+                                    <button onclick="showEditModal('<%=category._id%>', '<%=category.name%>', '<%=category.description%>')" class="btn btn-edit">
                                         <i class="fas fa-edit"></i>
                                         Edit
-                                    </a>
+                                    </button>
                                     <button onclick="deleteCategory('<%=category._id%>', '<%=category.name%>')" class="btn-delete">
                                         <i class="fas fa-trash"></i>
                                         Delete
@@ -219,6 +219,33 @@
         </div>
     </div>
 
+    <!-- Edit Category Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Category</h2>
+                <button class="close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form onsubmit="handleEditFormSubmit(event)">
+                <input type="hidden" id="editCategoryId" name="categoryId">
+                <div class="form-group">
+                    <label for="editCategoryName" class="form-label">Category Name</label>
+                    <input type="text" id="editCategoryName" name="categoryName" class="form-control" placeholder="Enter category name">
+                    <div id="edit-name-error" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="editCategoryDescription" class="form-label">Description</label>
+                    <textarea id="editCategoryDescription" name="description" class="form-control" rows="4" placeholder="Enter category description"></textarea>
+                    <div id="edit-description-error" class="error-message"></div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i>
+                    Update Category
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -248,11 +275,65 @@
             clearErrorMessages();
         }
 
+        // Edit Modal functions
+        function showEditModal(categoryId, categoryName, categoryDescription) {
+            const modal = document.getElementById('editModal');
+            
+            // Populate the form with current values
+            document.getElementById('editCategoryId').value = categoryId;
+            document.getElementById('editCategoryName').value = categoryName;
+            document.getElementById('editCategoryDescription').value = categoryDescription;
+            
+            // Clear any previous error messages
+            clearEditErrorMessages();
+            
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            clearEditForm();
+        }
+
+        function clearEditForm() {
+            document.getElementById('editCategoryId').value = '';
+            document.getElementById('editCategoryName').value = '';
+            document.getElementById('editCategoryDescription').value = '';
+            clearEditErrorMessages();
+        }
+
+        function clearEditErrorMessages() {
+            const errorElements = ['edit-name-error', 'edit-description-error'];
+            errorElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerText = "";
+                    element.style.display = "none";
+                }
+            });
+            
+            // Remove error classes from edit form controls
+            document.querySelectorAll('#editModal .form-control').forEach(control => {
+                control.classList.remove('error');
+            });
+        }
+
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('addModal');
-            if (event.target === modal) {
+            const addModal = document.getElementById('addModal');
+            const editModal = document.getElementById('editModal');
+            
+            if (event.target === addModal) {
                 closeAddModal();
+            } else if (event.target === editModal) {
+                closeEditModal();
             }
         }
 
@@ -513,6 +594,144 @@
                 }
             });
         }
+
+        // Edit form submission
+        function handleEditFormSubmit(event) {
+            event.preventDefault();
+            console.log("Edit form submitted 👌");
+            
+            if (!validateEditForm()) {
+                console.log("Edit form not valid ❌");
+                return;
+            }
+            
+            const categoryId = document.getElementById("editCategoryId").value;
+            const categoryName = document.getElementById("editCategoryName").value.trim();
+            const description = document.getElementById("editCategoryDescription").value.trim();
+            
+            fetch(`/admin/editCategory/${categoryId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({ categoryName, description })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to update category');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    if (data.noChanges) {
+                        // No changes detected - show info message
+                        Swal.fire({
+                            icon: "info",
+                            title: "No Changes Made",
+                            text: "No changes were detected. The category information remains the same.",
+                            confirmButtonText: "OK",
+                            confirmButtonColor: "#667eea"
+                        }).then(() => {
+                            closeEditModal();
+                        });
+                    } else {
+                        // Show success message and reload
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success!",
+                            text: data.message,
+                            confirmButtonText: "OK",
+                            confirmButtonColor: "#667eea"
+                        }).then(() => {
+                            closeEditModal();
+                            location.reload();
+                        });
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to update category');
+                }
+            })
+            .catch(error => {
+                if (error.message.includes('already exists')) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops!",
+                        text: "Category with this name already exists",
+                        confirmButtonColor: "#ef4444"
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops!",
+                        text: error.message || "An error occurred while updating the category",
+                        confirmButtonColor: "#ef4444"
+                    });
+                }
+            });
+        }
+
+        // Edit form validation
+        function validateEditForm() {
+            console.log("Edit validation started ✅");
+            clearEditErrorMessages();
+            
+            const name = document.getElementById("editCategoryName").value.trim();
+            const description = document.getElementById("editCategoryDescription").value.trim();
+            let isValid = true;
+
+            if (name === "") {
+                displayEditErrorMessage("edit-name-error", "Please enter a category name");
+                document.getElementById("editCategoryName").classList.add("error");
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                displayEditErrorMessage("edit-name-error", "Name should only contain letters and spaces");
+                document.getElementById("editCategoryName").classList.add("error");
+                isValid = false;
+            } else {
+                document.getElementById("editCategoryName").classList.remove("error");
+            }
+
+            if (description === "") {
+                displayEditErrorMessage("edit-description-error", "Please enter a description");
+                document.getElementById("editCategoryDescription").classList.add("error");
+                isValid = false;
+            } else {
+                document.getElementById("editCategoryDescription").classList.remove("error");
+            }
+
+            return isValid;
+        }
+
+        function displayEditErrorMessage(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.innerText = message;
+                errorElement.style.display = "block";
+            }
+        }
+
+        // Add validation to prevent leading whitespace in category name fields
+        document.getElementById('categoryName').addEventListener('input', function() {
+            if (this.value.startsWith(' ')) {
+                this.value = this.value.trimStart();
+            }
+        });
+
+        // Add the same validation for edit form when it's loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const editCategoryName = document.getElementById('editCategoryName');
+            if (editCategoryName) {
+                editCategoryName.addEventListener('input', function() {
+                    if (this.value.startsWith(' ')) {
+                        this.value = this.value.trimStart();
+                    }
+                });
+            }
+        });
 
         // Form validation
         function validateForm() {

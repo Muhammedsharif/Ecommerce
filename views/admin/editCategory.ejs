@@ -69,6 +69,13 @@
 
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
+                // Add validation to prevent leading whitespace in category name field
+                document.getElementById('categoryName').addEventListener('input', function() {
+                    if (this.value.startsWith(' ')) {
+                        this.value = this.value.trimStart();
+                    }
+                });
+
                 // Handle form submission with AJAX
                 document.getElementById('editCategoryForm').addEventListener('submit', async function(e) {
                     e.preventDefault();

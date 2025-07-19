@@ -73,8 +73,10 @@ const addProducts = async (req, res) => {
     const products = req.body;
     console.log("Received product data:", products);
 
+    // Enhanced duplicate check: case-insensitive and exclude deleted products
     const productExists = await Product.findOne({
-      productName: products.productName,
+      productName: { $regex: new RegExp(`^${products.productName.trim()}$`, 'i') },
+      isDeleted: false
     });
 
     if (!productExists) {
@@ -303,9 +305,11 @@ const editProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id });
     const data = req.body;
 
+    // Enhanced duplicate check for edit: case-insensitive, exclude current product and deleted products
     const existingProduct = await Product.findOne({
-      productName: data.productName,
+      productName: { $regex: new RegExp(`^${data.productName.trim()}$`, 'i') },
       _id: { $ne: id },
+      isDeleted: false
     });
 
     if (existingProduct) {
@@ -348,6 +352,17 @@ const editProduct = async (req, res) => {
 
         images.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
       }
+    }
+
+    // Validate total image count (existing + new) equals 3
+    const currentImageCount = product.productImage ? product.productImage.length : 0;
+    const newImageCount = images.length;
+    const totalImageCount = currentImageCount + newImageCount;
+
+    if (totalImageCount !== 3) {
+      return res.status(400).json({ 
+        error: `Total images must be exactly 3. Currently you have ${currentImageCount} existing images and are uploading ${newImageCount} new images (total: ${totalImageCount}).` 
+      });
     }
 
     // Find category by ID (form sends category ID, not name)

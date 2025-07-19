@@ -1041,7 +1041,34 @@ const changePassword = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        // Validate passwords
+        // Validate that current password is provided
+        if (!currentPassword || currentPassword.trim() === '') {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "Current password is required"
+            });
+        }
+
+        // Validate that new password is provided
+        if (!newPassword || newPassword.trim() === '') {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "New password is required"
+            });
+        }
+
+        // Validate that confirm password is provided
+        if (!confirmPassword || confirmPassword.trim() === '') {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "Confirm password is required"
+            });
+        }
+
+        // Validate passwords match
         if (newPassword !== confirmPassword) {
             return res.render("changePassword", {
                 user: user,
@@ -1050,6 +1077,7 @@ const changePassword = async (req, res) => {
             });
         }
 
+        // Validate password length
         if (newPassword.length < 8) {
             return res.render("changePassword", {
                 user: user,
@@ -1058,8 +1086,7 @@ const changePassword = async (req, res) => {
             });
         }
 
-        // Verify current password
-        
+        // Verify current password - this is the critical security check
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
         if (!isCurrentPasswordValid) {
@@ -1067,6 +1094,17 @@ const changePassword = async (req, res) => {
                 user: user,
                 page: 'password',
                 error: "Current password is incorrect"
+            });
+        }
+
+        // Check if new password is different from current password
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+
+        if (isSamePassword) {
+            return res.render("changePassword", {
+                user: user,
+                page: 'password',
+                error: "New password must be different from your current password"
             });
         }
 
