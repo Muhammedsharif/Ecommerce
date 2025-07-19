@@ -1075,7 +1075,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast('Cancel request submitted successfully. Awaiting admin approval.', 'success');
+                    showToast('Product cancelled.', 'success');
                     // Update the item's status in the DOM immediately
                     const itemCards = document.querySelectorAll('.item');
                     itemCards.forEach(card => {

@@ -195,9 +195,10 @@ const verifyPayment = async (req, res) => {
                 let discountAmount;
 
                 if (coupon.discountType === 'percentage') {
+                    // For percentage discounts, divide equally among all products
                     discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
-                    
                 } else {
+                    // For flat discounts, use current logic
                     discountAmount = Math.min(coupon.offerPrice, totalAmount);
                 }
 

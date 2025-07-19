@@ -1,5 +1,7 @@
 /**
  * Helper functions for coupon discount calculations during returns and cancellations
+ * For percentage discounts, the total discount is divided equally among all products
+ * For flat discounts, the current logic is maintained
  */
 
 /**
@@ -23,7 +25,8 @@ const calculateEqualCouponDiscount = (order, returnedItems) => {
         return sum + item.quantity;
     }, 0);
 
-    // Calculate discount per product (equal distribution)
+    // For percentage discounts, divide equally among all products
+    // For flat discounts, use the same equal distribution logic
     const discountPerProduct = order.couponDiscount / totalProductCount;
 
     // Calculate total number of returned/canceled products

@@ -399,7 +399,7 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Total Amount:</span>
-                    <span class="detail-value">₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+                    <span class="detail-value">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Payment Method:</span>

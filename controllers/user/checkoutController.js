@@ -105,8 +105,10 @@ const loadCheckout = async (req, res) => {
                 const totalBeforeDiscount = subtotal + shippingCost;
 
                 if (coupon.discountType === 'percentage') {
+                    // For percentage discounts, divide equally among all products
                     couponDiscount = Math.min((totalBeforeDiscount * coupon.offerPrice) / 100, totalBeforeDiscount);
                 } else {
+                    // For flat discounts, use current logic
                     couponDiscount = Math.min(coupon.offerPrice, totalBeforeDiscount);
                 }
 

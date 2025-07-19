@@ -391,8 +391,17 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Payment Method</div>
-                    <div class="info-value">Cash on Delivery</div>
+                    <div class="info-value"><%=order.paymentMethod%></div>
                 </div>
+                <% if (order.couponApplied && order.couponCode) { %>
+                <div class="info-item">
+                    <div class="info-label">Coupon Applied</div>
+                    <div class="info-value" style="color: #28a745; font-weight: bold;">
+                        <%= order.couponCode %> 
+                        <span style="font-size: 0.9rem; color: #6c757d;">(-₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %>)</span>
+                    </div>
+                </div>
+                <% } %>
             </div>
 
             <!-- Order Items -->
@@ -418,14 +427,8 @@
                             <div class="item-name"><%= item.product.productName %></div>
                             <div class="item-specs">
                                 Quantity: <%= item.quantity %> | 
-                                Size: <%= item.size || 'N/A' %> 
-                                
-                            </div>
-                        </div>
-                       
-                        
-                            <div class="item-price">
-                                ₹<% 
+                                Size: <%= item.size || 'N/A' %>
+                                <% 
                                     let variant = null;
                                     if (item.product && item.product.variant && item.size) {
                                         variant = item.product.variant.find(v => String(v.size) === String(item.size));
@@ -434,12 +437,71 @@
                                     let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
                                     let bestOffer = Math.max(productOffer, categoryOffer);
                                     let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
-                                    let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                                %><%= Math.round(displayPrice).toLocaleString('en-IN') %>
+                                    let unitPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                                    let totalPrice = unitPrice * item.quantity;
+                                %>
+                                <br>
+                                <span style="color: #6c757d; font-size: 0.85rem;">
+                                    ₹<%= Math.round(unitPrice).toLocaleString('en-IN') %> × <%= item.quantity %> = ₹<%= Math.round(totalPrice).toLocaleString('en-IN') %>
+                                </span>
                             </div>
-                
                         </div>
+                        
+                        <div class="item-price">
+                            ₹<%= Math.round(totalPrice).toLocaleString('en-IN') %>
+                        </div>
+                    </div>
                 <% }) %>
+            </div>
+
+            <!-- Order Summary -->
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e9ecef;">
+                <h3 class="card-title">
+                    <i class="fas fa-calculator"></i>
+                    Order Summary
+                </h3>
+                
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; max-width: 400px; margin-left: auto;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal:</span>
+                        <span>₹<%= Math.round(order.totalPrice).toLocaleString('en-IN') %></span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Shipping:</span>
+                        <span>
+                            <% 
+                                let shippingCost = order.totalPrice > 500 ? 0 : 50;
+                                let originalAmount = order.originalAmount || (order.totalPrice + shippingCost);
+                            %>
+                            <% if (shippingCost === 0) { %>
+                                <span style="color: #28a745;">FREE</span>
+                            <% } else { %>
+                                ₹<%= shippingCost.toLocaleString('en-IN') %>
+                            <% } %>
+                        </span>
+                    </div>
+
+                    <% if (order.couponApplied && order.couponDiscount > 0) { %>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #28a745;">
+                        <span>Coupon Discount (<%= order.couponCode %>):</span>
+                        <span>-₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %></span>
+                    </div>
+                    <% } %>
+
+                    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #dee2e6;">
+                    
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem;">
+                        <span>Total Amount:</span>
+                        <span style="color: #28a745;">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></span>
+                    </div>
+
+                    <% if (order.couponApplied && order.couponDiscount > 0) { %>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #6c757d; text-align: center;">
+                        You saved ₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %> with coupon <%= order.couponCode %>!
+                    </div>
+                    <% } %>
+                </div>
             </div>
         </div>
 

@@ -141,8 +141,12 @@ const applyCoupon = async (req, res) => {
         // Calculate discount amount based on discount type
         let discountAmount;
         if (coupon.discountType === 'percentage') {
-            discountAmount = Math.round(Math.min((cartTotal * coupon.offerPrice) / 100, cartTotal));
+            // For percentage discounts, divide equally among all products
+            const totalProductCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+            const totalDiscountAmount = Math.round(Math.min((cartTotal * coupon.offerPrice) / 100, cartTotal));
+            discountAmount = totalDiscountAmount;
         } else {
+            // For flat discounts, use current logic
             discountAmount = Math.round(Math.min(coupon.offerPrice, cartTotal));
         }
 

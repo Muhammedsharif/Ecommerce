@@ -1227,6 +1227,15 @@ const loadOrderDetails = async (req, res) => {
             }
             item.displayPrice = Math.round(displayPrice);
         });
+
+        // Calculate display totals for order views (handles partial returns/cancellations)
+        const { getOrderDisplayTotals } = require("../../helpers/couponHelper");
+        const displayTotals = getOrderDisplayTotals(order);
+        
+        // Add display totals to order object for view rendering
+        order.displaySubtotal = displayTotals.subtotal;
+        order.displayCouponDiscount = displayTotals.couponDiscount;
+        order.displayFinalAmount = displayTotals.finalAmount;
         
         res.render("orderDetails", {
             user: userData,
