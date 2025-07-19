@@ -1064,7 +1064,7 @@
                             <div class="coupon-item" onclick="selectCouponFromModal('${coupon.name}')">
                                 <div class="coupon-item-header">
                                     <span class="coupon-code-display">${coupon.name}</span>
-                                    <span class="coupon-discount">₹${coupon.offerPrice.toLocaleString('en-IN')} OFF</span>
+                                    <span class="coupon-discount">${coupon.displayText || (coupon.discountType === 'percentage' ? coupon.offerPrice + '% OFF' : '₹' + coupon.offerPrice.toLocaleString('en-IN') + ' OFF')}</span>
                                 </div>
                                 <div class="coupon-details">
                                     <strong>Minimum Order:</strong> ₹${coupon.minimumPrice.toLocaleString('en-IN')}<br>

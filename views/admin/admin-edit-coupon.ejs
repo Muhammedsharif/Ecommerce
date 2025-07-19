@@ -688,6 +688,9 @@ body {
             // Add usage limits validation
             document.getElementById('maxUsesPerUser').addEventListener('input', validateUsageLimits);
             document.getElementById('totalUsageLimit').addEventListener('input', validateUsageLimits);
+
+            // Add percentage validation
+            document.getElementById('offerPrice').addEventListener('input', validatePercentageInput);
         });
 
         // Update discount field based on type selection
@@ -729,6 +732,61 @@ body {
                 document.getElementById('expireOn').classList.remove('is-invalid');
                 return true;
             }
+        }
+
+        // Validate usage limits
+        function validateUsageLimits() {
+            const maxUsesPerUser = parseInt(document.getElementById('maxUsesPerUser').value);
+            const totalUsageLimit = parseInt(document.getElementById('totalUsageLimit').value);
+            const maxUsesPerUserInput = document.getElementById('maxUsesPerUser');
+            const totalUsageLimitInput = document.getElementById('totalUsageLimit');
+
+            // Clear previous errors
+            maxUsesPerUserInput.classList.remove('is-invalid');
+            totalUsageLimitInput.classList.remove('is-invalid');
+
+            // If total usage limit is set and max uses per user is greater than total usage limit
+            if (totalUsageLimit && maxUsesPerUser && maxUsesPerUser > totalUsageLimit) {
+                maxUsesPerUserInput.classList.add('is-invalid');
+                
+                // Add error message after the max uses per user field
+                let errorElement = maxUsesPerUserInput.parentNode.querySelector('.invalid-feedback');
+                if (!errorElement) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'invalid-feedback';
+                    maxUsesPerUserInput.parentNode.appendChild(errorElement);
+                }
+                errorElement.textContent = 'Maximum uses per user cannot be greater than total usage limit';
+                return false;
+            } else {
+                // Remove error message if validation passes
+                let errorElement = maxUsesPerUserInput.parentNode.querySelector('.invalid-feedback');
+                if (errorElement) {
+                    errorElement.textContent = '';
+                }
+                return true;
+            }
+        }
+
+        // Validate percentage input
+        function validatePercentageInput() {
+            const isPercentage = document.getElementById('discountTypePercentage').checked;
+            const offerPriceInput = document.getElementById('offerPrice');
+            const offerPriceError = document.getElementById('offerPriceError');
+            const value = parseFloat(offerPriceInput.value);
+
+            // Clear previous errors
+            offerPriceInput.classList.remove('is-invalid');
+            offerPriceError.textContent = '';
+
+            // Only validate if percentage type is selected and value is entered
+            if (isPercentage && value && value > 100) {
+                offerPriceInput.classList.add('is-invalid');
+                offerPriceError.textContent = 'Percentage discount cannot exceed 100%';
+                return false;
+            }
+
+            return true;
         }
 
         // Toggle category selection
@@ -856,6 +914,11 @@ body {
                 return;
             }
 
+            // Validate usage limits
+            if (!validateUsageLimits()) {
+                return;
+            }
+
             const submitBtn = document.getElementById('submitBtn');
             const formData = new FormData(this);
             const couponId = document.getElementById('couponId').value;
@@ -926,6 +989,17 @@ body {
                 Swal.fire({
                     title: 'Validation Error!',
                     text: `Total usage limit cannot be less than current usage (${currentUsage} users)`,
+                    icon: 'error',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            // Validate percentage discount
+            if (data.discountType === 'percentage' && parseFloat(data.offerPrice) > 100) {
+                Swal.fire({
+                    title: 'Validation Error!',
+                    text: 'Percentage discount cannot exceed 100%',
                     icon: 'error',
                     confirmButtonColor: '#667eea'
                 });

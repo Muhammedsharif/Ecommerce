@@ -895,7 +895,7 @@
                 <div class="coupon-card">
                     <div class="coupon-header">
                         <h4>${coupon.code}</h4>
-                        <span class="coupon-discount">₹${coupon.discount} OFF</span>
+                        <span class="coupon-discount">${coupon.discountType === 'percentage' ? coupon.discount + '% OFF' : '₹' + coupon.discount + ' OFF'}</span>
                     </div>
                     <div class="coupon-details">
                         <p>Minimum order: ₹${coupon.minimumOrder}</p>

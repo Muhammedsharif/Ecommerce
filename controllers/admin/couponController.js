@@ -440,6 +440,14 @@ const editCoupon = async (req, res) => {
             });
         }
 
+        // Validate that maxUsesPerUser is not greater than totalUsageLimit
+        if (totalUsageLimitNum && maxUsesPerUserNum > totalUsageLimitNum) {
+            return res.status(400).json({
+                success: false,
+                message: "Maximum uses per user cannot be greater than total usage limit"
+            });
+        }
+
         if (parseFloat(minimumPrice) < 0) {
             return res.status(400).json({
                 success: false,

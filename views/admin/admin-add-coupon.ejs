@@ -673,6 +673,9 @@ body {
             // Add usage limits validation
             document.getElementById('maxUsesPerUser').addEventListener('input', validateUsageLimits);
             document.getElementById('totalUsageLimit').addEventListener('input', validateUsageLimits);
+
+            // Add percentage validation
+            document.getElementById('offerPrice').addEventListener('input', validatePercentageInput);
         });
 
         // Update discount field based on type selection
@@ -748,6 +751,27 @@ body {
                 }
                 return true;
             }
+        }
+
+        // Validate percentage input
+        function validatePercentageInput() {
+            const isPercentage = document.getElementById('discountTypePercentage').checked;
+            const offerPriceInput = document.getElementById('offerPrice');
+            const offerPriceError = document.getElementById('offerPriceError');
+            const value = parseFloat(offerPriceInput.value);
+
+            // Clear previous errors
+            offerPriceInput.classList.remove('is-invalid');
+            offerPriceError.textContent = '';
+
+            // Only validate if percentage type is selected and value is entered
+            if (isPercentage && value && value > 100) {
+                offerPriceInput.classList.add('is-invalid');
+                offerPriceError.textContent = 'Percentage discount cannot exceed 100%';
+                return false;
+            }
+
+            return true;
         }
 
         // Toggle category selection
@@ -934,6 +958,17 @@ body {
                 Swal.fire({
                     title: 'Validation Error!',
                     text: 'Total usage limit must be at least 1',
+                    icon: 'error',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            // Validate percentage discount
+            if (data.discountType === 'percentage' && parseFloat(data.offerPrice) > 100) {
+                Swal.fire({
+                    title: 'Validation Error!',
+                    text: 'Percentage discount cannot exceed 100%',
                     icon: 'error',
                     confirmButtonColor: '#667eea'
                 });

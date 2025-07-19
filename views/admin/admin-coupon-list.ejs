@@ -484,7 +484,13 @@ body {
                                     <td>
                                         <span class="coupon-code"><%= coupon.name %></span>
                                     </td>
-                                    <td>₹<%= coupon.offerPrice.toLocaleString('en-IN') %></td>
+                                    <td>
+                                        <% if (coupon.discountType === 'percentage') { %>
+                                            <%= coupon.offerPrice %>%
+                                        <% } else { %>
+                                            ₹<%= coupon.offerPrice.toLocaleString('en-IN') %>
+                                        <% } %>
+                                    </td>
                                     <td>₹<%= coupon.minimumPrice.toLocaleString('en-IN') %></td>
                                     <td><%= new Date(coupon.expireOn).toLocaleDateString('en-IN') %></td>
                                     <td><%= coupon.usageCount %></td>
