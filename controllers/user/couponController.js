@@ -141,12 +141,12 @@ const applyCoupon = async (req, res) => {
         // Calculate discount amount based on discount type
         let discountAmount;
         if (coupon.discountType === 'percentage') {
-            discountAmount = Math.min((cartTotal * coupon.offerPrice) / 100, cartTotal);
+            discountAmount = Math.round(Math.min((cartTotal * coupon.offerPrice) / 100, cartTotal));
         } else {
-            discountAmount = Math.min(coupon.offerPrice, cartTotal);
+            discountAmount = Math.round(Math.min(coupon.offerPrice, cartTotal));
         }
 
-        const finalAmount = cartTotal - discountAmount;
+        const finalAmount = Math.round(cartTotal - discountAmount);
 
         // Store coupon in session for checkout process
         req.session.appliedCoupon = {

@@ -669,6 +669,10 @@ body {
             // Add date validation
             document.getElementById('startDate').addEventListener('change', validateDates);
             document.getElementById('expireOn').addEventListener('change', validateDates);
+
+            // Add usage limits validation
+            document.getElementById('maxUsesPerUser').addEventListener('input', validateUsageLimits);
+            document.getElementById('totalUsageLimit').addEventListener('input', validateUsageLimits);
         });
 
         // Update discount field based on type selection
@@ -708,6 +712,40 @@ body {
             } else {
                 document.getElementById('expireOnError').textContent = '';
                 document.getElementById('expireOn').classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        // Validate usage limits
+        function validateUsageLimits() {
+            const maxUsesPerUser = parseInt(document.getElementById('maxUsesPerUser').value);
+            const totalUsageLimit = parseInt(document.getElementById('totalUsageLimit').value);
+            const maxUsesPerUserInput = document.getElementById('maxUsesPerUser');
+            const totalUsageLimitInput = document.getElementById('totalUsageLimit');
+
+            // Clear previous errors
+            maxUsesPerUserInput.classList.remove('is-invalid');
+            totalUsageLimitInput.classList.remove('is-invalid');
+
+            // If total usage limit is set and max uses per user is greater than total usage limit
+            if (totalUsageLimit && maxUsesPerUser && maxUsesPerUser > totalUsageLimit) {
+                maxUsesPerUserInput.classList.add('is-invalid');
+                
+                // Add error message after the max uses per user field
+                let errorElement = maxUsesPerUserInput.parentNode.querySelector('.invalid-feedback');
+                if (!errorElement) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'invalid-feedback';
+                    maxUsesPerUserInput.parentNode.appendChild(errorElement);
+                }
+                errorElement.textContent = 'Maximum uses per user cannot be greater than total usage limit';
+                return false;
+            } else {
+                // Remove error message if validation passes
+                let errorElement = maxUsesPerUserInput.parentNode.querySelector('.invalid-feedback');
+                if (errorElement) {
+                    errorElement.textContent = '';
+                }
                 return true;
             }
         }
@@ -831,6 +869,11 @@ body {
 
             // Validate dates first
             if (!validateDates()) {
+                return;
+            }
+
+            // Validate usage limits
+            if (!validateUsageLimits()) {
                 return;
             }
 

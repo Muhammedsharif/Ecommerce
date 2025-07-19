@@ -64,8 +64,8 @@ const loadCheckout = async (req, res) => {
             let productOffer = product.productOffer || 0;
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
-            let itemPrice = bestOffer > 0 ? variantPrice - (variantPrice * bestOffer / 100) : variantPrice;
-            let itemTotal = itemPrice * item.quantity;
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+            let itemTotal = Math.round(itemPrice * item.quantity);
             
             validItems.push({
                 ...item.toObject(),
@@ -213,8 +213,8 @@ const processCheckout = async (req, res) => {
             let productOffer = product.productOffer || 0;
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
-            let itemPrice = bestOffer > 0 ? variantPrice - (variantPrice * bestOffer / 100) : variantPrice;
-            let itemTotal = itemPrice * item.quantity;
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+            let itemTotal = Math.round(itemPrice * item.quantity);
             let itemsize = variant.size;
 console.log(productOffer,categoryOffer)
             validItems.push({
@@ -409,7 +409,7 @@ const loadThankYou = async (req, res) => {
             let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
-            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            let displayPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
             item.displayPrice = displayPrice;
         });
 
@@ -463,7 +463,7 @@ const loadPaymentSuccess = async (req, res) => {
             let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
-            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+            let displayPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
             item.displayPrice = displayPrice;
         });
 

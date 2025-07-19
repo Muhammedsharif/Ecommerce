@@ -152,8 +152,8 @@ const verifyPayment = async (req, res) => {
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let variantPrice = variant.varientPrice;
-            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-            let itemTotal = itemPrice * item.quantity;
+            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+            let itemTotal = Math.round(itemPrice * item.quantity);
             
             validItems.push({
                 product: product._id,
@@ -361,8 +361,8 @@ const handlePaymentFailure = async (req, res) => {
                         let categoryOffer = (product.category && product.category.categoryOffer) || 0;
                         let bestOffer = Math.max(productOffer, categoryOffer);
                         let variantPrice = variant.varientPrice;
-                        let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                        let itemTotal = itemPrice * item.quantity;
+                        let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                        let itemTotal = Math.round(itemPrice * item.quantity);
                         
                         validItems.push({
                             product: product._id,
@@ -564,8 +564,8 @@ const retryPayment = async (req, res) => {
                 let categoryOffer = (product.category && product.category.categoryOffer) || 0;
                 let bestOffer = Math.max(productOffer, categoryOffer);
                 let variantPrice = variant.varientPrice;
-                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                let itemTotal = itemPrice * item.quantity;
+                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                let itemTotal = Math.round(itemPrice * item.quantity);
                 
                 validItems.push({
                     product: product._id,

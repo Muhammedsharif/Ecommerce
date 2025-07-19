@@ -1036,9 +1036,9 @@
                     `"${transaction.customer}"`,
                     `"${transaction.type}"`,
                     `"${transaction.description.replace(/"/g, '""')}"`,
-                    `"₹${transaction.amount.toLocaleString()}"`,
-                    `"₹${transaction.discount.toLocaleString()}"`,
-                    `"₹${transaction.netAmount.toLocaleString()}"`,
+                    `"₹${Math.round(transaction.amount).toLocaleString()}"`,
+                    `"₹${Math.round(transaction.discount).toLocaleString()}"`,
+                    `"₹${Math.round(transaction.netAmount).toLocaleString()}"`,
                     `"${transaction.status}"`
                 ];
                 csvRows.push(row.join(','));
@@ -1110,9 +1110,9 @@
                         <td>${transaction.customer}</td>
                         <td>${transaction.type}</td>
                         <td title="${transaction.description}">${transaction.description.length > 50 ? transaction.description.substring(0, 50) + '...' : transaction.description}</td>
-                        <td>₹${transaction.amount.toLocaleString()}</td>
-                        <td>₹${transaction.discount.toLocaleString()}</td>
-                        <td>₹${transaction.netAmount.toLocaleString()}</td>
+                        <td>₹${Math.round(transaction.amount).toLocaleString()}</td>
+                        <td>₹${Math.round(transaction.discount).toLocaleString()}</td>
+                        <td>₹${Math.round(transaction.netAmount).toLocaleString()}</td>
                         <td><span class="status-badge ${statusClass}">${transaction.status}</span></td>
                     </tr>
                 `;

@@ -37,6 +37,7 @@
                         placeholder="Enter your password"
                         value="<%= typeof password !== 'undefined' ? password : '' %>"
                     />
+                    <span class="input-icon password-toggle" id="passwordToggle">👁️</span>
                     <div id="error2" class="error-message"></div>
                 </div>
 
@@ -134,6 +135,16 @@
             if (!isEmailValid || !isPasswordValid) {
                 e.preventDefault();
             }
+        });
+
+        // Password toggle functionality
+        const passwordToggle = document.getElementById("passwordToggle");
+        passwordToggle.addEventListener("click", function() {
+            const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+            passwordField.setAttribute("type", type);
+            
+            // Toggle eye icon
+            this.textContent = type === "password" ? "👁️" : "🙈";
         });
     </script>
 </body>

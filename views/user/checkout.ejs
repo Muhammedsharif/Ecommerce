@@ -904,7 +904,7 @@
                     </div>
                     <div class="summary-row discount">
                         <span>Coupon Discount (<%= appliedCoupon.couponCode %>)</span>
-                        <span>-₹<%= couponDiscount.toLocaleString('en-IN') %></span>
+                        <span>-₹<%= Math.round(couponDiscount).toLocaleString('en-IN') %></span>
                     </div>
                 <% } %>
 

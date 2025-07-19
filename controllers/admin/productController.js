@@ -167,8 +167,8 @@ const addProducts = async (req, res) => {
       // Calculate sale price based on product offer using the calculated regular price
       salePrice = varientPrice;
       if (products.productOffer && products.productOffer > 0) {
-        const discountAmount = (varientPrice * products.productOffer) / 100;
-        salePrice = varientPrice - discountAmount;
+        const discountAmount = Math.round((varientPrice * products.productOffer) / 100);
+        salePrice = Math.round(varientPrice - discountAmount);
       }
 
       // Create variant array with quantities from size variants
@@ -176,8 +176,8 @@ const addProducts = async (req, res) => {
         const variantPrice = parseFloat(sizeVariants[size]?.price) || varientPrice;
         let variantSalePrice = variantPrice;
         if (products.productOffer && products.productOffer > 0) {
-          const discountAmount = (variantPrice * products.productOffer) / 100;
-          variantSalePrice = variantPrice - discountAmount;
+          const discountAmount = Math.round((variantPrice * products.productOffer) / 100);
+          variantSalePrice = Math.round(variantPrice - discountAmount);
         }
         return {
           size,
@@ -387,8 +387,8 @@ const editProduct = async (req, res) => {
     // Calculate sale price based on product offer using the calculated regular price
     let salePrice = varientPrice;
     if (data.productOffer && data.productOffer > 0) {
-      const discountAmount = (varientPrice * data.productOffer) / 100;
-      salePrice = varientPrice - discountAmount;
+      const discountAmount = Math.round((varientPrice * data.productOffer) / 100);
+      salePrice = Math.round(varientPrice - discountAmount);
     }
 
     // Create variant array with data from form or defaults
@@ -396,8 +396,8 @@ const editProduct = async (req, res) => {
       const variantPrice = parseFloat(sizeVariants[size]?.price) || varientPrice;
       let variantSalePrice = variantPrice;
       if (data.productOffer && data.productOffer > 0) {
-        const discountAmount = (variantPrice * data.productOffer) / 100;
-        variantSalePrice = variantPrice - discountAmount;
+        const discountAmount = Math.round((variantPrice * data.productOffer) / 100);
+        variantSalePrice = Math.round(variantPrice - discountAmount);
       }
       return {
         size,

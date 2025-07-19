@@ -219,3 +219,29 @@ a[href="/auth/google"] img {
       font-size: 0.75rem;
       display:none ;
     }
+
+    .password-input-group {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-input-group input {
+      width: 100%;
+      padding-right: 40px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      user-select: none;
+      font-size: 16px;
+      color: #666;
+      transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: #00aabb;
+    }

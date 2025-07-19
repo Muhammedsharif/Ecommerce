@@ -693,15 +693,15 @@ const loadOrders = async (req, res) => {
                 let bestOffer = Math.max(productOffer, categoryOffer);
                 let displayPrice;
                 if (bestOffer > 0) {
-                    displayPrice =  (basePrice * bestOffer / 100);
+                    displayPrice = Math.round(basePrice - (basePrice * bestOffer / 100));
                 } else if (item.product && item.product.salePrice) {
-                    displayPrice = item.product.salePrice;
+                    displayPrice = Math.round(item.product.salePrice);
                 } else if (item.product && item.product.price) {
-                    displayPrice = item.product.price;
+                    displayPrice = Math.round(item.product.price);
                 } else {
-                    displayPrice = item.price;
+                    displayPrice = Math.round(item.price);
                 }
-                item.displayPrice = Math.round(displayPrice);
+                item.displayPrice = displayPrice;
             });
         });
 
@@ -1219,7 +1219,7 @@ const loadOrderDetails = async (req, res) => {
             if (item.product && item.product.isOfferActive && item.product.offerPrice) {
                 displayPrice = item.product.offerPrice;
             } else if (item.product && item.product.discount && item.product.discount > 0) {
-                displayPrice = item.product.price - (item.product.price * item.product.discount / 100);
+                displayPrice = Math.round(item.product.price - (item.product.price * item.product.discount / 100));
             } else if (item.product && item.product.salePrice) {
                 displayPrice = item.product.salePrice;
             } else if (item.product && item.product.price) {
@@ -2018,8 +2018,8 @@ const downloadInvoice = async (req, res) => {
             let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
-            let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-            let itemTotal = displayPrice * item.quantity;
+            let displayPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+            let itemTotal = Math.round(displayPrice * item.quantity);
             subtotal += itemTotal;
 
             // Add new page if needed

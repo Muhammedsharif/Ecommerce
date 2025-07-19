@@ -413,10 +413,10 @@
                             </div>
                             <div class="item-price">
                                 <div style="color:#6b7280; font-size:0.9rem; margin-bottom:0.25rem;">
-                                    Unit Price: ₹<%= item.displayPrice.toFixed(0) %>
+                                     Price: ₹<%=Math.round( item.displayPrice) %>
                                 </div>
-                                <div style="color:#ef4444; font-weight:bold;">
-                                    Total: ₹<%= (item.displayPrice * item.quantity).toFixed(0) %>
+                                <div style="color:#ef4444; font-size: 13px;">
+                                    Quantity Total: ₹<%= Math.round((item.displayPrice * item.quantity)) %>
                                 </div>
                             </div>
                         </div>
@@ -457,10 +457,10 @@
                     let subtotal = 0;
                     if (cartItems) {
                         cartItems.forEach(item => {
-                            subtotal += item.displayPrice * item.quantity;
+                            subtotal += Math.round(item.displayPrice * item.quantity);
                         });
                     }   
-                    %><%= Math.round(subtotal).toFixed(0) %>
+                    %><%= Math.round(subtotal) %>
                 </span>
             </div>
             

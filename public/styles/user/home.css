@@ -47,23 +47,9 @@
             animation: fadeInUp 1s ease 0.2s both;
         }
 
-        .cta-button {
-            background: linear-gradient(45deg, #e5e1e1, #6b4444); 
-            color: white;
-            padding: 18px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: fadeInUp 1s ease 0.4s both;
-        }
+        
 
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
-        }
+       
 
         .floating-elements {
             position: absolute;
@@ -493,10 +479,7 @@
                 font-size: 0.9rem;
             }
 
-            .cta-button {
-                padding: 12px 24px;
-                font-size: 0.9rem;
-            }
+           
 
             .product-grid {
                 grid-template-columns: 1fr;

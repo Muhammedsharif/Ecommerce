@@ -717,10 +717,10 @@
 
                         <div class="product-price" data-product-id="<%=product._id%>">
                             <% if (totalOffer > 0) { %>
-                                <span class="current-price">₹<%=initialDiscountedPrice.toLocaleString('en-IN')%></span>
+                                <span class="current-price">₹<%=Math.round(initialDiscountedPrice).toLocaleString('en-IN')%></span>
                                
                             <% } else { %>
-                                <span class="current-price">₹<%=initialPrice.toLocaleString('en-IN')%></span>
+                                <span class="current-price">₹<%=Math.round(initialPrice).toLocaleString('en-IN')%></span>
                             <% } %>
                         </div>
 

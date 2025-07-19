@@ -1376,10 +1376,7 @@ function validateForm() {
     if (!description || description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
-    } else if (!/^[a-zA-Z0-9\s.,'"'""\-()\/:!&?—]+$/.test(description.trim())) {
-        displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
-        isValid = false;
-    }
+    } 
 
     if (productOffer && (!/^\d+$/.test(productOffer) || parseInt(productOffer) < 0 || parseInt(productOffer) > 100)) {
         displayErrorMessage('productOffer-error', 'Product offer must be between 0 and 100.');

@@ -34,9 +34,15 @@
 
          <input type="text" name="phone" id="phone" placeholder="Phone" value="<%= typeof phone !== 'undefined' ? phone : '' %>" />
         <div id="error3" class="error-message"></div>
-        <input type="password" name="password" id="password" placeholder="Password" />
+        <div class="password-input-group">
+          <input type="password" name="password" id="password" placeholder="Password" />
+          <span class="password-toggle" id="passwordToggle">👁️</span>
+        </div>
         <div id="error4" class="error-message"></div>
-        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
+        <div class="password-input-group">
+          <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
+          <span class="password-toggle" id="confirmPasswordToggle">👁️</span>
+        </div>
         <div id="error5" class="error-message"></div>
 
         <input type="text" name="referralCode" id="referralCode" placeholder="Referral Code (Optional)" value="<%= typeof referralCode !== 'undefined' ? referralCode : '' %>" />
@@ -153,6 +159,29 @@
 
 
      document.addEventListener("DOMContentLoaded",function(){
+      // Add validation to prevent leading whitespace in name field
+      nameid.addEventListener('input', function() {
+        if (this.value.startsWith(' ')) {
+          this.value = this.value.trimStart();
+        }
+      });
+
+      // Password toggle functionality
+      const passwordToggle = document.getElementById("passwordToggle");
+      const confirmPasswordToggle = document.getElementById("confirmPasswordToggle");
+
+      passwordToggle.addEventListener("click", function() {
+        const type = passid.getAttribute("type") === "password" ? "text" : "password";
+        passid.setAttribute("type", type);
+        this.textContent = type === "password" ? "👁️" : "🙈";
+      });
+
+      confirmPasswordToggle.addEventListener("click", function() {
+        const type = cpassid.getAttribute("type") === "password" ? "text" : "password";
+        cpassid.setAttribute("type", type);
+        this.textContent = type === "password" ? "👁️" : "🙈";
+      });
+
       signform.addEventListener("submit",function(e){
 
           nameValidateChecking()

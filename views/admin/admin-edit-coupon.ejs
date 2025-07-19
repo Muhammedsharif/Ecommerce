@@ -684,6 +684,10 @@ body {
             // Add date validation
             document.getElementById('startDate').addEventListener('change', validateDates);
             document.getElementById('expireOn').addEventListener('change', validateDates);
+
+            // Add usage limits validation
+            document.getElementById('maxUsesPerUser').addEventListener('input', validateUsageLimits);
+            document.getElementById('totalUsageLimit').addEventListener('input', validateUsageLimits);
         });
 
         // Update discount field based on type selection

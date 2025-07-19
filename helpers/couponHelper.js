@@ -43,10 +43,10 @@ const calculateEqualCouponDiscount = (order, returnedItems) => {
     const adjustedRefundAmount = returnedItemsValue - equalDiscount;
 
     return {
-        equalDiscount: Math.round(equalDiscount * 100) / 100, // Round to 2 decimal places
-        adjustedRefundAmount: Math.round(adjustedRefundAmount * 100) / 100,
-        returnedItemsValue: returnedItemsValue,
-        discountPerProduct: Math.round(discountPerProduct * 100) / 100,
+        equalDiscount: Math.round(equalDiscount), // Round to nearest whole number
+        adjustedRefundAmount: Math.round(adjustedRefundAmount),
+        returnedItemsValue: Math.round(returnedItemsValue),
+        discountPerProduct: Math.round(discountPerProduct),
         returnedProductCount: returnedProductCount,
         totalProductCount: totalProductCount
     };

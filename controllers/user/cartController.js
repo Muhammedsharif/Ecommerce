@@ -68,7 +68,7 @@ const loadCart = async (req,res) =>{
                 let categoryOffer = (product.category && product.category.categoryOffer) || 0;
                 let bestOffer = Math.max(productOffer, categoryOffer);
                 let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
-                let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                let displayPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
 
                 return {
                     ...item.toObject(),
