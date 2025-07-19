@@ -111,6 +111,7 @@ router.post("/move-to-cart-from-wishlist",userAuth,cartController.moveToCartFrom
 //Checkout Management
 router.get("/checkout",userAuth,checkoutController.loadCheckout)
 router.post("/checkout",userAuth,checkoutController.processCheckout)
+router.post("/buy-now",userAuth,checkoutController.buyNow)
 router.get("/order-confirmation/:orderId",userAuth,checkoutController.loadThankYou)
 
 //Coupon Management

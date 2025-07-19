@@ -22,41 +22,26 @@ const loadCheckout = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        // Get cart items for the user with populated product and category data
-        const cart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-            populate: {
-                path: 'category',
-                model: 'Category'
-            }
-        });
-
-        if (!cart || cart.items.length === 0) {
-            return res.redirect("/cart");
-        }
-
-        let cartItems = cart.items;
+        // Check if this is a direct buy now checkout
+        const buyNowData = req.session.buyNowData;
+        let cartItems = [];
         let subtotal = 0;
         let validItems = [];
 
-        // Validate cart items and calculate totals
-        for (let item of cartItems) {
-            const product = item.productId;
+        if (buyNowData) {
+            // Handle Buy Now checkout
+            const product = await Product.findById(buyNowData.productId).populate('category');
             
-            // Check if product exists and is not blocked/deleted
-            if (!product || product.isBlocked || product.isDeleted) {
-                continue; // Skip invalid products
+            if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                delete req.session.buyNowData;
+                return res.redirect("/pageNotFound");
             }
 
-            // Check if product is available
-            if (product.status !== "Available") {
-                continue; // Skip unavailable products
-            }
-
-            // Find the specific variant for this cart item
-            const variant = product.variant.find(v => v.size === item.size);
-            if (!variant || variant.varientquantity < item.quantity) {
-                continue; // Skip items with insufficient stock
+            // Find the specific variant
+            const variant = product.variant.find(v => v.size === buyNowData.size);
+            if (!variant || variant.varientquantity < buyNowData.quantity) {
+                delete req.session.buyNowData;
+                return res.redirect(`/productDetails?id=${buyNowData.productId}`);
             }
 
             // Calculate item total using best offer (product/category)
@@ -65,21 +50,76 @@ const loadCheckout = async (req, res) => {
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
-            let itemTotal = Math.round(itemPrice * item.quantity);
+            let itemTotal = Math.round(itemPrice * buyNowData.quantity);
             
             validItems.push({
-                ...item.toObject(),
                 productId: product,
+                quantity: buyNowData.quantity,
+                size: buyNowData.size,
+                color: buyNowData.color,
                 itemPrice: itemPrice,
                 itemTotal: itemTotal
             });
 
-            subtotal += itemTotal;
-        }
+            subtotal = itemTotal;
+        } else {
+            // Handle regular cart checkout
+            const cart = await Cart.findOne({ userId }).populate({
+                path: 'items.productId',
+                populate: {
+                    path: 'category',
+                    model: 'Category'
+                }
+            });
 
-        // If no valid items, redirect to cart
-        if (validItems.length === 0) {
-            return res.redirect("/cart");
+            if (!cart || cart.items.length === 0) {
+                return res.redirect("/cart");
+            }
+
+            cartItems = cart.items;
+
+            // Validate cart items and calculate totals
+            for (let item of cartItems) {
+                const product = item.productId;
+                
+                // Check if product exists and is not blocked/deleted
+                if (!product || product.isBlocked || product.isDeleted) {
+                    continue; // Skip invalid products
+                }
+
+                // Check if product is available
+                if (product.status !== "Available") {
+                    continue; // Skip unavailable products
+                }
+
+                // Find the specific variant for this cart item
+                const variant = product.variant.find(v => v.size === item.size);
+                if (!variant || variant.varientquantity < item.quantity) {
+                    continue; // Skip items with insufficient stock
+                }
+
+                // Calculate item total using best offer (product/category)
+                let variantPrice = variant.varientPrice;
+                let productOffer = product.productOffer || 0;
+                let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                let bestOffer = Math.max(productOffer, categoryOffer);
+                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                let itemTotal = Math.round(itemPrice * item.quantity);
+                
+                validItems.push({
+                    ...item.toObject(),
+                    productId: product,
+                    itemPrice: itemPrice,
+                    itemTotal: itemTotal
+                });
+
+                subtotal += itemTotal;
+            }
+
+            // If no valid items, redirect to cart
+            if (validItems.length === 0) {
+                return res.redirect("/cart");
+            }
         }
 
         // Get user addresses
@@ -129,7 +169,8 @@ const loadCheckout = async (req, res) => {
             totalAmount: finalAmount,
             appliedCoupon: appliedCoupon,
             couponDiscount: couponDiscount,
-            originalAmount: subtotal + shippingCost
+            originalAmount: subtotal + shippingCost,
+            isBuyNow: !!buyNowData
         });
 
     } catch (error) {
@@ -176,37 +217,31 @@ const processCheckout = async (req, res) => {
             });
         }
 
-        // Get cart items with product and category populated
-        const cart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-            populate: {
-                path: 'category',
-                model: 'Category'
-            }
-        });
-        if (!cart || cart.items.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Cart is empty" 
-            });
-        }
-
         let validItems = [];
         let subtotal = 0;
+        let itemsToUpdateStock = [];
 
-        // Re-validate cart items and stock
-        for (let item of cart.items) {
-            const product = item.productId;
+        // Check if this is a Buy Now checkout
+        const buyNowData = req.session.buyNowData;
+
+        if (buyNowData) {
+            // Handle Buy Now checkout
+            const product = await Product.findById(buyNowData.productId).populate('category');
             
             if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
-                continue;
-            }
-
-            const variant = product.variant.find(v => v.size === item.size);
-            if (!variant || variant.varientquantity < item.quantity) {
+                delete req.session.buyNowData;
                 return res.status(400).json({ 
                     success: false, 
-                    message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                    message: "Product is no longer available" 
+                });
+            }
+
+            const variant = product.variant.find(v => v.size === buyNowData.size);
+            if (!variant || variant.varientquantity < buyNowData.quantity) {
+                delete req.session.buyNowData;
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Insufficient stock for ${product.productName} (Size: ${buyNowData.size})` 
                 });
             }
 
@@ -216,25 +251,88 @@ const processCheckout = async (req, res) => {
             let categoryOffer = (product.category && product.category.categoryOffer) || 0;
             let bestOffer = Math.max(productOffer, categoryOffer);
             let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
-            let itemTotal = Math.round(itemPrice * item.quantity);
-            let itemsize = variant.size;
-console.log(productOffer,categoryOffer)
+            let itemTotal = Math.round(itemPrice * buyNowData.quantity);
+
             validItems.push({
                 product: product._id,
-                quantity: item.quantity,
+                quantity: buyNowData.quantity,
                 price: itemPrice, // legacy
                 finalPrice: itemPrice, // explicit final price for clarity
-                size: itemsize
+                size: buyNowData.size
             });
 
-            subtotal += itemTotal;
-        }
-
-        if (validItems.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "No valid items in cart" 
+            itemsToUpdateStock.push({
+                productId: product._id,
+                size: buyNowData.size,
+                quantity: buyNowData.quantity
             });
+
+            subtotal = itemTotal;
+        } else {
+            // Handle regular cart checkout
+            const cart = await Cart.findOne({ userId }).populate({
+                path: 'items.productId',
+                populate: {
+                    path: 'category',
+                    model: 'Category'
+                }
+            });
+            
+            if (!cart || cart.items.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "Cart is empty" 
+                });
+            }
+
+            // Re-validate cart items and stock
+            for (let item of cart.items) {
+                const product = item.productId;
+                
+                if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                    continue;
+                }
+
+                const variant = product.variant.find(v => v.size === item.size);
+                if (!variant || variant.varientquantity < item.quantity) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                    });
+                }
+
+                // Calculate item price using best offer (product/category)
+                let variantPrice = variant.varientPrice;
+                let productOffer = product.productOffer || 0;
+                let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                let bestOffer = Math.max(productOffer, categoryOffer);
+                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                let itemTotal = Math.round(itemPrice * item.quantity);
+                let itemsize = variant.size;
+
+                validItems.push({
+                    product: product._id,
+                    quantity: item.quantity,
+                    price: itemPrice, // legacy
+                    finalPrice: itemPrice, // explicit final price for clarity
+                    size: itemsize
+                });
+
+                itemsToUpdateStock.push({
+                    productId: product._id,
+                    size: item.size,
+                    quantity: item.quantity
+                });
+
+                subtotal += itemTotal;
+            }
+
+            if (validItems.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "No valid items in cart" 
+                });
+            }
         }
 
         // Calculate totals using correct subtotal (no tax)
@@ -348,7 +446,7 @@ console.log(productOffer,categoryOffer)
         }
 
         // Update product stock
-        for (let item of cart.items) {
+        for (let item of itemsToUpdateStock) {
             const product = await Product.findById(item.productId);
             if (product) {
                 const variantIndex = product.variant.findIndex(v => v.size === item.size);
@@ -359,8 +457,13 @@ console.log(productOffer,categoryOffer)
             }
         }
 
-        // Clear cart
-        await Cart.findOneAndDelete({ userId });
+        // Clear cart only if it's not a Buy Now order
+        if (!buyNowData) {
+            await Cart.findOneAndDelete({ userId });
+        } else {
+            // Clear Buy Now data from session
+            delete req.session.buyNowData;
+        }
 
         res.status(200).json({ 
             success: true, 
@@ -541,11 +644,92 @@ const loadRetryPayment = async (req, res) => {
     }
 };
 
+// Controller function to handle Buy Now functionality
+const buyNow = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.status(401).json({ 
+                success: false, 
+                message: "Please login to continue",
+                redirectUrl: "/login"
+            });
+        }
+
+        const { productId, size, quantity, color } = req.body;
+
+        // Validate required fields
+        if (!productId || !size || !quantity) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required product information"
+            });
+        }
+
+        // Validate quantity
+        const qty = parseInt(quantity);
+        if (isNaN(qty) || qty < 1) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid quantity"
+            });
+        }
+
+        // Validate product and stock
+        const product = await Product.findById(productId).populate('category');
+        if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+            return res.status(400).json({
+                success: false,
+                message: "Product is not available"
+            });
+        }
+
+        // Find the specific variant
+        const variant = product.variant.find(v => v.size === size);
+        if (!variant) {
+            return res.status(400).json({
+                success: false,
+                message: "Selected size is not available"
+            });
+        }
+
+        if (variant.varientquantity < qty) {
+            return res.status(400).json({
+                success: false,
+                message: `Only ${variant.varientquantity} items available in stock`
+            });
+        }
+
+        // Store Buy Now data in session
+        req.session.buyNowData = {
+            productId: productId,
+            size: size,
+            quantity: qty,
+            color: color || product.color
+        };
+
+        res.status(200).json({
+            success: true,
+            message: "Redirecting to checkout",
+            redirectUrl: "/checkout"
+        });
+
+    } catch (error) {
+        console.error("Error in Buy Now:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong. Please try again."
+        });
+    }
+};
+
 module.exports = {
     loadCheckout,
     processCheckout,
     loadThankYou,
     loadPaymentSuccess,
     loadPaymentFailure,
-    loadRetryPayment
+    loadRetryPayment,
+    buyNow
 };

@@ -1631,11 +1631,85 @@
                     toast.style.transform = 'translateX(100%)';
                 }, 3000);
             }
-                   function proceedToCheckout() {
-          
+                   async function proceedToCheckout() {
+            try {
+                // Get selected size
+                const selectedSizeElement = document.querySelector('input[name="size"]:checked');
+                const selectedSize = selectedSizeElement ? selectedSizeElement.value : null;
 
-            // Redirect to checkout page
-            window.location.href = '/checkout';
+                // Validate size selection
+                if (!selectedSize) {
+                    showToast('Please select a size before proceeding', 'error');
+                    // Highlight size section to draw attention
+                    const sizeSection = document.querySelector('.size-options');
+                    if (sizeSection) {
+                        sizeSection.style.border = '2px solid #ef4444';
+                        sizeSection.style.borderRadius = '8px';
+                        sizeSection.style.padding = '10px';
+                        setTimeout(() => {
+                            sizeSection.style.border = '';
+                            sizeSection.style.borderRadius = '';
+                            sizeSection.style.padding = '';
+                        }, 3000);
+                    }
+                    return;
+                }
+
+                // Get quantity
+                const quantityInput = document.querySelector('.quantity-input');
+                const quantity = parseInt(quantityInput.value) || 1;
+
+                // Get selected color
+                const selectedColor = "<%=color%>";
+
+                // Get product ID
+                const productId = "<%=product._id%>";
+
+                // Show loading state
+                const buyNowButton = document.querySelector('.btn2');
+                const originalHTML = buyNowButton.innerHTML;
+                buyNowButton.disabled = true;
+                buyNowButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                // Send Buy Now request
+                const response = await fetch('/buy-now', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        size: selectedSize,
+                        quantity: quantity,
+                        color: selectedColor
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Redirect to checkout page
+                    window.location.href = data.redirectUrl;
+                } else {
+                    // Handle error
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        showToast(data.message || 'Failed to proceed to checkout', 'error');
+                        buyNowButton.disabled = false;
+                        buyNowButton.innerHTML = originalHTML;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error in Buy Now:', error);
+                showToast('Something went wrong. Please try again.', 'error');
+                
+                // Reset button state
+                const buyNowButton = document.querySelector('.btn2');
+                buyNowButton.disabled = false;
+                buyNowButton.innerHTML = '⚡ Buy Now';
+            }
         }
         </script>
 </body>
