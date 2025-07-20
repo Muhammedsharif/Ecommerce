@@ -428,7 +428,28 @@
                             Quantity: <%= item.quantity %> | Size: <%= item.size || 'N/A' %>
                         </div>
                     </div>
-                    <div class="item-price">₹<%= Math.round(item.price).toLocaleString() %></div>
+                    <div class="item-price">
+                        <%
+                            // Calculate the final item price including coupon discount
+                            let basePrice = item.price;
+                            let finalItemPrice = basePrice;
+                            
+                            // If coupon was applied, calculate per-item discount
+                            if (order.couponApplied && order.couponDiscount > 0) {
+                                // Calculate total number of products in the order (considering quantities)
+                                const totalProductCount = order.orderedItems.reduce((sum, orderItem) => {
+                                    return sum + orderItem.quantity;
+                                }, 0);
+                                
+                                // Distribute coupon discount equally among all products
+                                const couponDiscountPerItem = order.couponDiscount / totalProductCount;
+                                
+                                // Apply coupon discount per item to get the final display price
+                                finalItemPrice = Math.max(0, Math.round(basePrice - couponDiscountPerItem));
+                            }
+                        %>
+                        ₹<%= finalItemPrice.toLocaleString() %>
+                    </div>
                 </div>
             <% }) %>
         </div>

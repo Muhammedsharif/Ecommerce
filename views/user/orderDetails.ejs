@@ -600,7 +600,7 @@
                                         <i class="fas fa-undo"></i>
                                         Return Item
                                     </button>
-                                <% } else if (order.status === 'Pending' || order.status === 'Processing') { %>
+                                <% } else if ((order.status === 'Pending' || order.status === 'Processing') && !(order.paymentStatus === 'Failed' || (order.paymentMethod === 'ONLINE' && order.paymentStatus === 'Pending'))) { %>
                                     <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>', '<%= item.product.productName %>')"
                                             class="btn-item-action btn-cancel-item">
                                         <i class="fas fa-times"></i>
@@ -671,7 +671,7 @@
                     Retry Payment
                 </a>
             <% } %>
-            <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+            <% if ((order.status === 'Pending' || order.status === 'Processing') && !(order.paymentStatus === 'Failed' || (order.paymentMethod === 'ONLINE' && order.paymentStatus === 'Pending'))) { %>
         <button onclick="cancelAllItems('<%= order._id %>')" class="btn btn-danger">
             <i class="fas fa-times"></i>
             Cancel All Items

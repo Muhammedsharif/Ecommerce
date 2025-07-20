@@ -627,6 +627,51 @@ const loadRetryPayment = async (req, res) => {
             return res.redirect('/orders');
         }
 
+        // Calculate coupon discount per item if coupon was applied
+        let couponDiscountPerItem = 0;
+        if (order.couponApplied && order.couponDiscount > 0) {
+            // Calculate total number of products in the order (considering quantities)
+            const totalProductCount = order.orderedItems.reduce((sum, item) => {
+                return sum + item.quantity;
+            }, 0);
+            
+            // Distribute coupon discount equally among all products
+            couponDiscountPerItem = order.couponDiscount / totalProductCount;
+        }
+
+        // Calculate the correct display price for each item including coupon discount
+        order.orderedItems.forEach(item => {
+            // Start with the stored item price (which includes product/category offers)
+            let basePrice = item.price;
+            
+            // Verify the base price calculation for consistency
+            if (item.product && item.product.variant && item.size) {
+                const variant = item.product.variant.find(v => v.size === item.size);
+                if (variant) {
+                    const productOffer = item.product.productOffer || 0;
+                    const categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
+                    const bestOffer = Math.max(productOffer, categoryOffer);
+                    const variantPrice = variant.varientPrice;
+                    const calculatedPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                    
+                    // Use calculated price if there's a significant difference
+                    if (Math.abs(basePrice - calculatedPrice) > 1) {
+                        basePrice = calculatedPrice;
+                    }
+                }
+            }
+            
+            // Apply coupon discount per item to get the final display price
+            const finalItemPrice = Math.round(basePrice - couponDiscountPerItem);
+            item.displayPrice = Math.max(0, finalItemPrice); // Ensure price doesn't go negative
+            
+            console.log(`Item: ${item.product.productName}`);
+            console.log(`Base price (with offers): ${basePrice}`);
+            console.log(`Coupon discount per item: ${couponDiscountPerItem}`);
+            console.log(`Final display price: ${item.displayPrice}`);
+            console.log(`---`);
+        });
+
         // Get user data
         const userData = await User.findById(userId);
         if (!userData) {
