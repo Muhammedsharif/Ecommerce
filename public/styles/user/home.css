@@ -32,7 +32,7 @@
             font-size: 3.5rem;
             font-weight: 900;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #e5e1e1, #5e4d4d); 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -103,7 +103,7 @@
             font-size: 3rem;
             font-weight: 800;
             margin-bottom: 60px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #667eea, #4ecdc4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -190,12 +190,12 @@
         }
 
         .wishlist-btn:hover {
-            color: #ff6b6b;
+            color: #ef4444;
             transform: scale(1.2);
         }
 
         .wishlist-btn.active {
-            color: #ff6b6b;
+            color: #ef4444;
         }
 
         .product-image {
@@ -259,19 +259,15 @@
 
         .add-to-cart {
             width: 100%;
-
-           
             padding: 15px;
             border-radius: 10px;
-            /* color: rgb(255, 255, 255); */
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            background-color: white;
-            color: #ff6a00;
-            border: 2px solid #ff6a00;
-            
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
         }
 
         .add-to-cart:hover {

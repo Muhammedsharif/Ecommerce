@@ -15,15 +15,14 @@
     .container {
         width: 839px;
     min-height: 313px;
-    background-color: #d5f9ff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 1px;
-    display: flex
-;
+    display: flex;
 }
     .left {
       flex: 1;
       position: relative;
-      padding: 40px;
+      padding: 61px;
     }
     .left h1 {
       font-size: 48px;
@@ -184,11 +183,11 @@ a[href="/auth/google"] img {
     }
     form input:focus {
       outline: none;
-      border-bottom: 1px solid #00aabb;
+      border-bottom: 1px solid #667eea;
     }
     .submit-btn {
       width: 100%;
-      background-color: #6ddae9;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       padding: 12px;
       color: white;
       font-weight: 600;
@@ -196,6 +195,11 @@ a[href="/auth/google"] img {
       border-radius: 6px;
       margin-top: 15px;
       cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
     }
     .login-link {
       margin-top: 10px;
@@ -204,7 +208,7 @@ a[href="/auth/google"] img {
       padding-bottom: 10px;
     }
     .login-link a {
-      color: #00aabb;
+      color: #667eea;
       text-decoration: none;
     }
     .lang {
@@ -243,5 +247,5 @@ a[href="/auth/google"] img {
     }
 
     .password-toggle:hover {
-      color: #00aabb;
+      color: #667eea;
     }

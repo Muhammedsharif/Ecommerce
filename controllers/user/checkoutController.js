@@ -138,7 +138,7 @@ const loadCheckout = async (req, res) => {
         if (appliedCoupon) {
             // Validate coupon and recalculate discount for display
             const { validateCouponForCheckout } = require('./couponController');
-            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req);
 
             if (couponValidation.valid) {
                 const coupon = couponValidation.coupon;
@@ -350,7 +350,7 @@ const processCheckout = async (req, res) => {
         const appliedCoupon = req.session.appliedCoupon;
         if (appliedCoupon) {
             // Validate coupon before processing order
-            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req);
 
             if (couponValidation.valid) {
                 // Recalculate discount based on current cart total and discount type

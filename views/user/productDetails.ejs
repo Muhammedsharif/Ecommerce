@@ -1367,6 +1367,36 @@
                         if (stockText && selectedVariant) {
                             stockText.textContent = `${selectedVariant.varientquantity || 0} Items in Stock`;
                         }
+
+                        // Reset quantity to 1 and update button states when size changes
+                        const currentQty = 1;
+                        quantityInput.value = currentQty;
+                        
+                        // Update quantity input max attribute
+                        const maxStock = selectedVariant ? selectedVariant.varientquantity : 0;
+                        quantityInput.setAttribute('max', maxStock);
+
+                        // Update button states based on new variant
+                        const minusBtn = document.querySelector(".minus-btn");
+                        const plusBtn = document.querySelector(".plus-btn");
+                        
+                        if (minusBtn) {
+                            minusBtn.disabled = currentQty <= 1;
+                        }
+                        
+                        if (plusBtn) {
+                            plusBtn.disabled = currentQty >= maxStock || maxStock === 0;
+                        }
+
+                        // Update stock text color if out of stock
+                        if (stockText) {
+                            if (maxStock === 0) {
+                                stockText.style.color = '#e74c3c';
+                                stockText.textContent = 'Out of Stock';
+                            } else {
+                                stockText.style.color = '#10b981';
+                            }
+                        }
                     });
                 });
 
@@ -1405,36 +1435,54 @@
                     return newQty;
                 }
 
-                minusBtn.addEventListener("click", () => {
-                    let qty = parseInt(quantityInput.value);
+                // Function to get currently selected variant
+                function getCurrentSelectedVariant() {
                     const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
-                    const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
+                    return selectedSize ? variantMap[selectedSize] : null;
+                }
 
-                    validateAndUpdateQuantity(qty - 1, selectedVariant);
-                });
+                // Minus button event listener
+                if (minusBtn) {
+                    minusBtn.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        let qty = parseInt(quantityInput.value) || 1;
+                        const selectedVariant = getCurrentSelectedVariant();
+                        validateAndUpdateQuantity(qty - 1, selectedVariant);
+                    });
+                }
 
-                plusBtn.addEventListener("click", () => {
-                    let qty = parseInt(quantityInput.value);
-                    const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
-                    const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
-
-                    validateAndUpdateQuantity(qty + 1, selectedVariant);
-                });
+                // Plus button event listener
+                if (plusBtn) {
+                    plusBtn.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        let qty = parseInt(quantityInput.value) || 1;
+                        const selectedVariant = getCurrentSelectedVariant();
+                        validateAndUpdateQuantity(qty + 1, selectedVariant);
+                    });
+                }
 
                 // Handle direct input changes
-                quantityInput.addEventListener("input", () => {
-                    let qty = parseInt(quantityInput.value) || 1;
-                    const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
-                    const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
+                if (quantityInput) {
+                    quantityInput.addEventListener("input", (e) => {
+                        let qty = parseInt(e.target.value) || 1;
+                        const selectedVariant = getCurrentSelectedVariant();
+                        validateAndUpdateQuantity(qty, selectedVariant);
+                    });
 
-                    validateAndUpdateQuantity(qty, selectedVariant);
-                });
+                    // Handle blur event to ensure valid value
+                    quantityInput.addEventListener("blur", (e) => {
+                        let qty = parseInt(e.target.value) || 1;
+                        const selectedVariant = getCurrentSelectedVariant();
+                        validateAndUpdateQuantity(qty, selectedVariant);
+                    });
 
-                quantityInput.addEventListener("input", () => {
-                    const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
-                    const selectedVariant = selectedSize ? variantMap[selectedSize] : null;
-                    updatePricesAndTotals(selectedVariant);
-                });
+                    // Prevent non-numeric input
+                    quantityInput.addEventListener("keypress", (e) => {
+                        if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                    });
+                }
 
                 // Initialize with default size
                 const defaultSizeInput = document.querySelector('input[name="size"]:checked');

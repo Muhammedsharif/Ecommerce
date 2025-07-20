@@ -1,0 +1,479 @@
+/* 
+ * Unified Color Theme Override CSS
+ * This file ensures consistent color theming across all user-side pages
+ * Primary: #667eea (Modern Blue)
+ * Secondary: #764ba2 (Purple) 
+ * Accent: #4ecdc4 (Teal)
+ * Success: #10b981 (Green)
+ * Warning: #f59e0b (Orange)
+ * Error: #ef4444 (Red)
+ * Dark: #1f2937 (Dark Gray)
+ * Light: #f8f9fa (Light Gray)
+ */
+
+/* Global Button Styles */
+.btn-primary,
+.submit-btn,
+.verify-btn,
+.continue-shopping-btn,
+.add-to-cart-btn,
+.move-to-cart-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover,
+.submit-btn:hover,
+.verify-btn:hover,
+.continue-shopping-btn:hover,
+.add-to-cart-btn:hover,
+.move-to-cart-btn:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
+}
+
+.btn-secondary {
+    background: transparent !important;
+    color: #667eea !important;
+    border: 2px solid #667eea !important;
+}
+
+.btn-secondary:hover {
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Link Colors */
+/* a {
+    color: #030303 !important;
+    transition: color 0.3s ease !important;
+} */
+
+a:hover {
+    color: #764ba2 !important;
+}
+
+/* Form Input Focus States */
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    outline: none !important;
+}
+
+/* Success Messages */
+.alert-success,
+.success-message {
+    background-color: #d1fae5 !important;
+    border-color: #10b981 !important;
+    color: #065f46 !important;
+}
+
+.toast-success {
+    background-color: #000000 !important;
+    border-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+/* Error Messages */
+.alert-danger,
+.alert-error,
+.error-message {
+    background-color: #fee2e2 !important;
+    border-color: #ef4444 !important;
+    color: #991b1b !important;
+}
+
+.toast-error {
+    background-color: #000000 !important;
+    border-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+/* Warning Messages */
+.alert-warning,
+.warning-message {
+    background-color: #fef3c7 !important;
+    border-color: #f59e0b !important;
+    color: #92400e !important;
+}
+
+/* Info Messages */
+.alert-info,
+.info-message {
+    background-color: #dbeafe !important;
+    border-color: #667eea !important;
+    color: #1e40af !important;
+}
+
+/* Wishlist and Cart Icons */
+.wishlist-btn.active,
+.wishlist-icon.active {
+    color: #ef4444 !important;
+}
+
+.cart-badge {
+    background: #10b981 !important;
+}
+
+.wishlist-badge {
+    background: #ef4444 !important;
+}
+
+/* Product Cards */
+.product-card {
+    border: 1px solid #e5e7eb !important;
+    transition: all 0.3s ease !important;
+}
+
+.product-card:hover {
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15) !important;
+    transform: translateY(-5px) !important;
+}
+
+/* Discount Badges */
+.discount-badge,
+.offer-badge {
+    background: linear-gradient(45deg, #ef4444, #f59e0b) !important;
+    color: white !important;
+}
+
+/* Price Colors */
+.current-price,
+.discounted-price {
+    color: #000000 !important;
+    font-weight: bold !important;
+}
+
+.original-price,
+.crossed-price {
+    color: #9ca3af !important;
+    text-decoration: line-through !important;
+}
+
+/* Navigation */
+.nav-links a:hover {
+    color: #667eea !important;
+}
+
+.nav-icon:hover {
+    color: #667eea !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: #667eea !important;
+    border-color: #e5e7eb !important;
+}
+
+.pagination .page-link:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border-color: #667eea !important;
+}
+
+.pagination .page-link.active {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border-color: #667eea !important;
+    color: white !important;
+}
+
+/* Progress Bars */
+.progress-bar {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* Badges */
+.badge-primary {
+    background: #667eea !important;
+}
+
+.badge-success {
+    background: #10b981 !important;
+}
+
+.badge-danger {
+    background: #ef4444 !important;
+}
+
+.badge-warning {
+    background: #f59e0b !important;
+}
+
+/* Tables */
+.table-primary {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Modals */
+.modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+}
+
+/* Tabs */
+.nav-tabs .nav-link.active {
+    background: #667eea !important;
+    color: white !important;
+    border-color: #667eea !important;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #667eea !important;
+    color: #667eea !important;
+}
+
+/* Cards */
+.card-header {
+    background: rgba(102, 126, 234, 0.1) !important;
+    border-bottom-color: #667eea !important;
+}
+
+/* Dropdowns */
+.dropdown-item:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+}
+
+/* Checkboxes and Radio Buttons */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: #667eea !important;
+    border-color: #667eea !important;
+}
+
+/* Range Sliders */
+input[type="range"]::-webkit-slider-thumb {
+    background: #667eea !important;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background: #667eea !important;
+}
+
+/* Specific Page Overrides */
+
+/* Wishlist Page */
+.wishlist-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+}
+
+.header-icon {
+    background: #667eea !important;
+}
+
+.item-count-badge {
+    background: #667eea !important;
+}
+
+.empty-wishlist-btn {
+    background: #ef4444 !important;
+}
+
+/* Wallet Page */
+.stat-card.primary {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.stat-icon.up {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+}
+
+.stat-icon.down {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+}
+
+/* Order Pages */
+.order-status.delivered {
+    color: #10b981 !important;
+}
+
+.order-status.pending {
+    color: #f59e0b !important;
+}
+
+.order-status.cancelled {
+    color: #ef4444 !important;
+}
+
+/* Payment Pages */
+.payment-success {
+    color: #10b981 !important;
+}
+
+.payment-failed {
+    color: #ef4444 !important;
+}
+
+/* Profile Pages */
+.profile-sidebar .menu-item.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+    color: #667eea !important;
+}
+
+/* Search and Filter */
+.filter-btn.active {
+    background: #667eea !important;
+    color: white !important;
+}
+
+.search-btn {
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Quantity Selectors */
+.quantity-btn {
+    border-color: #667eea !important;
+    color: #667eea !important;
+}
+
+.quantity-btn:hover {
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Star Ratings */
+.star-rating .star.filled {
+    color: #f59e0b !important;
+}
+
+/* Loading Spinners */
+.spinner {
+    border-top-color: #667eea !important;
+}
+
+/* Toast Notifications */
+.toast-notification {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-left: 4px solid #ffffff !important;
+}
+
+.toast-notification.success {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-left-color: #ffffff !important;
+}
+
+.toast-notification.error {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-left-color: #ffffff !important;
+}
+
+.toast-notification.warning {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-left-color: #ffffff !important;
+}
+
+/* Responsive Design Helpers */
+@media (max-width: 768px) {
+    .btn-primary,
+    .submit-btn,
+    .verify-btn {
+        padding: 12px 20px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* Animation Overrides */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Utility Classes */
+.text-primary {
+    color: #667eea !important;
+}
+
+.text-secondary {
+    color: #764ba2 !important;
+}
+
+.text-accent {
+    color: #4ecdc4 !important;
+}
+
+.text-success {
+    color: #10b981 !important;
+}
+
+.text-warning {
+    color: #f59e0b !important;
+}
+
+.text-danger {
+    color: #ef4444 !important;
+}
+
+.bg-primary {
+    background-color: #667eea !important;
+}
+
+.bg-secondary {
+    background-color: #764ba2 !important;
+}
+
+.bg-accent {
+    background-color: #4ecdc4 !important;
+}
+
+.bg-success {
+    background-color: #10b981 !important;
+}
+
+.bg-warning {
+    background-color: #f59e0b !important;
+}
+
+.bg-danger {
+    background-color: #ef4444 !important;
+}
+
+.border-primary {
+    border-color: #667eea !important;
+}
+
+.border-secondary {
+    border-color: #764ba2 !important;
+}
+
+.border-accent {
+    border-color: #4ecdc4 !important;
+}
+
+.border-success {
+    border-color: #10b981 !important;
+}
+
+.border-warning {
+    border-color: #f59e0b !important;
+}
+
+.border-danger {
+    border-color: #ef4444 !important;
+}

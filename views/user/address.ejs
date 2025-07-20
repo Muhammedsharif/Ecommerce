@@ -862,13 +862,8 @@
                 toast.textContent = message;
                 toast.className = `toast show ${type}`;
 
-                if (type === 'success') {
-                    toast.style.background = '#28a745';
-                } else if (type === 'info') {
-                    toast.style.background = '#17a2b8';
-                } else if (type === 'error') {
-                    toast.style.background = '#dc3545';
-                }
+                toast.style.background = '#000000';
+                toast.style.color = '#ffffff';
 
                 console.log('Toast should be visible now'); // Debug log
 
@@ -899,8 +894,8 @@
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: ${type === 'error' ? '#dc3545' : type === 'info' ? '#17a2b8' : '#28a745'};
-                color: white;
+                background: #000000;
+                color: #ffffff;
                 padding: 15px 20px;
                 border-radius: 8px;
                 z-index: 999999;

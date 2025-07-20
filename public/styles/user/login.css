@@ -77,9 +77,9 @@
         }
 
         .input-field:focus {
-            border-color: #8b5cf6;
+            border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .input-icon {
@@ -98,11 +98,11 @@
         }
 
         .password-toggle:hover {
-            color: #8b5cf6;
+            color: #667eea;
         }
 
         .forgot-password {
-            color: #8b5cf6;
+            color: #667eea;
             font-size: 12px;
             text-decoration: none;
             display: block;
@@ -138,23 +138,23 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
         .btn-secondary {
             background: transparent;
-            color: #8b5cf6;
-            border: 1.5px solid #8b5cf6;
+            color: #667eea;
+            border: 1.5px solid #667eea;
         }
 
         .btn-secondary:hover {
-            background: #8b5cf6;
+            background: #667eea;
             color: white;
             transform: translateY(-2px);
         }
@@ -225,7 +225,7 @@
         /* Right side - Illustration */
         .illustration-section {
             flex: 1;
-            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4ecdc4 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -279,7 +279,7 @@
         }
 
         .signup-link {
-            color: #8b5cf6;
+            color: #667eea;
             text-decoration: none;
             font-size: 14px;
             margin-top: 20px;
