@@ -782,7 +782,7 @@
                         <label for="payment-wallet">
                             Wallet Payment
                             <div class="wallet-balance">
-                                Balance: ₹<%= (user.wallet || 0).toLocaleString('en-IN') %>
+                                Balance: ₹<%=  Math.round((user.wallet || 0)).toLocaleString('en-IN') %>
                                 <% if ((user.wallet || 0) < totalAmount) { %>
                                     <span class="insufficient-balance">(Insufficient)</span>
                                 <% } %>

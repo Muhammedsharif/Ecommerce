@@ -1244,6 +1244,7 @@
                                     <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                                     <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                                     <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                    <option value="Payment Failed" <%= status === 'Payment Failed' ? 'selected' : '' %>>Payment Failed</option>
                                 </select>
 
                                 <!-- <button class="notification-btn" onclick="exportOrders()">
@@ -1271,7 +1272,7 @@
                                 <tbody id="ordersTableBody">
                                     <% if (orders && orders.length > 0) { %>
                                         <% orders.forEach(order => { %>
-                                            <tr data-order-id="<%= order.orderId %>" data-customer="<%= order.userId ? order.userId.name : 'N/A' %>" data-status="<%= order.status.toLowerCase() %>">
+                                            <tr data-order-id="<%= order.orderId %>" data-customer="<%= order.userId ? order.userId.name : 'N/A' %>" data-status="<%= order.paymentStatus === 'Failed' ? 'payment failed' : order.status.toLowerCase() %>">
                                                 <td>
                                                     <div class="order-id"><%= order.orderId %></div>
                                                 </td>
@@ -1340,9 +1341,15 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span class="status-badge status-<%= order.status.toLowerCase() %>">
-                                                        <%= order.status.toUpperCase() %>
-                                                    </span>
+                                                    <% if (order.paymentStatus === 'Failed') { %>
+                                                        <span class="status-badge status-cancelled">
+                                                            PAYMENT FAILED
+                                                        </span>
+                                                    <% } else { %>
+                                                        <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                                                            <%= order.status.toUpperCase() %>
+                                                        </span>
+                                                    <% } %>
                                                 </td>
                                                 <td>
                                                     <div class="action-buttons">

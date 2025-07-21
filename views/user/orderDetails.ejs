@@ -1183,7 +1183,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast('Cancel request submitted for all items. Awaiting admin approval.', 'success');
+                    showToast('Product Cancelled', 'success');
                     setTimeout(() => {
                         location.reload();
                     }, 1500);

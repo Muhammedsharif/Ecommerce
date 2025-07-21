@@ -19,9 +19,13 @@ const getOrderPage = async (req, res) => {
         // Build search and filter query
         let matchQuery = {};
 
-        // Status filter
+        // Status filter - handle both regular status and payment failed status
         if (status && status !== "all") {
-            matchQuery.status = status;
+            if (status === "Payment Failed") {
+                matchQuery.paymentStatus = "Failed";
+            } else {
+                matchQuery.status = status;
+            }
         }
 
         // Search functionality - search by order ID or customer details
@@ -158,7 +162,38 @@ const updateOrderStatus = async (req, res) => {
             });
         }
 
-        // Implement status transition validation logic
+        // Special handling for payment failed orders
+        if (order.paymentStatus === 'Failed') {
+            // For payment failed orders, allow updating to Processing (after successful retry payment)
+            if (status === 'Processing') {
+                order.status = status;
+                order.paymentStatus = 'Completed'; // Mark payment as completed
+                await order.save();
+                
+                return res.status(200).json({
+                    success: true,
+                    message: `Order status updated to ${status} and payment marked as completed`,
+                    newStatus: status
+                });
+            } else if (status === 'Cancelled') {
+                // Allow cancelling failed payment orders
+                order.status = status;
+                await order.save();
+                
+                return res.status(200).json({
+                    success: true,
+                    message: `Order status updated to ${status}`,
+                    newStatus: status
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "Payment failed orders can only be updated to 'Processing' (after successful payment) or 'Cancelled'"
+                });
+            }
+        }
+
+        // Implement status transition validation logic for regular orders
         const currentStatus = order.status;
         const isValidTransition = validateStatusTransition(currentStatus, status);
 
