@@ -1156,7 +1156,7 @@ async function validateAndSubmit() {
             formData.append('sizeVariants', JSON.stringify(sizeVariants));
 
             const response = await fetch(`/admin/editProduct/${productId}`, {
-                method: 'POST',
+                method: 'PATCH',
                 body: formData
             });
 

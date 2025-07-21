@@ -1,15 +1,4 @@
-/**
- * Helper functions for coupon discount calculations during returns and cancellations
- * For percentage discounts, the total discount is divided equally among all products
- * For flat discounts, the current logic is maintained
- */
 
-/**
- * Calculate equal coupon discount for returned/canceled items
- * @param {Object} order - The order object
- * @param {Array} returnedItems - Array of returned/canceled items with their quantities
- * @returns {Object} - Object containing equal discount and adjusted refund amount
- */
 const calculateEqualCouponDiscount = (order, returnedItems) => {
     // If no coupon was applied, return zero discount
     if (!order.couponApplied || !order.couponDiscount || order.couponDiscount === 0) {
@@ -20,13 +9,10 @@ const calculateEqualCouponDiscount = (order, returnedItems) => {
         };
     }
 
-    // Calculate total number of products in the order (considering quantities)
     const totalProductCount = order.orderedItems.reduce((sum, item) => {
         return sum + item.quantity;
     }, 0);
 
-    // For percentage discounts, divide equally among all products
-    // For flat discounts, use the same equal distribution logic
     const discountPerProduct = order.couponDiscount / totalProductCount;
 
     // Calculate total number of returned/canceled products
@@ -55,12 +41,7 @@ const calculateEqualCouponDiscount = (order, returnedItems) => {
     };
 };
 
-/**
- * Calculate equal coupon discount for a single item
- * @param {Object} order - The order object
- * @param {Object} item - The item being returned/canceled
- * @returns {Object} - Object containing equal discount and adjusted refund amount
- */
+
 const calculateSingleItemCouponDiscount = (order, item) => {
     return calculateEqualCouponDiscount(order, [{
         price: item.price,
@@ -68,12 +49,7 @@ const calculateSingleItemCouponDiscount = (order, item) => {
     }]);
 };
 
-/**
- * Calculate proportional coupon discount for returned/canceled items (legacy function for backward compatibility)
- * @param {Object} order - The order object
- * @param {Array} returnedItems - Array of returned/canceled items with their quantities
- * @returns {Object} - Object containing proportional discount and adjusted refund amount
- */
+
 const calculateProportionalCouponDiscount = (order, returnedItems) => {
     // Use equal distribution instead of proportional for consistency
     const result = calculateEqualCouponDiscount(order, returnedItems);
@@ -85,12 +61,7 @@ const calculateProportionalCouponDiscount = (order, returnedItems) => {
     };
 };
 
-/**
- * Update order coupon discount after partial returns/cancellations
- * @param {Object} order - The order object
- * @param {Number} proportionalDiscount - The proportional discount amount to subtract
- * @returns {Object} - Updated order with adjusted coupon discount
- */
+
 const updateOrderCouponDiscount = (order, proportionalDiscount) => {
     if (order.couponApplied && order.couponDiscount > 0) {
         // Reduce the coupon discount by the proportional amount

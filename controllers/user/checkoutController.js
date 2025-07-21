@@ -8,6 +8,7 @@ const { validateCouponForCheckout, markCouponAsUsed } = require("./couponControl
 
 // Controller function to load and display the checkout page
 const loadCheckout = async (req, res) => {
+    
     try {
         // Get user ID from session
         const userId = req.session.user;

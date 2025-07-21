@@ -18,7 +18,7 @@ const categoryInfo = async (req, res) => {
                 { name: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 // { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ],
-            isListed:true
+            isDeleted:false
         })
         .sort({createdAt:-1})
         .skip(skip)
@@ -262,7 +262,7 @@ const deleteCategory = async (req, res) => {
       });
     }
 
-   await Category.findByIdAndUpdate(id,{isListed:false})
+   await Category.findByIdAndUpdate(id,{isDeleted:true})
 
     res.json({
       success: true,
@@ -321,6 +321,50 @@ const addCategoryOffer = async (req, res) => {
     }
 };
 
+const removeCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId } = req.body;
+
+        // Validate input
+        if (!categoryId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Category ID is required'
+            });
+        }
+
+        // Find and update the category
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found'
+            });
+        }
+
+        // Remove category offer by setting it to 0
+        category.categoryOffer = 0;
+        await category.save();
+
+        res.json({
+            success: true,
+            message: 'Category offer removed successfully',
+            data: {
+                categoryId: category._id,
+                categoryName: category.name,
+                offerPercentage: category.categoryOffer
+            }
+        });
+
+    } catch (error) {
+        console.error('Error removing category offer:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
 
 
 module.exports ={
@@ -331,7 +375,8 @@ module.exports ={
     geteditCategory,
     editCategory,
     deleteCategory,
-    addCategoryOffer
+    addCategoryOffer,
+    removeCategoryOffer
 }
 
 

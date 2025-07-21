@@ -96,13 +96,7 @@ const loadCart = async (req,res) =>{
 // Controller function to add products to cart with size and color selection
 const addToCart = async(req,res)=>{
     try {
-        // Debug logging for cart addition requests
-        console.log('=== ADD TO CART REQUEST RECEIVED ===');
-        console.log('Request method:', req.method);
-        console.log('Request URL:', req.url);
-        console.log('Request body:', req.body);
-        console.log('Session:', req.session);
-
+        
         // Extract user ID and product details from request
         const userId = req.session.user;
         const { productId, size, color } = req.body;

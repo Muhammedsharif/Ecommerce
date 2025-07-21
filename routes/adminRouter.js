@@ -33,9 +33,10 @@ router.post("/addCategory",adminAuth,categoryController.addCategory)
 router.get("/listCategory",adminAuth,categoryController.getListCategory)
 router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory)
 router.get("/editCategory",adminAuth,categoryController.geteditCategory)
-router.post("/editCategory/:id",adminAuth,categoryController.editCategory)
-router.post("/deletecategory", adminAuth,categoryController.deleteCategory);
+router.patch("/editCategory/:id",adminAuth,categoryController.editCategory)
+router.patch("/deletecategory", adminAuth,categoryController.deleteCategory);
 router.post("/category/offer", adminAuth,categoryController.addCategoryOffer);
+router.delete("/category/offer", adminAuth,categoryController.removeCategoryOffer);
 
 //Product Management
 router.get("/addProducts",adminAuth,productController.getProductAddPage);
@@ -45,7 +46,7 @@ router.patch('/deleteProduct/:id',adminAuth, productController.deleteProduct);
 router.get("/blockProduct",adminAuth,productController.blockProduct)
 router.get("/unblockProduct",adminAuth,productController.unblockProduct)
 router.get("/editProduct",productController.getEditProduct) // Temporarily disabled auth for debugging
-router.post("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
+router.patch("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 
 //Order Management

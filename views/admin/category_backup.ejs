@@ -118,7 +118,7 @@
                                         <% } %>
                                     </a>
                                     <% if (category.categoryOffer && category.categoryOffer > 0) { %>
-                                        <a href="#" class="btn btn-remove" onclick="removeOffer('<%= category._id %>', '<%= category.name %>')">
+                                        <a href="#" class="btn btn-remove" onclick="removeCategoryOffer('<%= category._id %>', '<%= category.name %>')">
                                             <i class="fas fa-times"></i>
                                             Remove
                                         </a>
@@ -353,7 +353,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/admin/deleteCategory`, {
-                        method: 'PATCH',
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -421,7 +421,7 @@
                         });
 
                         const data = await response.json();
-                        window.location.reload()
+
                         if (data.success) {
                             // Update the UI without page refresh
                             updateCategoryStatus(categoryId, false);
@@ -472,7 +472,7 @@
                         });
 
                         const data = await response.json();
-                        window.location.reload()
+
                         if (data.success) {
                             // Update the UI without page refresh
                             updateCategoryStatus(categoryId, true);
@@ -890,65 +890,6 @@
                     icon: 'error',
                     title: 'Error',
                     text: 'Error saving offer. Please try again.',
-                    confirmButtonColor: '#ef4444'
-                });
-            }
-        }
-
-        // Remove offer function
-        async function removeOffer(categoryId, categoryName) {
-            try {
-                // Show confirmation dialog
-                const result = await Swal.fire({
-                    title: 'Remove Offer?',
-                    text: `Are you sure you want to remove the offer from "${categoryName}"?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, remove it!',
-                    cancelButtonText: 'Cancel'
-                });
-
-                if (result.isConfirmed) {
-                    const response = await fetch('/admin/category/offer', {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            categoryId: categoryId
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Show success message
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Removed!',
-                            text: 'Category offer has been removed successfully!',
-                            confirmButtonColor: '#667eea'
-                        }).then(() => {
-                            // Reload page to show updated offer
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message || 'Failed to remove offer',
-                            confirmButtonColor: '#ef4444'
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error removing offer:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error removing offer. Please try again.',
                     confirmButtonColor: '#ef4444'
                 });
             }

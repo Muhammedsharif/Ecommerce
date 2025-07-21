@@ -47,7 +47,7 @@
                 </div>
             <% } %>
 
-            <form id="editCategoryForm" method="post" action="/admin/editCategory/<%=category._id%>">
+            <form id="editCategoryForm" method="patch" action="/admin/editCategory/<%=category._id%>">
                 <div class="form-group">
                     <label for="categoryName">Category Name *</label>
                     <input type="text" id="categoryName" name="categoryName" value="<%=category.name%>" required
@@ -97,7 +97,7 @@
 
                     try {
                         const response = await fetch(this.action, {
-                            method: 'POST',
+                            method: 'PATCH',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Accept': 'application/json'
