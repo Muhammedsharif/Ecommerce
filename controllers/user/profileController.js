@@ -1945,6 +1945,67 @@ const downloadInvoice = async (req, res) => {
             return res.status(404).send('Order not found');
         }
 
+        // Check if order is delivered - invoice only available after delivery
+        if (order.status !== 'Delivered') {
+            return res.status(403).send(`
+                <html>
+                    <head>
+                        <title>Invoice Not Available</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                text-align: center; 
+                                padding: 50px; 
+                                background-color: #f8f9fa; 
+                            }
+                            .container { 
+                                max-width: 500px; 
+                                margin: 0 auto; 
+                                background: white; 
+                                padding: 40px; 
+                                border-radius: 10px; 
+                                box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+                            }
+                            .icon { 
+                                font-size: 4rem; 
+                                color: #ffc107; 
+                                margin-bottom: 20px; 
+                            }
+                            h1 { 
+                                color: #333; 
+                                margin-bottom: 20px; 
+                            }
+                            p { 
+                                color: #666; 
+                                line-height: 1.6; 
+                                margin-bottom: 30px; 
+                            }
+                            .btn { 
+                                background: #667eea; 
+                                color: white; 
+                                padding: 12px 24px; 
+                                text-decoration: none; 
+                                border-radius: 6px; 
+                                display: inline-block; 
+                                transition: background 0.3s; 
+                            }
+                            .btn:hover { 
+                                background: #5a6fd8; 
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="icon">📄</div>
+                            <h1>Invoice Not Available</h1>
+                            <p>Invoice will be available after delivery. Your order status is currently: <strong>${order.status}</strong></p>
+                            <a href="/orders" class="btn">Back to Orders</a>
+                        </div>
+                    </body>
+                </html>
+            `);
+        }
+
         // Get user data
         const userData = await User.findById(userId);
         if (!userData) {

@@ -250,6 +250,21 @@
             box-shadow: none !important;
         }
 
+        .cod-restriction-message {
+            font-size: 0.8rem;
+            color: #dc2626;
+            margin-top: 0.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .cod-restriction-message::before {
+            content: "⚠️";
+            font-size: 0.9rem;
+        }
+
         .wallet-balance {
             font-size: 0.875rem;
             color: #718096;
@@ -766,10 +781,17 @@
                     <i class="fas fa-credit-card"></i> Payment Method
                 </h2>
                 <div class="payment-options">
-                    <div class="payment-option" onclick="selectPayment('COD')">
-                        <input type="radio" name="payment" value="COD" id="payment-cod" checked>
+                    <div class="payment-option <% if (isCODDisabled) { %>payment-disabled<% } %>" onclick="selectPayment('COD')" <% if (isCODDisabled) { %>title="COD is available only for orders up to ₹4000"<% } %>>
+                        <input type="radio" name="payment" value="COD" id="payment-cod" <% if (!isCODDisabled) { %>checked<% } %> <% if (isCODDisabled) { %>disabled<% } %>>
                         <i class="fas fa-money-bill-wave payment-icon"></i>
-                        <label for="payment-cod">Cash on Delivery</label>
+                        <label for="payment-cod">
+                            Cash on Delivery
+                            <% if (isCODDisabled) { %>
+                                <div class="cod-restriction-message">
+                                    COD is available only for orders up to ₹4000
+                                </div>
+                            <% } %>
+                        </label>
                     </div>
                     <div class="payment-option" onclick="selectPayment('ONLINE')">
                         <input type="radio" name="payment" value="ONLINE" id="payment-online">
@@ -1136,9 +1158,25 @@
         }
 
         function selectPayment(paymentMethod) {
-            // Check if wallet payment is disabled due to insufficient balance
-            if (paymentMethod === 'WALLET' && event.currentTarget.classList.contains('payment-disabled')) {
-                return; // Don't allow selection of disabled wallet payment
+            // Check if payment method is disabled
+            if (event.currentTarget.classList.contains('payment-disabled')) {
+                // Show appropriate error message
+                if (paymentMethod === 'COD') {
+                    Swal.fire({
+                        title: 'COD Not Available',
+                        text: 'COD is available only for orders up to ₹4000. Please choose online payment or wallet payment.',
+                        icon: 'warning',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                } else if (paymentMethod === 'WALLET') {
+                    Swal.fire({
+                        title: 'Insufficient Balance',
+                        text: 'Your wallet balance is insufficient for this order. Please choose online payment or add money to your wallet.',
+                        icon: 'warning',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                }
+                return; // Don't allow selection of disabled payment methods
             }
 
             selectedPayment = paymentMethod;
@@ -1397,8 +1435,23 @@
                 defaultAddress.closest('.address-card').classList.add('selected');
             }
 
-            // Set default payment as selected
-            document.querySelector('.payment-option').classList.add('selected');
+            // Set default payment as selected - choose first available payment method
+            const isCODDisabled = <%= isCODDisabled ? 'true' : 'false' %>;
+            if (isCODDisabled) {
+                // If COD is disabled, select online payment as default
+                selectedPayment = 'ONLINE';
+                const onlinePaymentOption = document.querySelector('.payment-option[onclick="selectPayment(\'ONLINE\')"]');
+                if (onlinePaymentOption) {
+                    onlinePaymentOption.classList.add('selected');
+                }
+            } else {
+                // If COD is available, select it as default
+                selectedPayment = 'COD';
+                const codPaymentOption = document.querySelector('.payment-option[onclick="selectPayment(\'COD\')"]');
+                if (codPaymentOption) {
+                    codPaymentOption.classList.add('selected');
+                }
+            }
         });
     </script>
 

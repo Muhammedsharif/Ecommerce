@@ -72,6 +72,7 @@ router.put("/edit-coupon/:id",adminAuth,couponController.editCoupon)
 router.delete("/delete-coupon/:id",adminAuth,couponController.deleteCoupon)
 router.get("/get-categories",adminAuth,couponController.getCategories)
 router.get("/get-products",adminAuth,couponController.getProducts)
+router.get("/coupon-usage/:id",adminAuth,couponController.getCouponUsageDetails)
 
 // Dashboard Analytics Routes
 router.get("/dashboard-analytics",adminAuth,dashboardController.getDashboard)

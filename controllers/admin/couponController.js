@@ -273,7 +273,7 @@ const getCouponListPage = async (req, res) => {
             
             return {
                 ...coupon,
-                usageCount: coupon.userId ? coupon.userId.length : 0,
+                usageCount: coupon.currentUsageCount || 0,
                 status: isExpired ? 'Expired' : (isActive ? 'Active' : 'Inactive'),
                 isExpired: isExpired
             };
@@ -589,6 +589,117 @@ const getProducts = async (req, res) => {
     }
 };
 
+// Controller function to get detailed coupon usage analytics
+const getCouponUsageDetails = async (req, res) => {
+    try {
+        const couponId = req.params.id;
+
+        if (!couponId) {
+            return res.status(400).json({
+                success: false,
+                message: "Coupon ID is required"
+            });
+        }
+
+        // Get coupon details
+        const coupon = await Coupon.findById(couponId);
+        if (!coupon) {
+            return res.status(404).json({
+                success: false,
+                message: "Coupon not found"
+            });
+        }
+
+        // Get orders that used this coupon
+        const Order = require("../../models/orderSchema");
+        const User = require("../../models/userSchema");
+
+        const ordersWithCoupon = await Order.find({
+            couponCode: coupon.name,
+            status: { $ne: 'Cancelled' } // Don't count cancelled orders
+        })
+        .populate('userId', 'name email')
+        .select('userId orderId finalAmount couponDiscount createdOn status')
+        .sort({ createdOn: -1 })
+        .limit(50); // Limit to recent 50 orders for performance
+
+        // Calculate usage statistics
+        const totalUsageCount = coupon.currentUsageCount || 0;
+        const totalDiscountGiven = ordersWithCoupon.reduce((sum, order) => sum + (order.couponDiscount || 0), 0);
+        const averageOrderValue = ordersWithCoupon.length > 0 
+            ? ordersWithCoupon.reduce((sum, order) => sum + order.finalAmount, 0) / ordersWithCoupon.length 
+            : 0;
+
+        // Get usage by month for the last 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const monthlyUsage = await Order.aggregate([
+            {
+                $match: {
+                    couponCode: coupon.name,
+                    status: { $ne: 'Cancelled' },
+                    createdOn: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdOn" },
+                        month: { $month: "$createdOn" }
+                    },
+                    count: { $sum: 1 },
+                    totalDiscount: { $sum: "$couponDiscount" }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                coupon: {
+                    name: coupon.name,
+                    discountType: coupon.discountType,
+                    offerPrice: coupon.offerPrice,
+                    minimumPrice: coupon.minimumPrice,
+                    totalUsageLimit: coupon.totalUsageLimit,
+                    maxUsesPerUser: coupon.maxUsesPerUser,
+                    expireOn: coupon.expireOn,
+                    islist: coupon.islist
+                },
+                statistics: {
+                    totalUsageCount: totalUsageCount,
+                    totalDiscountGiven: Math.round(totalDiscountGiven),
+                    averageOrderValue: Math.round(averageOrderValue),
+                    usagePercentage: coupon.totalUsageLimit 
+                        ? Math.round((totalUsageCount / coupon.totalUsageLimit) * 100) 
+                        : null
+                },
+                recentOrders: ordersWithCoupon.map(order => ({
+                    orderId: order.orderId,
+                    userName: order.userId ? order.userId.name : 'Unknown',
+                    userEmail: order.userId ? order.userId.email : 'Unknown',
+                    orderAmount: order.finalAmount,
+                    discountAmount: order.couponDiscount || 0,
+                    orderDate: order.createdOn,
+                    status: order.status
+                })),
+                monthlyUsage: monthlyUsage
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching coupon usage details:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch coupon usage details"
+        });
+    }
+};
+
 module.exports = {
     getAddCouponPage,
     addCoupon,
@@ -597,5 +708,6 @@ module.exports = {
     editCoupon,
     deleteCoupon,
     getCategories,
-    getProducts
+    getProducts,
+    getCouponUsageDetails
 };

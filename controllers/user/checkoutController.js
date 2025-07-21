@@ -160,6 +160,9 @@ const loadCheckout = async (req, res) => {
             }
         }
 
+        // Check if COD should be disabled (orders above ₹4000)
+        const isCODDisabled = finalAmount > 4000;
+
         res.render("checkout", {
             user: userData,
             cartItems: validItems,
@@ -170,7 +173,8 @@ const loadCheckout = async (req, res) => {
             appliedCoupon: appliedCoupon,
             couponDiscount: couponDiscount,
             originalAmount: subtotal + shippingCost,
-            isBuyNow: !!buyNowData
+            isBuyNow: !!buyNowData,
+            isCODDisabled: isCODDisabled
         });
 
     } catch (error) {
@@ -380,6 +384,14 @@ const processCheckout = async (req, res) => {
                     message: couponValidation.message || "Coupon is no longer valid"
                 });
             }
+        }
+
+        // Validate COD restriction for orders above ₹4000
+        if (paymentMethod === 'COD' && totalAmount > 4000) {
+            return res.status(400).json({
+                success: false,
+                message: "COD is available only for orders up to ₹4000. Please choose online payment or wallet payment."
+            });
         }
 
         // Validate wallet payment if selected
