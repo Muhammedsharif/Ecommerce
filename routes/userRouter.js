@@ -25,7 +25,6 @@ router.post("/verify-otp",userController.verifyOtp)
 router.post("/resend-otp",userController.resendOtp)
 router.get("/auth/google",passport.authenticate('google',{scope:['profile','email']}))
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),
-
 userController.googleCallbackHandler
 )
 
@@ -41,8 +40,6 @@ router.get("/filter",userController.filterProducts)
 router.post("/search",userAuth,userController.searchProduct)
 router.get('/products',userAuth,userController.getAllProducts);
 
-
-
 //Product Management
 router.get("/productDetails",userAuth,productController.loadProductDetails)
 
@@ -56,7 +53,6 @@ router.post("/reset-password",profileController.resetPassword)
 router.get("/Profile",userAuth,profileController.userProfile)
 
 // Additional Profile Pages
-
 router.get("/orders",userAuth,profileController.loadOrders)
 router.get("/wallet",userAuth,profileController.loadWallet)
 router.get("/change-password",userAuth,profileController.loadChangePassword)
@@ -90,19 +86,17 @@ router.get("/editAddress",userAuth,profileController.loadeditAddress)
 router.post("/editAddress",userAuth,profileController.editAddress)
 router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 
-//Whishlist Management
+//Wishlist Management
 router.get("/wishlist",userAuth,wishlistController.loadWishlist)
 router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
 router.get('/removeFromWishlist',userAuth,wishlistController.removeProduct)
-
+router.get("/wishlist-count",wishlistController.getWishlistCount)
 
 //Cart Management
 router.get("/cart",userAuth,cartController.loadCart)
-router.post("/addToCart",cartController.addToCart)
-router.post("/add-to-cart",cartController.addToCart)
+router.post("/addToCart",userAuth,cartController.addToCart)
+router.post("/add-to-cart",userAuth,cartController.addToCart)
 router.get("/cart-count",cartController.getCartCount)
-// Test route
-
 router.post("/update-cart-quantity",userAuth,cartController.updateCartQuantity)
 router.delete("/remove-from-cart",userAuth,cartController.removeFromCart)
 router.delete("/empty-cart",userAuth,cartController.emptyCart)
@@ -132,12 +126,6 @@ router.get("/download-invoice/:orderId",userAuth,profileController.downloadInvoi
 
 //Wallet Management
 router.get("/wallet",userAuth,profileController.loadWallet)
-
-
-
-
-
-
 
 // Referral System Routes
 router.get("/referral/info", userAuth, referralController.getUserReferralInfo)

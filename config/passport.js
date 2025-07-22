@@ -34,7 +34,7 @@ async (accessToken,refreshToken,Profiler,done)=>{
     }
 }
 
-))
+));
 
 passport.serializeUser((user,done)=>{
     done(null,user.id)

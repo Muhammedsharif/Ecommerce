@@ -55,7 +55,8 @@ const addToWishlist = async (req, res) => {
             return res.status(200).json({
                 status: true,
                 action: 'removed',
-                message: 'Product removed from wishlist'
+                message: 'Product removed from wishlist',
+                wishlistCount: user.wishlist.length
             });
         } else {
             // Product doesn't exist, add it
@@ -64,7 +65,8 @@ const addToWishlist = async (req, res) => {
             return res.status(200).json({
                 status: true,
                 action: 'added',
-                message: 'Product added to wishlist'
+                message: 'Product added to wishlist',
+                wishlistCount: user.wishlist.length
             });
         }
     } catch (error) {
@@ -94,6 +96,26 @@ const removeProduct = async (req,res)=>{
     }
 }
 
+// Get wishlist count for header badge
+const getWishlistCount = async(req, res) => {
+    try {
+        const userId = req.session.user;
+
+        if (!userId) {
+            return res.json({ success: true, wishlistCount: 0 });
+        }
+
+        const user = await User.findById(userId);
+        const wishlistCount = user ? user.wishlist.length : 0;
+
+        res.json({ success: true, wishlistCount: wishlistCount });
+
+    } catch (error) {
+        console.error("Error getting wishlist count:", error);
+        res.json({ success: false, wishlistCount: 0 });
+    }
+}
+
 
 
 
@@ -101,4 +123,5 @@ module.exports={
     loadWishlist,
     addToWishlist,
     removeProduct,
+    getWishlistCount,
 }

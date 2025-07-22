@@ -250,13 +250,14 @@ const addToCart = async(req,res)=>{
             await user.save();
         }
 
-        // Get updated cart count
-        const cartCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        // Get updated cart count (number of unique items, not total quantity)
+        const cartCount = cart.items.length;
 
         res.json({
             success: true,
             message: 'Product added to cart successfully',
             cartCount: cartCount,
+            length: cartCount, // For backward compatibility
             productName: product.productName
         });
 
@@ -276,7 +277,7 @@ const getCartCount = async(req, res) => {
         }
 
         const cart = await Cart.findOne({ userId });
-        const cartCount = cart ? cart.items.length:0
+        const cartCount = cart ? cart.items.length : 0;
 
         res.json({ success: true, cartCount: cartCount });
 
@@ -446,8 +447,8 @@ const moveToCartFromWishlist = async(req, res) => {
 
         await cart.save();
 
-        // Get updated cart count
-        const cartCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        // Get updated cart count (number of unique items, not total quantity)
+        const cartCount = cart.items.length;
 
         res.json({
             success: true,
@@ -533,8 +534,8 @@ const updateCartQuantity = async(req, res) => {
         await cart.save();
         console.log('Cart saved successfully');
 
-        // Calculate total cart count
-        const cartCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+        // Calculate cart count (number of unique items, not total quantity)
+        const cartCount = cart.items.length;
         console.log('Total cart count:', cartCount);
 
         res.json({

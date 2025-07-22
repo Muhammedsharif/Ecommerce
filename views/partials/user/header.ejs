@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +10,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/styles/user/header.css">
     <link rel="stylesheet" href="/styles/user/theme-override.css">
-
-
 </head>
 <body>
     <!-- Header -->
@@ -24,39 +21,38 @@
                 <li><a href="/shop">Shop</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li>
-              
             </ul>
             <% if (locals.user) { %>
             <div class="nav-actions">
-               
-
                 <!-- <input type="text" class="search-box" placeholder="Search"> -->
-             <a href="/wishlist">  <button class="nav-icon wishlist-icon" title="Wishlist" id="wishlistIcon">
-                     <i class="fas fa-heart"></i>
-                     <% if (locals.wishlistCount && wishlistCount > 0) { %>
-                         <span class="wishlist-badge" id="wishlistBadge"><%= wishlistCount %></span>
-                     <% } %>
-                </button></a>
-                <a href="/cart"><button class="nav-icon cart-icon" title="Cart" id="cartIcon">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
-                </button></a>
+                <a href="/wishlist">
+                    <button class="nav-icon wishlist-icon" title="Wishlist" id="wishlistIcon">
+                        <i class="fas fa-heart"></i>
+                        <% if (locals.wishlistCount && wishlistCount > 0) { %>
+                            <span class="wishlist-badge" id="wishlistBadge"><%= wishlistCount %></span>
+                        <% } %>
+                    </button>
+                </a>
+                <a href="/cart">
+                    <button class="nav-icon cart-icon" title="Cart" id="cartIcon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                    </button>
+                </a>
 
-                
-                    
-    <!-- Profile icon with dropdown -->
+                <!-- Profile icon with dropdown -->
                 <div class="dropdown">
-                <button class="nav-icon" title="Profile" onclick="toggleDropdown()">
-                    <i class="fas fa-user-circle"></i>
-                </button>
-                <div id="dropdownContent" class="dropdown-content">
-                    <a href="/profile">Profile</a>
-                    <a href="/logout">Logout</a>
-                </div>
+                    <button class="nav-icon" title="Profile" onclick="toggleDropdown()">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    <div id="dropdownContent" class="dropdown-content">
+                        <a href="/profile">Profile</a>
+                        <a href="/logout">Logout</a>
+                    </div>
                 </div>
                 <% } else { %>
                 <a href="/login" class="nav-icon" style="text-decoration: none;" title="Login">
-                <i class="fas fa-sign-in-alt"></i> login
+                    <i class="fas fa-sign-in-alt"></i> login
                 </a>
                 <% } %>
                 
@@ -72,149 +68,133 @@
                 <li><a href="/shop">Shop</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li>
-                
             </ul>
-        
+        </div>
     </header>
-</div>
+
     <script>
-        
-  function toggleDropdown() {
-    const dropdown = document.getElementById("dropdownContent");
-    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-  }
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdownContent");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
 
-      // function showCart() {
-      //       if (cartItems.length === 0) {
-      //           showNotification('Your cart is empty!');
-      //           return;
-      //       }
-            
-      //       let cartSummary = 'Cart Items:\n';
-      //       let total = 0;
-      //       cartItems.forEach(item => {
-      //           cartSummary += `${item.name} - $${item.price}\n`;
-      //           total += item.price;
-      //       });
-      //       cartSummary += `\nTotal: $${total.toFixed(2)}`;
-            
-      //       alert(cartSummary);
-      //   }
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                document.getElementById("dropdownContent").style.display = "none";
+            }
+        });
 
-        // function showWishlist() {
-        //     if (wishlistItems.length === 0) {
-        //         showNotification('Your wishlist is empty!');
-        //         return;
-        //     }
-            
-        //     let wishlistSummary = 'Wishlist Items:\n';
-        //     wishlistItems.forEach(item => {
-        //         wishlistSummary += `${item.name} - $${item.price}\n`;
-        //     });
-            
-        //     alert(wishlistSummary);
-        // }
+        // Wishlist counter functions
+        function updateWishlistCounter(count) {
+            const badge = document.getElementById('wishlistBadge');
+            const icon = document.getElementById('wishlistIcon');
 
+            if (count > 0) {
+                if (badge) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline';
+                    badge.classList.remove('hidden');
+                } else {
+                    // Create badge if it doesn't exist
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'wishlist-badge';
+                    newBadge.id = 'wishlistBadge';
+                    newBadge.textContent = count;
+                    newBadge.style.display = 'inline';
+                    icon.appendChild(newBadge);
+                }
+            } else {
+                if (badge) {
+                    badge.style.display = 'none';
+                    badge.classList.add('hidden');
+                }
+            }
+        }
 
-  // Close dropdown when clicking outside
-  window.addEventListener('click', function(e) {
-    if (!e.target.closest('.dropdown')) {
-      document.getElementById("dropdownContent").style.display = "none";
-    }
-  });
+        function incrementWishlistCounter() {
+            const badge = document.getElementById('wishlistBadge');
+            let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+            updateWishlistCounter(currentCount + 1);
+        }
 
-  // Wishlist counter functions
-  function updateWishlistCounter(count) {
-    const badge = document.getElementById('wishlistBadge');
-    const icon = document.getElementById('wishlistIcon');
+        function decrementWishlistCounter() {
+            const badge = document.getElementById('wishlistBadge');
+            let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+            updateWishlistCounter(Math.max(0, currentCount - 1));
+        }
 
-    if (count > 0) {
-      if (badge) {
-        badge.textContent = count;
-        badge.classList.remove('hidden');
-      } else {
-        // Create badge if it doesn't exist
-        const newBadge = document.createElement('span');
-        newBadge.className = 'wishlist-badge';
-        newBadge.id = 'wishlistBadge';
-        newBadge.textContent = count;
-        icon.appendChild(newBadge);
-      }
-    } else {
-      if (badge) {
-        badge.classList.add('hidden');
-      }
-    }
-  }
+        // Cart counter functions
+        function updateCartCounter(count) {
+            const cartBadge = document.getElementById('cartBadge');
+            if (cartBadge) {
+                if (count > 0) {
+                    cartBadge.textContent = count;
+                    cartBadge.style.display = 'inline';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            }
+        }
 
-  function incrementWishlistCounter() {
-    const badge = document.getElementById('wishlistBadge');
-    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
-    updateWishlistCounter(currentCount + 1);
-  }
+        function incrementCartCounter() {
+            const cartBadge = document.getElementById('cartBadge');
+            if (cartBadge) {
+                const currentCount = parseInt(cartBadge.textContent) || 0;
+                updateCartCounter(currentCount + 1);
+            }
+        }
 
-  function decrementWishlistCounter() {
-    const badge = document.getElementById('wishlistBadge');
-    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
-    updateWishlistCounter(Math.max(0, currentCount - 1));
-  }
+        function decrementCartCounter() {
+            const cartBadge = document.getElementById('cartBadge');
+            if (cartBadge) {
+                const currentCount = parseInt(cartBadge.textContent) || 0;
+                updateCartCounter(Math.max(0, currentCount - 1));
+            }
+        }
 
-  // Cart counter functions
-  function updateCartCounter(count) {
-    const cartBadge = document.getElementById('cartBadge');
-    if (cartBadge) {
-      if (count > 0) {
-        cartBadge.textContent = count;
-        cartBadge.style.display = 'block';
-      } else {
-        cartBadge.style.display = 'none';
-      }
-    }
-  }
+        // Load cart count on page load
+        async function loadCartCount() {
+            try {
+                const response = await fetch('/cart-count');
+                const data = await response.json();
+                if (data.success) {
+                    updateCartCounter(data.cartCount);
+                }
+            } catch (error) {
+                console.error('Error loading cart count:', error);
+            }
+        }
 
-  function incrementCartCounter() {
-    const cartBadge = document.getElementById('cartBadge');
-    if (cartBadge) {
-      const currentCount = parseInt(cartBadge.textContent) || 0;
-      updateCartCounter(currentCount + 1);
-    }
-  }
+        // Load wishlist count on page load
+        async function loadWishlistCount() {
+            try {
+                const response = await fetch('/wishlist-count');
+                const data = await response.json();
+                if (data.success) {
+                    updateWishlistCounter(data.wishlistCount);
+                }
+            } catch (error) {
+                console.error('Error loading wishlist count:', error);
+            }
+        }
 
-  function decrementCartCounter() {
-    const cartBadge = document.getElementById('cartBadge');
-    if (cartBadge) {
-      const currentCount = parseInt(cartBadge.textContent) || 0;
-      updateCartCounter(Math.max(0, currentCount - 1));
-    }
-  }
+        // Load both counts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCartCount();
+            loadWishlistCount();
+        });
 
-  // Load cart count on page load
-  async function loadCartCount() {
-    try {
-      const response = await fetch('/cart-count');
-      const data = await response.json();
-      if (data.success) {
-        updateCartCounter(data.cartCount);
-      }
-    } catch (error) {
-      console.error('Error loading cart count:', error);
-    }
-  }
-
-  // Load cart count when page loads
-  document.addEventListener('DOMContentLoaded', loadCartCount);
-
-  // Make functions globally available
-  window.updateWishlistCounter = updateWishlistCounter;
-  window.incrementWishlistCounter = incrementWishlistCounter;
-  window.decrementWishlistCounter = decrementWishlistCounter;
-  window.updateCartCounter = updateCartCounter;
-  window.incrementCartCounter = incrementCartCounter;
-  window.decrementCartCounter = decrementCartCounter;
-  window.loadCartCount = loadCartCount;
-
-
-</script>
+        // Make functions globally available
+        window.updateWishlistCounter = updateWishlistCounter;
+        window.incrementWishlistCounter = incrementWishlistCounter;
+        window.decrementWishlistCounter = decrementWishlistCounter;
+        window.updateCartCounter = updateCartCounter;
+        window.incrementCartCounter = incrementCartCounter;
+        window.decrementCartCounter = decrementCartCounter;
+        window.loadCartCount = loadCartCount;
+        window.loadWishlistCount = loadWishlistCount;
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    </body>
-    </html>
+</body>
+</html>

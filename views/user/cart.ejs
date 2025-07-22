@@ -615,8 +615,9 @@
                         item.quantity = quantity;
                     }
                     showToast('Cart updated successfully', 'success');
-                    // Reload page to ensure price/subtotal is always correct from backend
-                    setTimeout(() => { window.location.reload(); }, 500);
+
+                    // Update the UI without page reload
+                    updateUI();
 
                     // Update cart counter in header using the response cartCount
                     const cartCount = data.cartCount || cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -933,6 +934,13 @@
                     if (increaseBtn) {
                         increaseBtn.disabled = item.quantity >= 10;
                     }
+
+                    // Update the quantity total for this specific item
+                    const quantityTotalElement = cartItem.querySelector('.item-price div:last-child');
+                    if (quantityTotalElement) {
+                        const itemTotal = Math.round(item.price * item.quantity);
+                        quantityTotalElement.textContent = `Quantity Total: ₹${itemTotal}`;
+                    }
                 }
             });
 
@@ -942,7 +950,11 @@
                 const qty = Number(item.quantity) || 0;
                 return total + (price * qty);
             }, 0);
-            document.querySelector('.subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+            
+            const subtotalElement = document.querySelector('.subtotal');
+            if (subtotalElement) {
+                subtotalElement.textContent = `₹${Math.round(subtotal)}`;
+            }
 
             // Update cart badge using the global function
             const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
