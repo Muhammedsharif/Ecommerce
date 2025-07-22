@@ -70,11 +70,23 @@ const loadCart = async (req,res) =>{
                 let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
                 let displayPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
 
+                // Calculate maxStock based on specific variant size or total stock
+                let maxStock = 0;
+                if (product) {
+                    if (variant) {
+                        // If specific size variant found, use its stock
+                        maxStock = variant.varientquantity || 0;
+                    } else {
+                        // If no specific variant or size is N/A, use total stock across all variants
+                        maxStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+                    }
+                }
+
                 return {
                     ...item.toObject(),
                     isAvailable,
                     unavailableReason,
-                    maxStock: product ? product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0) : 0,
+                    maxStock: maxStock,
                     displayPrice
                 };
             });
@@ -513,16 +525,37 @@ const updateCartQuantity = async(req, res) => {
             return res.status(400).json({ success: false, message: 'Product category is no longer available' });
         }
 
-        // Check variant-based stock availability
-        const totalVariantStock = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
-        console.log('Total variant stock:', totalVariantStock, 'Requested quantity:', quantity);
+        // Check variant-based stock availability based on specific size
+        const cartItem = cart.items[itemIndex];
+        let stockLimit = 0;
+        let stockMessage = '';
 
-        if (quantity > totalVariantStock) {
+        if (cartItem.size && cartItem.size !== 'N/A') {
+            // Find the specific variant for this size
+            const variant = product.variant.find(v => String(v.size) === String(cartItem.size));
+            if (variant) {
+                stockLimit = variant.varientquantity || 0;
+                stockMessage = `Only ${stockLimit} items available for size ${cartItem.size}`;
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: `Size ${cartItem.size} is no longer available`
+                });
+            }
+        } else {
+            // If no specific size, use total stock across all variants
+            stockLimit = product.variant.reduce((total, variant) => total + (variant.varientquantity || 0), 0);
+            stockMessage = `Only ${stockLimit} items available in stock`;
+        }
+
+        console.log('Stock limit for item:', stockLimit, 'Requested quantity:', quantity);
+
+        if (quantity > stockLimit) {
             console.log('Insufficient stock');
             return res.status(400).json({
                 success: false,
-                message: `Only ${totalVariantStock} items available in stock`,
-                availableStock: totalVariantStock
+                message: stockMessage,
+                availableStock: stockLimit
             });
         }
 

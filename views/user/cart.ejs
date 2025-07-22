@@ -424,10 +424,10 @@
                             <div class="quantity-controls">
                                 <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', -1)"
                                         <%= item.quantity <= 1 ? 'disabled' : '' %>>-</button>
-                                <input type="number" value="<%= item.quantity %>" min="1" max="10" class="qty-input"
+                                <input type="number" value="<%= item.quantity %>" min="1" max="<%= Math.min(10, item.maxStock) %>" class="qty-input"
                                        onchange="setQuantity('<%= item._id %>', this.value)">
                                 <button class="qty-btn" onclick="updateQuantity('<%= item._id %>', 1)"
-                                        <%= item.quantity >= 10 ? 'disabled' : '' %>>+</button>
+                                        <%= item.quantity >= Math.min(10, item.maxStock) ? 'disabled' : '' %>>+</button>
                             </div>
                             <button class="remove-btn" onclick="removeItem('<%= item._id %>')">
                                 <i class="fas fa-times"></i> Remove
@@ -926,13 +926,20 @@
                         input.value = item.quantity;
                     }
 
-                    // Update button states
+                    // Update button states based on stock and quantity limits
                     if (decreaseBtn) {
                         decreaseBtn.disabled = item.quantity <= 1;
                     }
 
                     if (increaseBtn) {
-                        increaseBtn.disabled = item.quantity >= 10;
+                        const maxAllowed = Math.min(10, item.maxStock);
+                        increaseBtn.disabled = item.quantity >= maxAllowed;
+                    }
+
+                    // Update input max attribute
+                    if (input) {
+                        const maxAllowed = Math.min(10, item.maxStock);
+                        input.setAttribute('max', maxAllowed);
                     }
 
                     // Update the quantity total for this specific item
