@@ -20,10 +20,9 @@ const calculateEqualCouponDiscount = (order, returnedItems) => {
         return sum + item.quantity;
     }, 0);
 
-    // Calculate equal coupon discount for returned items
+   
     const equalDiscount = discountPerProduct * returnedProductCount;
 
-    // Calculate total value of returned/canceled items
     const returnedItemsValue = returnedItems.reduce((sum, item) => {
         return sum + (item.price * item.quantity);
     }, 0);
@@ -32,7 +31,7 @@ const calculateEqualCouponDiscount = (order, returnedItems) => {
     const adjustedRefundAmount = returnedItemsValue - equalDiscount;
 
     return {
-        equalDiscount: Math.round(equalDiscount), // Round to nearest whole number
+        equalDiscount: Math.round(equalDiscount), 
         adjustedRefundAmount: Math.round(adjustedRefundAmount),
         returnedItemsValue: Math.round(returnedItemsValue),
         discountPerProduct: Math.round(discountPerProduct),
@@ -84,11 +83,7 @@ const updateOrderCouponDiscount = (order, proportionalDiscount) => {
     return order;
 };
 
-/**
- * Calculate the current order total based on non-returned/non-cancelled items
- * @param {Object} order - The order object
- * @returns {Object} - Object containing current totals and breakdown
- */
+
 const calculateCurrentOrderTotal = (order) => {
     // Calculate total for remaining (non-returned/non-cancelled) items
     const remainingItems = order.orderedItems.filter(item => 
@@ -114,18 +109,25 @@ const calculateCurrentOrderTotal = (order) => {
     };
 };
 
-/**
- * Calculate display totals for order views (handles partial returns/cancellations)
- * @param {Object} order - The order object
- * @returns {Object} - Object containing display totals
- */
+
 const getOrderDisplayTotals = (order) => {
-    const currentTotals = calculateCurrentOrderTotal(order);
+    // Calculate total for remaining (non-returned/non-cancelled) items
+    const remainingItems = order.orderedItems.filter(item => 
+        item.status !== 'Cancelled' && item.status !== 'Returned'
+    );
     
-    // If all items are returned/cancelled, show original amounts but with zero final amount
-    if (currentTotals.remainingItemsCount === 0) {
+    const cancelledOrReturnedItems = order.orderedItems.filter(item => 
+        item.status === 'Cancelled' || item.status === 'Returned'
+    );
+    
+    const remainingItemsValue = remainingItems.reduce((sum, item) => {
+        return sum + (item.price * item.quantity);
+    }, 0);
+    
+    // If all items are returned/cancelled, show zero amounts
+    if (remainingItems.length === 0) {
         return {
-            subtotal: order.totalPrice || 0,
+            subtotal: 0,
             couponDiscount: 0,
             finalAmount: 0,
             isFullyReturned: true,
@@ -133,24 +135,46 @@ const getOrderDisplayTotals = (order) => {
         };
     }
     
-    // If some items are returned/cancelled, show adjusted amounts
-    if (currentTotals.remainingItemsCount < currentTotals.totalItemsCount) {
+    // If some items are returned/cancelled and coupon was applied, calculate equal distribution
+    if (cancelledOrReturnedItems.length > 0 && order.couponApplied && order.couponDiscount > 0) {
+        
+        const totalProductCount = order.orderedItems.reduce((sum, item) => {
+            return sum + item.quantity;
+        }, 0);
+        
+      
+        const remainingProductCount = remainingItems.reduce((sum, item) => {
+            return sum + item.quantity;
+        }, 0);
+        
+        
+        const discountPerProduct = order.couponDiscount / totalProductCount;
+        
+        // Calculate coupon discount for remaining items (equal distribution)
+        const remainingCouponDiscount = Math.round(discountPerProduct * remainingProductCount);
+        
+        const adjustedFinalAmount = remainingItemsValue - remainingCouponDiscount;
+        
         return {
-            subtotal: currentTotals.remainingItemsValue,
-            couponDiscount: currentTotals.currentCouponDiscount,
-            finalAmount: currentTotals.currentFinalAmount,
+            subtotal: remainingItemsValue,
+            couponDiscount: remainingCouponDiscount,
+            finalAmount: Math.max(0, adjustedFinalAmount),
             isPartiallyReturned: true,
-            remainingItemsValue: currentTotals.remainingItemsValue
+            remainingItemsValue: remainingItemsValue,
+            originalCouponDiscount: order.couponDiscount,
+            discountPerProduct: Math.round(discountPerProduct),
+            remainingProductCount: remainingProductCount,
+            totalProductCount: totalProductCount
         };
     }
     
     // No returns/cancellations, show original amounts
     return {
-        subtotal: order.totalPrice || 0,
+        subtotal: order.totalPrice || remainingItemsValue,
         couponDiscount: order.couponDiscount || 0,
-        finalAmount: order.finalAmount || 0,
+        finalAmount: order.finalAmount || (remainingItemsValue - (order.couponDiscount || 0)),
         isFullyActive: true,
-        remainingItemsValue: order.totalPrice || 0
+        remainingItemsValue: remainingItemsValue
     };
 };
 

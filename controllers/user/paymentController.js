@@ -43,9 +43,9 @@ const createRazorpayOrder = async (req, res) => {
 
         // Create Razorpay order
         const options = {
-            amount: Math.round(parseFloat(roundedTotal) * 100), // Amount in paise, ensure it's an integer
+            amount: Math.round(parseFloat(roundedTotal) * 100), 
             currency: 'INR',
-            receipt: `ord_${Date.now().toString().slice(-10)}`, // Keep receipt under 40 chars
+            receipt: `ord_${Date.now().toString().slice(-10)}`, 
             notes: {
                 userId: userId.toString(),
                 addressId: addressId.toString()

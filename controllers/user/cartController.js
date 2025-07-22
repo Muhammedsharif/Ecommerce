@@ -276,7 +276,7 @@ const getCartCount = async(req, res) => {
         }
 
         const cart = await Cart.findOne({ userId });
-        const cartCount = cart ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
+        const cartCount = cart ? cart.items.length:0
 
         res.json({ success: true, cartCount: cartCount });
 

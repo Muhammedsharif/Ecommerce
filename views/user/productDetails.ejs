@@ -1652,10 +1652,10 @@
                             });
 
                             const data = await response.json();
-
+                            window.location.reload()
                             if (data.success) {
                                 successCount++;
-                                lastCartCount = data.cartCount;
+                                lastCartCount = data.length;
                             } else {
                                 errorMessage = data.message || "Failed to add to cart";
                                 break;
@@ -1716,11 +1716,18 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({ productId: productId })
+                    
                 })
                 .then(response => response.json())
+                
                 .then(response => {
                     if (response.status) {
                         showToast(response.message || 'Product added to wishlist!', 'success');
+                        setTimeout(()=>{
+                             window.location.reload()
+                        },500)
+                        
+                       
                     } else {
                         showToast(response.message || 'Failed to add to wishlist', 'error');
                     }

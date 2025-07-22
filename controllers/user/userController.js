@@ -365,10 +365,8 @@
 
     const logout = async (req,res)=>{
         try {
-            // Only clear user session data, preserve admin session if exists
+            
             delete req.session.user;
-
-            // Save the session to ensure the deletion is persisted
             req.session.save((err) => {
                 if(err){
                     console.log("Session save error",err.message)
@@ -436,27 +434,27 @@ const loadShoppingPage = async (req, res) => {
         });
 
         // Apply sorting based on calculated prices
-        console.log('Applying sort in loadShoppingPage:', sort);
+       
         switch (sort) {
             case 'price_asc':
                 findProducts.sort((a, b) => a.calculatedLowestPrice - b.calculatedLowestPrice);
-                console.log('Applied price_asc sorting');
+                
                 break;
             case 'price_desc':
                 findProducts.sort((a, b) => b.calculatedLowestPrice - a.calculatedLowestPrice);
-                console.log('Applied price_desc sorting');
+                
                 break;
             case 'name_asc':
                 findProducts.sort((a, b) => a.productName.localeCompare(b.productName));
-                console.log('Applied name_asc sorting');
+                
                 break;
             case 'name_desc':
                 findProducts.sort((a, b) => b.productName.localeCompare(a.productName));
-                console.log('Applied name_desc sorting');
+                
                 break;
             default:
                 findProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                console.log('Applied default sorting (newest first)');
+                
         }
     
         
