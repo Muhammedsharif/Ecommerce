@@ -1240,11 +1240,27 @@ const loadOrderDetails = async (req, res) => {
             return res.redirect("/pageNotFound");
         }
 
-        const order = await Order.findOne({ _id: orderId, userId: userId })
+        // Try to find order by orderId field first (for custom order IDs like ORD175319601321662UHS)
+        // If not found, try by _id field (for MongoDB ObjectIds)
+        let order = await Order.findOne({ orderId: orderId, userId: userId })
             .populate({
                 path: 'orderedItems.product',
                 select: 'productName productImage salePrice price offerPrice discount isOfferActive'
             });
+
+        // If not found by orderId, try by _id (in case orderId is actually a MongoDB ObjectId)
+        if (!order) {
+            try {
+                order = await Order.findOne({ _id: orderId, userId: userId })
+                    .populate({
+                        path: 'orderedItems.product',
+                        select: 'productName productImage salePrice price offerPrice discount isOfferActive'
+                    });
+            } catch (castError) {
+                // If _id cast fails, order remains null and will be handled below
+                console.log('Order ID is not a valid ObjectId, searching by orderId field only');
+            }
+        }
 
         if (!order) {
             return res.redirect("/orders?error=" + encodeURIComponent("Order not found"));

@@ -596,11 +596,19 @@
                             });
 
                             const verifyResult = await verifyResponse.json();
+                            console.log('Payment verification result:', verifyResult);
 
                             if (verifyResult.success) {
+                                console.log('Payment verified successfully, redirecting to:', verifyResult.redirectUrl);
                                 // Redirect to success page
-                                window.location.href = verifyResult.redirectUrl;
+                                if (verifyResult.redirectUrl) {
+                                    window.location.href = verifyResult.redirectUrl;
+                                } else {
+                                    console.error('No redirect URL provided in response');
+                                    window.location.href = `/payment-success/${verifyResult.orderId}`;
+                                }
                             } else {
+                                console.error('Payment verification failed:', verifyResult.message);
                                 throw new Error(verifyResult.message || 'Payment verification failed');
                             }
                         } catch (error) {

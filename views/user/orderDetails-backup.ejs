@@ -992,8 +992,6 @@
             const reasonSelect = document.getElementById('actionReason');
             const errorMessage = document.getElementById('reasonError');
             const confirmBtn = document.getElementById('confirmActionBtn');
-            const otherReasonText = document.getElementById('otherReasonText');
-            const otherReasonError = document.getElementById('otherReasonError');
 
             // Validate reason selection
             if (!reasonSelect.value) {
@@ -1003,41 +1001,19 @@
                 return;
             }
 
-            // If "Other" is selected, validate the text area
-            let finalReason = reasonSelect.value;
-            if (reasonSelect.value === 'Other') {
-                const otherText = otherReasonText.value.trim();
-                if (!otherText) {
-                    otherReasonText.classList.add('error');
-                    otherReasonError.style.display = 'block';
-                    otherReasonText.focus();
-                    return;
-                } else {
-                    // Combine "Other" with the custom reason
-                    finalReason = `Other: ${otherText}`;
-                    // Clear any previous errors
-                    otherReasonText.classList.remove('error');
-                    otherReasonError.style.display = 'none';
-                }
-            }
-
-            // Clear any previous errors
-            reasonSelect.classList.remove('error');
-            errorMessage.style.display = 'none';
-
             // Disable button and show loading
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             try {
                 if (currentAction === 'cancelItem') {
-                    await processCancelItem(currentOrderId, currentItemId, finalReason);
+                    await processCancelItem(currentOrderId, currentItemId, reasonSelect.value);
                 } else if (currentAction === 'returnItem') {
-                    await processReturnItem(currentOrderId, currentItemId, finalReason);
+                    await processReturnItem(currentOrderId, currentItemId, reasonSelect.value);
                 } else if (currentAction === 'cancelAllItems') {
-                    await processCancelAllItems(currentOrderId, finalReason);
+                    await processCancelAllItems(currentOrderId, reasonSelect.value);
                 } else if (currentAction === 'returnAllItems') {
-                    await processReturnAllItems(currentOrderId, finalReason);
+                    await processReturnAllItems(currentOrderId, reasonSelect.value);
                 }
 
                 closeActionModal();
@@ -1235,31 +1211,6 @@
             }
         });
 
-        // Handle "Other" option selection
-        document.addEventListener('DOMContentLoaded', function() {
-            const actionReason = document.getElementById('actionReason');
-            const otherReasonContainer = document.getElementById('otherReasonContainer');
-            const otherReasonText = document.getElementById('otherReasonText');
-            const otherReasonError = document.getElementById('otherReasonError');
-
-            if (actionReason) {
-                actionReason.addEventListener('change', function() {
-                    if (this.value === 'Other') {
-                        otherReasonContainer.style.display = 'block';
-                        // Focus on the text area after a short delay to ensure it's visible
-                        setTimeout(() => {
-                            otherReasonText.focus();
-                        }, 100);
-                    } else {
-                        otherReasonContainer.style.display = 'none';
-                        otherReasonText.value = '';
-                        otherReasonText.classList.remove('error');
-                        otherReasonError.style.display = 'none';
-                    }
-                });
-            }
-        });
-
         // Retry payment functionality for order details page
         const retryPaymentBtn = document.getElementById('retryPaymentBtn');
         if (retryPaymentBtn) {
@@ -1404,20 +1355,6 @@
                     </select>
                     <div class="error-message" id="reasonError">
                         Please select a reason
-                    </div>
-                    
-                    <!-- Other reason text area (hidden by default) -->
-                    <div id="otherReasonContainer" class="other-reason-container" style="display: none;">
-                        <label for="otherReasonText" class="form-label">
-                            <i class="fas fa-edit"></i>
-                            Please specify your reason for choosing 'Other'
-                        </label>
-                        <textarea id="otherReasonText" class="form-textarea" 
-                                  placeholder="Please provide a detailed reason for your choice..."
-                                  rows="4"></textarea>
-                        <div class="error-message" id="otherReasonError">
-                            Please specify your reason
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1604,40 +1541,6 @@
             background: #adb5bd;
             cursor: not-allowed;
             transform: none;
-        }
-
-        /* Other reason container styles */
-        .other-reason-container {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
-
-        .form-textarea {
-            width: 100%;
-            padding: 0.8rem;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
-            background: white;
-            transition: all 0.3s ease;
-            resize: vertical;
-            min-height: 100px;
-            font-family: inherit;
-        }
-
-        .form-textarea:focus {
-            outline: none;
-            border-color: #dc3545;
-            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-        }
-
-        .form-textarea.error {
-            border-color: #dc3545;
-            background-color: #fff5f5;
         }
 
         @keyframes fadeIn {

@@ -81,6 +81,9 @@ const createRazorpayOrder = async (req, res) => {
 
 // Verify Razorpay payment and create order
 const verifyPayment = async (req, res) => {
+    console.log('🚀 VERIFY PAYMENT STARTED');
+    console.log('Request body:', req.body);
+    
     try {
         const userId = req.session.user;
         const { 
@@ -90,7 +93,11 @@ const verifyPayment = async (req, res) => {
             addressId 
         } = req.body;
 
+        console.log('User ID:', userId);
+        console.log('Payment details:', { razorpay_order_id, razorpay_payment_id, addressId });
+
         if (!userId) {
+            console.log('❌ No user ID in session');
             return res.status(401).json({ 
                 success: false, 
                 message: "Please login to continue" 
@@ -98,6 +105,7 @@ const verifyPayment = async (req, res) => {
         }
 
         // Verify signature
+        console.log('🔐 Verifying signature...');
         const body = razorpay_order_id + "|" + razorpay_payment_id;
         const expectedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'your_key_secret')
@@ -105,200 +113,101 @@ const verifyPayment = async (req, res) => {
             .digest('hex');
 
         if (expectedSignature !== razorpay_signature) {
+            console.log('❌ Signature verification failed');
+            console.log('Expected:', expectedSignature);
+            console.log('Received:', razorpay_signature);
             return res.status(400).json({
                 success: false,
-                message: 'Payment verification failed'
+                message: 'Payment verification failed - invalid signature'
             });
         }
+
+        console.log('✅ Signature verification successful');
 
         // Get user data
         const userData = await User.findById(userId);
-        
-        // Check for Buy Now data first, then cart data
-        const buyNowData = req.session.buyNowData;
-        let validItems = [];
-        let subtotal = 0;
-        let itemsToUpdateStock = [];
-
-        if (buyNowData) {
-            // Handle Buy Now purchase
-            const product = await Product.findById(buyNowData.productId).populate('category');
-            
-            if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
-                delete req.session.buyNowData;
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Product is no longer available" 
-                });
-            }
-
-            const variant = product.variant.find(v => v.size === buyNowData.size);
-            if (!variant || variant.varientquantity < buyNowData.quantity) {
-                delete req.session.buyNowData;
-                return res.status(400).json({ 
-                    success: false, 
-                    message: `Insufficient stock for ${product.productName} (Size: ${buyNowData.size})` 
-                });
-            }
-
-            // Calculate item price using best offer (product/category)
-            let variantPrice = variant.varientPrice;
-            let productOffer = product.productOffer || 0;
-            let categoryOffer = (product.category && product.category.categoryOffer) || 0;
-            let bestOffer = Math.max(productOffer, categoryOffer);
-            let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
-            let itemTotal = Math.round(itemPrice * buyNowData.quantity);
-
-            validItems.push({
-                product: product._id,
-                quantity: buyNowData.quantity,
-                price: itemPrice,
-                size: buyNowData.size
+        if (!userData) {
+            console.log('❌ User not found');
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
             });
-
-            itemsToUpdateStock.push({
-                productId: product._id,
-                size: buyNowData.size,
-                quantity: buyNowData.quantity
-            });
-
-            subtotal = itemTotal;
-        } else {
-            // Handle cart-based purchase
-            const cart = await Cart.findOne({ userId }).populate({
-                path: 'items.productId',
-                populate: {
-                    path: 'category',
-                    model: 'Category'
-                }
-            });
-
-            if (!cart || cart.items.length === 0) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Cart is empty" 
-                });
-            }
-
-            // Validate cart items and calculate totals
-            for (let item of cart.items) {
-                const product = item.productId;
-                
-                if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
-                    continue;
-                }
-
-                const variant = product.variant.find(v => v.size === item.size);
-                if (!variant || variant.varientquantity < item.quantity) {
-                    return res.status(400).json({ 
-                        success: false, 
-                        message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
-                    });
-                }
-
-                // Apply best offer (product/category) to get item price
-                let productOffer = product.productOffer || 0;
-                let categoryOffer = (product.category && product.category.categoryOffer) || 0;
-                let bestOffer = Math.max(productOffer, categoryOffer);
-                let variantPrice = variant.varientPrice;
-                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
-                let itemTotal = Math.round(itemPrice * item.quantity);
-                
-                validItems.push({
-                    product: product._id,
-                    quantity: item.quantity,
-                    price: itemPrice,
-                    size: variant.size
-                });
-
-                itemsToUpdateStock.push({
-                    productId: product._id,
-                    size: item.size,
-                    quantity: item.quantity
-                });
-
-                subtotal += itemTotal;
-            }
-
-            if (validItems.length === 0) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "No valid items in cart" 
-                });
-            }
-        }
-
-        // Calculate totals (no tax)
-        const shippingCost = subtotal > 500 ? 0 : 50;
-        let totalAmount = subtotal + shippingCost;
-
-        // Handle coupon validation and application
-        let couponData = {
-            applied: false,
-            code: null,
-            discount: 0,
-            originalAmount: totalAmount
-        };
-
-        const appliedCoupon = req.session.appliedCoupon;
-        if (appliedCoupon) {
-            // Validate coupon before processing order
-            const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
-
-            if (couponValidation.valid) {
-                // Recalculate discount based on current cart total and discount type
-                const coupon = couponValidation.coupon;
-                let discountAmount;
-
-                if (coupon.discountType === 'percentage') {
-                    // For percentage discounts, divide equally among all products
-                    discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
-                } else {
-                    // For flat discounts, use current logic
-                    discountAmount = Math.min(coupon.offerPrice, totalAmount);
-                }
-
-                totalAmount = totalAmount - discountAmount;
-
-                couponData = {
-                    applied: true,
-                    code: appliedCoupon.couponCode,
-                    discount: discountAmount,
-                    originalAmount: subtotal + shippingCost,
-                    couponId: appliedCoupon.couponId
-                };
-            } else {
-                // Remove invalid coupon from session
-                delete req.session.appliedCoupon;
-                console.log('Coupon validation failed during online payment:', couponValidation.message);
-            }
         }
 
         // Check if this is a retry payment by looking for existing failed order
+        console.log('🔍 Checking if this is a retry payment...');
         let existingOrder = null;
+        let isRetryPayment = false;
+        
         try {
-            // Try to find a failed order with the same Razorpay order ID
             const razorpayOrderData = await razorpay.orders.fetch(razorpay_order_id);
+            console.log('Razorpay order data:', razorpayOrderData);
+            
             const failedOrderId = razorpayOrderData.notes?.failedOrderId;
+            const retryPaymentFlag = razorpayOrderData.notes?.retryPayment;
+            
+            console.log('Order notes:', { failedOrderId, retryPaymentFlag });
             
             if (failedOrderId && failedOrderId !== 'cart_retry') {
+                console.log('🔍 Looking for existing failed order:', failedOrderId);
                 existingOrder = await Order.findOne({
                     orderId: failedOrderId,
                     userId: userId,
                     paymentStatus: 'Failed'
                 });
+                
+                if (existingOrder) {
+                    isRetryPayment = true;
+                    console.log('✅ Found existing failed order for retry payment');
+                } else {
+                    console.log('❌ No existing failed order found');
+                }
             }
         } catch (fetchError) {
-            console.log('Could not fetch Razorpay order details:', fetchError.message);
+            console.log('⚠️ Could not fetch Razorpay order details:', fetchError.message);
         }
 
         let orderId;
-        
-        if (existingOrder) {
-            // Update existing failed order
-            console.log('Updating existing failed order:', existingOrder.orderId);
-            orderId = existingOrder.orderId;
+        let validItems = [];
+        let subtotal = 0;
+        let itemsToUpdateStock = [];
+        let totalAmount = 0;
+        let couponData = {
+            applied: false,
+            code: null,
+            discount: 0,
+            originalAmount: 0
+        };
+
+        if (isRetryPayment && existingOrder) {
+            console.log('🔄 Processing retry payment with existing order data');
             
+            // Use existing order data
+            orderId = existingOrder.orderId;
+            validItems = existingOrder.orderedItems;
+            subtotal = existingOrder.totalPrice;
+            totalAmount = existingOrder.finalAmount;
+            
+            // Prepare coupon data from existing order
+            if (existingOrder.couponApplied) {
+                couponData = {
+                    applied: true,
+                    code: existingOrder.couponCode,
+                    discount: existingOrder.couponDiscount || 0,
+                    originalAmount: existingOrder.originalAmount || totalAmount
+                };
+            }
+            
+            // Prepare items for stock update
+            for (let item of existingOrder.orderedItems) {
+                itemsToUpdateStock.push({
+                    productId: item.product,
+                    size: item.size,
+                    quantity: item.quantity
+                });
+            }
+            
+            // Update existing order
             existingOrder.status = 'Processing';
             existingOrder.paymentStatus = 'Completed';
             existingOrder.razorpayOrderId = razorpay_order_id;
@@ -306,7 +215,164 @@ const verifyPayment = async (req, res) => {
             existingOrder.razorpaySignature = razorpay_signature;
             
             await existingOrder.save();
+            console.log('✅ Updated existing order for retry payment');
+            
         } else {
+            console.log('🆕 Processing new payment (not a retry)');
+            
+            // Handle new payment - check for Buy Now data first, then cart data
+            const buyNowData = req.session.buyNowData;
+
+            if (buyNowData) {
+                console.log('📦 Processing Buy Now payment');
+                // Handle Buy Now purchase
+                const product = await Product.findById(buyNowData.productId).populate('category');
+                
+                if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                    delete req.session.buyNowData;
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: "Product is no longer available" 
+                    });
+                }
+
+                const variant = product.variant.find(v => v.size === buyNowData.size);
+                if (!variant || variant.varientquantity < buyNowData.quantity) {
+                    delete req.session.buyNowData;
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: `Insufficient stock for ${product.productName} (Size: ${buyNowData.size})` 
+                    });
+                }
+
+                // Calculate item price using best offer (product/category)
+                let variantPrice = variant.varientPrice;
+                let productOffer = product.productOffer || 0;
+                let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                let bestOffer = Math.max(productOffer, categoryOffer);
+                let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                let itemTotal = Math.round(itemPrice * buyNowData.quantity);
+
+                validItems.push({
+                    product: product._id,
+                    quantity: buyNowData.quantity,
+                    price: itemPrice,
+                    size: buyNowData.size
+                });
+
+                itemsToUpdateStock.push({
+                    productId: product._id,
+                    size: buyNowData.size,
+                    quantity: buyNowData.quantity
+                });
+
+                subtotal = itemTotal;
+            } else {
+                console.log('🛒 Processing cart-based payment');
+                // Handle cart-based purchase
+                const cart = await Cart.findOne({ userId }).populate({
+                    path: 'items.productId',
+                    populate: {
+                        path: 'category',
+                        model: 'Category'
+                    }
+                });
+
+                if (!cart || cart.items.length === 0) {
+                    console.log('❌ Cart is empty');
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: "Cart is empty" 
+                    });
+                }
+
+                // Validate cart items and calculate totals
+                for (let item of cart.items) {
+                    const product = item.productId;
+                    
+                    if (!product || product.isBlocked || product.isDeleted || product.status !== "Available") {
+                        continue;
+                    }
+
+                    const variant = product.variant.find(v => v.size === item.size);
+                    if (!variant || variant.varientquantity < item.quantity) {
+                        return res.status(400).json({ 
+                            success: false, 
+                            message: `Insufficient stock for ${product.productName} (Size: ${item.size})` 
+                        });
+                    }
+
+                    // Apply best offer (product/category) to get item price
+                    let productOffer = product.productOffer || 0;
+                    let categoryOffer = (product.category && product.category.categoryOffer) || 0;
+                    let bestOffer = Math.max(productOffer, categoryOffer);
+                    let variantPrice = variant.varientPrice;
+                    let itemPrice = bestOffer > 0 ? Math.round(variantPrice - (variantPrice * bestOffer / 100)) : Math.round(variantPrice);
+                    let itemTotal = Math.round(itemPrice * item.quantity);
+                    
+                    validItems.push({
+                        product: product._id,
+                        quantity: item.quantity,
+                        price: itemPrice,
+                        size: variant.size
+                    });
+
+                    itemsToUpdateStock.push({
+                        productId: product._id,
+                        size: item.size,
+                        quantity: item.quantity
+                    });
+
+                    subtotal += itemTotal;
+                }
+
+                if (validItems.length === 0) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: "No valid items in cart" 
+                    });
+                }
+            }
+
+            // Calculate totals (no tax)
+            const shippingCost = subtotal > 500 ? 0 : 50;
+            totalAmount = subtotal + shippingCost;
+
+            // Handle coupon validation and application
+            const appliedCoupon = req.session.appliedCoupon;
+            if (appliedCoupon) {
+                // Validate coupon before processing order
+                const couponValidation = await validateCouponForCheckout(appliedCoupon, userId);
+
+                if (couponValidation.valid) {
+                    // Recalculate discount based on current cart total and discount type
+                    const coupon = couponValidation.coupon;
+                    let discountAmount;
+
+                    if (coupon.discountType === 'percentage') {
+                        // For percentage discounts, divide equally among all products
+                        discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount);
+                    } else {
+                        // For flat discounts, use current logic
+                        discountAmount = Math.min(coupon.offerPrice, totalAmount);
+                    }
+
+                    totalAmount = totalAmount - discountAmount;
+
+                    couponData = {
+                        applied: true,
+                        code: appliedCoupon.couponCode,
+                        discount: discountAmount,
+                        originalAmount: subtotal + shippingCost,
+                        couponId: appliedCoupon.couponId
+                    };
+                } else {
+                    // Remove invalid coupon from session
+                    delete req.session.appliedCoupon;
+                    console.log('Coupon validation failed during online payment:', couponValidation.message);
+                }
+            }
+
             // Generate unique order ID for new order
             orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
 
@@ -333,16 +399,18 @@ const verifyPayment = async (req, res) => {
             });
 
             await newOrder.save();
+            console.log('✅ Created new order');
         }
 
-        // Mark coupon as used if applied
-        if (couponData.applied && couponData.couponId) {
+        // Mark coupon as used if applied (only for new orders)
+        if (!isRetryPayment && couponData.applied && couponData.couponId) {
             await markCouponAsUsed(couponData.couponId, userId);
             // Clear coupon from session
             delete req.session.appliedCoupon;
         }
 
         // Update product stock
+        console.log('📦 Updating product stock...');
         for (let item of itemsToUpdateStock) {
             const product = await Product.findById(item.productId);
             if (product) {
@@ -354,14 +422,27 @@ const verifyPayment = async (req, res) => {
             }
         }
 
-        // Clear cart or Buy Now data
-        if (buyNowData) {
-            // Clear Buy Now data from session
-            delete req.session.buyNowData;
+        // Clear cart or Buy Now data - but NOT for retry payments of existing failed orders
+        if (!isRetryPayment) {
+            const buyNowData = req.session.buyNowData;
+            if (buyNowData) {
+                // Clear Buy Now data from session
+                delete req.session.buyNowData;
+                console.log('Buy Now data cleared from session');
+            } else {
+                // Clear cart for new orders
+                const cartDeleted = await Cart.findOneAndDelete({ userId });
+                if (cartDeleted) {
+                    console.log('Cart cleared successfully for new order, user:', userId);
+                } else {
+                    console.log('No cart found to clear for new order, user:', userId);
+                }
+            }
         } else {
-            // Clear cart
-            await Cart.findOneAndDelete({ userId });
+            console.log('Retry payment detected - preserving current cart for user:', userId);
         }
+
+        console.log('✅ Payment verification successful, sending response');
 
         res.json({
             success: true,
@@ -371,10 +452,15 @@ const verifyPayment = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error verifying payment:', error);
+        console.error('❌ PAYMENT VERIFICATION ERROR:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Request body:', req.body);
+        console.error('User ID:', req.session?.user);
+        
         res.status(500).json({
             success: false,
-            message: 'Payment verification failed'
+            message: 'Payment verification failed: ' + error.message
         });
     }
 };
@@ -529,6 +615,28 @@ const handlePaymentFailure = async (req, res) => {
 
                     await failedOrder.save();
                     console.log('Failed order record created:', failedOrderId);
+
+                    // Clear cart and Buy Now data when payment fails during initial checkout
+                    // This is because the user has already committed to placing the order
+                    if (buyNowData) {
+                        // Clear Buy Now data from session
+                        delete req.session.buyNowData;
+                        console.log('Buy Now data cleared after payment failure');
+                    } else {
+                        // Clear cart after payment failure during initial checkout
+                        const cartDeleted = await Cart.findOneAndDelete({ userId });
+                        if (cartDeleted) {
+                            console.log('Cart cleared after payment failure for user:', userId);
+                        } else {
+                            console.log('No cart found to clear after payment failure for user:', userId);
+                        }
+                    }
+
+                    // Clear applied coupon from session since the order failed
+                    if (req.session.appliedCoupon) {
+                        delete req.session.appliedCoupon;
+                        console.log('Applied coupon cleared after payment failure');
+                    }
                 }
             } catch (orderError) {
                 console.error('Error creating failed order record:', orderError);
@@ -560,6 +668,8 @@ const retryPayment = async (req, res) => {
     try {
         const userId = req.session.user;
         const { failedOrderId } = req.body;
+
+        console.log('🔄 Retry payment requested for order:', failedOrderId);
 
         if (!userId) {
             return res.status(401).json({ 
