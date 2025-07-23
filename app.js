@@ -2,7 +2,8 @@
 const express=require("express")
 const app=express()
 const path=require("path")
-const env=require("dotenv").config() // Load environment variables
+const env=require("dotenv").config()
+const morgan=require("morgan")
 const session=require("express-session") // Session management
 const passport = require('./config/passport'); // Authentication configuration
 const db=require("./config/db") // Database connection
@@ -15,7 +16,7 @@ db() // Initialize database connection
 // Middleware configuration
 app.use(express.json()) // Parse JSON request bodies
 app.use(express.urlencoded({extended:true})) // Parse URL-encoded request bodies
-
+app.use(morgan("combined"))
 // Session configuration for user authentication
 app.use(session({
     secret:process.env.SESSION_SECRET,
