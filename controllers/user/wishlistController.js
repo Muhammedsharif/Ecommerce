@@ -124,4 +124,5 @@ module.exports={
     addToWishlist,
     removeProduct,
     getWishlistCount,
+    
 }

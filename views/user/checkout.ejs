@@ -875,7 +875,7 @@
                             let bestOffer = Math.max(productOffer, categoryOffer);
                             let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.itemPrice === 'number' ? item.itemPrice : item.price);
                             let displayPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                            let itemTotal = displayPrice * item.quantity;
+                            let itemTotal = Math.round(displayPrice * item.quantity);
                             summarySubtotal += itemTotal;
                     %>
                         <div style="display: flex; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem 0; gap: 0.75rem;">
@@ -968,7 +968,7 @@
             }
 
             try {
-                const response = await fetch('/apply-coupon', {
+                const response = await fetch('/coupons/apply', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1015,7 +1015,7 @@
 
         async function removeCoupon() {
             try {
-                const response = await fetch('/remove-coupon', {
+                const response = await fetch('/coupons/remove', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1071,7 +1071,7 @@
             `;
 
             try {
-                const response = await fetch('/get-available-coupons', {
+                const response = await fetch('/coupons/available', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1241,7 +1241,7 @@
                 // Handle different payment methods
                 if (selectedPayment === 'ONLINE') {
                     // Create Razorpay order
-                    const razorpayResponse = await fetch('/create-razorpay-order', {
+                    const razorpayResponse = await fetch('/checkout/create-razorpay-order', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1274,7 +1274,7 @@
                                     document.getElementById('place-order-btn').disabled = true;
                                     document.getElementById('loading').style.display = 'block';
 
-                                    const verifyResponse = await fetch('/verify-payment', {
+                                    const verifyResponse = await fetch('/checkout/verify-payment', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -1297,7 +1297,7 @@
                                             window.location.href = verifyResult.redirectUrl;
                                         } else {
                                             console.error('No redirect URL provided in response');
-                                            window.location.href = `/payment-success/${verifyResult.orderId}`;
+                                            window.location.href = `/checkout/payment-success/${verifyResult.orderId}`;
                                         }
                                     } else {
                                         console.error('Payment verification failed:', verifyResult.message);
@@ -1305,7 +1305,7 @@
                                     }
                                 } catch (error) {
                                     console.error('Payment verification error:', error);
-                                    window.location.href = `/payment-failure?error=${encodeURIComponent(error.message)}`;
+                                    window.location.href = `/checkout/payment-failure?error=${encodeURIComponent(error.message)}`;
                                 }
                             },
                             modal: {
@@ -1328,7 +1328,7 @@
                             
                             try {
                                 // Call backend to handle payment failure and create failed order record
-                                const failureResponse = await fetch('/handle-payment-failure', {
+                                const failureResponse = await fetch('/checkout/handle-payment-failure', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -1346,12 +1346,12 @@
                                     window.location.href = failureResult.redirectUrl;
                                 } else {
                                     // Fallback to basic failure page
-                                    window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description)}`;
+                                    window.location.href = `/checkout/payment-failure?error=${encodeURIComponent(response.error.description)}`;
                                 }
                             } catch (error) {
                                 console.error('Error handling payment failure:', error);
                                 // Fallback to basic failure page
-                                window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description)}`;
+                                window.location.href = `/checkout/payment-failure?error=${encodeURIComponent(response.error.description)}`;
                             }
                         });
 

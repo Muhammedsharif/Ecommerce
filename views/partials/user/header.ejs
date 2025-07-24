@@ -47,11 +47,11 @@
                     </button>
                     <div id="dropdownContent" class="dropdown-content">
                         <a href="/profile">Profile</a>
-                        <a href="/logout">Logout</a>
+                        <a href="/auth/logout">Logout</a>
                     </div>
                 </div>
                 <% } else { %>
-                <a href="/login" class="nav-icon" style="text-decoration: none;" title="Login">
+                <a href="/auth/login" class="nav-icon" style="text-decoration: none;" title="Login">
                     <i class="fas fa-sign-in-alt"></i> login
                 </a>
                 <% } %>
@@ -76,6 +76,11 @@
         function toggleDropdown() {
             const dropdown = document.getElementById("dropdownContent");
             dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        function toggleMobileNav() {
+            const mobileNav = document.getElementById("mobileNav");
+            mobileNav.classList.toggle("show");
         }
 
         // Close dropdown when clicking outside
@@ -156,7 +161,7 @@
         // Load cart count on page load
         async function loadCartCount() {
             try {
-                const response = await fetch('/cart-count');
+                const response = await fetch('/cart/count');
                 const data = await response.json();
                 if (data.success) {
                     updateCartCounter(data.cartCount);
@@ -169,7 +174,7 @@
         // Load wishlist count on page load
         async function loadWishlistCount() {
             try {
-                const response = await fetch('/wishlist-count');
+                const response = await fetch('/wishlist/count');
                 const data = await response.json();
                 if (data.success) {
                     updateWishlistCounter(data.wishlistCount);

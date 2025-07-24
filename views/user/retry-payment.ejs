@@ -481,7 +481,7 @@
                 <i class="fas fa-credit-card"></i>
                 Pay Now
             </button>
-            <a href="/order-details/<%= order.orderId %>" class="btn btn-secondary">
+            <a href="/orders/details/<%= order._id %>" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i>
                 Back to Order
             </a>
@@ -547,7 +547,7 @@
                 showLoading();
 
                 // Get retry payment order details
-                const response = await fetch('/retry-payment', {
+                const response = await fetch('/checkout/retry-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -578,7 +578,7 @@
                             showLoading();
 
                             // Verify payment
-                            const verifyResponse = await fetch('/verify-payment', {
+                            const verifyResponse = await fetch('/checkout/verify-payment', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -605,7 +605,7 @@
                                         window.location.href = verifyResult.redirectUrl;
                                     } else {
                                         console.error('No redirect URL provided in response');
-                                        window.location.href = `/payment-success/${verifyResult.orderId}`;
+                                        window.location.href = `/checkout/payment-success/${verifyResult.orderId}`;
                                     }
                                 }, 1500);
                             } else {

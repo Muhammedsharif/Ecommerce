@@ -769,7 +769,7 @@ img[src*="data:"] {
             </div>
 
             <div class="form-body">
-                <form method="post" action="/admin/addProducts" enctype="multipart/form-data" id="productForm">
+                <form method="post" action="/admin/products/add" enctype="multipart/form-data" id="productForm">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="product_name" class="form-label" >
@@ -1083,7 +1083,7 @@ img[src*="data:"] {
                         }
                     });
 
-                    const response = await fetch('/admin/addProducts', {
+                    const response = await fetch('/admin/products/add', {
                         method: 'POST',
                         body: formData
                     });

@@ -4,21 +4,21 @@ const bcrypt = require("bcrypt")
 
 
 const pageerror = async (req, res) => {
-    res.render("admin-error")
+    res.render("pageerror")
 }
 
 
 
 const loadLogin = async (req, res) => {
-
     const error = req.query.message;
-const email = req.query.email;
-const password = req.query.password;1
+    const email = req.query.email;
+    const password = req.query.password;
+    
     if(req.session.admin){
         return res.redirect("/admin/dashboard");
     }
  
-    res.render("adminlogin",{  error, email,password })
+    res.render("adminlogin", { error, email, password })
 }
 
 const login = async (req, res) => {
@@ -54,7 +54,7 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.log("Login error", error);
-        return res.redirect("/pageerror");
+        return res.redirect("/admin/pageerror");
     }
 };
 
@@ -63,9 +63,9 @@ const loadDashboard = async (req,res) =>{
     if(req.session.admin){
         try {
             // Redirect to the new dashboard controller
-            res.redirect("/admin/dashboard-analytics");
+            res.redirect("/admin/dashboard/analytics");
         } catch (error) {
-            res.redirect("/pageerror");
+            res.redirect("/admin/pageerror");
         }
     }
 }
@@ -80,13 +80,13 @@ const logout = async (req, res) => {
         req.session.save((err) => {
             if (err) {
                 console.log("Error in logout", err);
-                return res.redirect("/pageerror");
+                return res.redirect("/admin/pageerror");
             }
             res.redirect("/admin/login");
         });
     } catch (error) {
         console.log("Error in logout", error);
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 }
 

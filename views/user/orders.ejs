@@ -448,7 +448,7 @@
                     <i class="fas fa-shopping-bag"></i>
                     My Orders
                 </h1>
-                <a href="/Profile" class="back-btn">
+                <a href="/profile" class="back-btn">
                     <i class="fas fa-arrow-left"></i>
                     Back to Profile
                 </a>
@@ -555,13 +555,13 @@
 
                             <div class="order-actions">
                                 <% if (order.paymentStatus === 'Failed' || (order.paymentMethod === 'ONLINE' && order.paymentStatus === 'Pending')) { %>
-                                    <a href="/retry-payment/<%= order.orderId %>" class="btn btn-danger">
+                                    <a href="/checkout/retry-payment/<%= order.orderId %>" class="btn btn-danger">
                                         <i class="fas fa-redo"></i>
                                         Retry Payment
                                     </a>
                                 <% } else if (order.status !== 'Cancelled') { %>
                                     <% if (order.status === 'Delivered') { %>
-                                        <a href="/download-invoice/<%= order.orderId %>" class="btn btn-success" target="_blank">
+                                        <a href="/orders/download-invoice/<%= order.orderId %>" class="btn btn-success" target="_blank">
                                             <i class="fas fa-file-pdf"></i>
                                             Invoice
                                         </a>
@@ -572,7 +572,7 @@
                                         </button>
                                     <% } %>
                                 <% } %>
-                                <a href="/order-details/<%= order._id %>" class="btn btn-outline">
+                                <a href="/orders/details/<%= order._id %>" class="btn btn-outline">
                                     <i class="fas fa-eye"></i>
                                     View Details
                                 </a>
@@ -674,7 +674,7 @@
                     requestBody.cancellationReason = cancellationReason;
                 }
 
-                const response = await fetch('/cancel-order', {
+                const response = await fetch('/orders/cancel', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -776,7 +776,7 @@
                     return;
                 }
 
-                const response = await fetch('/return-order', {
+                const response = await fetch('/orders/return', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

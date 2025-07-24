@@ -299,8 +299,16 @@ body {
 }
 
 .btn-info {
-    background: #17a2b8;
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
     color: white;
+    border: none;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #00bcd4 0%, #2196f3 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 210, 255, 0.4);
 }
 
 /* Usage Information Styles */
@@ -463,7 +471,7 @@ body {
             <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-ticket-alt"></i> Coupon Management</h1>
-                <a href="/admin/add-coupon" class="add-btn">
+                <a href="/admin/coupons/add" class="add-btn">
                     <i class="fas fa-plus"></i> Add New Coupon
                 </a>
             </div>
@@ -582,7 +590,7 @@ body {
                                                     class="btn btn-sm btn-info">
                                                 <i class="fas fa-chart-bar"></i> Usage
                                             </button>
-                                            <a href="/admin/edit-coupon?id=<%= coupon._id %>" 
+                                            <a href="/admin/coupons/edit?id=<%= coupon._id %>" 
                                                class="btn btn-sm btn-edit">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
@@ -601,7 +609,7 @@ body {
                         <i class="fas fa-ticket-alt"></i>
                         <h3>No Coupons Found</h3>
                         <p>No coupons match your search criteria. Try adjusting your filters or create a new coupon.</p>
-                        <a href="/admin/add-coupon" class="btn btn-primary">
+                        <a href="/admin/coupons/add" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Create First Coupon
                         </a>
                     </div>
@@ -645,7 +653,7 @@ body {
         // View usage details function
         async function viewUsageDetails(couponId, couponName) {
             try {
-                const response = await fetch(`/admin/coupon-usage/${couponId}`);
+                const response = await fetch(`/admin/coupons/usage/${couponId}`);
                 const result = await response.json();
 
                 if (result.success) {
@@ -781,7 +789,7 @@ body {
 
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`/admin/delete-coupon/${couponId}`, {
+                    const response = await fetch(`/admin/coupons/delete/${couponId}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',

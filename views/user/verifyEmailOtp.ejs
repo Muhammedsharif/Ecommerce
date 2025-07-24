@@ -186,7 +186,7 @@
     </style>
 </head>
 <body>
-    <a href="/change-password" class="back-link">
+    <a href="/profile/change-password" class="back-link">
         <i class="fas fa-arrow-left"></i> Back to Settings
     </a>
 
@@ -218,7 +218,7 @@
             </div>
         <% } %>
 
-        <form id="otpForm" method="POST" action="/verify-email-otp">
+        <form id="otpForm" method="POST" action="/profile/verify-email-otp">
             <input type="hidden" name="newEmail" value="<%= newEmail %>">
             
             <div class="otp-input-group">
@@ -292,7 +292,7 @@
             const newEmail = '<%= newEmail %>';
             
             try {
-                const response = await fetch('/send-email-otp', {
+                const response = await fetch('/profile/send-email-otp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

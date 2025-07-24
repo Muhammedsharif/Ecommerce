@@ -7,8 +7,7 @@ const morgan=require("morgan")
 const session=require("express-session") // Session management
 const passport = require('./config/passport'); // Authentication configuration
 const db=require("./config/db") // Database connection
-const userRouter=require("./routes/userRouter") // User-facing routes
-const adminRouter=require("./routes/adminRouter") // Admin panel routes
+const { registerRoutes } = require("./routes/index") // Central route registration
 const addWishlistCount = require('./middlewares/wishlistCount') // Middleware for wishlist count
 db() // Initialize database connection
 
@@ -16,7 +15,7 @@ db() // Initialize database connection
 // Middleware configuration
 app.use(express.json()) // Parse JSON request bodies
 app.use(express.urlencoded({extended:true})) // Parse URL-encoded request bodies
-app.use(morgan("combined"))
+// app.use(morgan("combined"))
 // Session configuration for user authentication
 app.use(session({
     secret:process.env.SESSION_SECRET,
@@ -50,8 +49,8 @@ app.set("views", [
 app.use(express.static('public'));
 
 
-app.use("/",userRouter)
-app.use("/admin",adminRouter)
+// Register all routes through central routing system
+registerRoutes(app)
 
 const PORT =process.env.PORT || 3000
 app.listen(PORT,()=>console.log(`Server running at ${PORT}`))

@@ -889,7 +889,7 @@
                     <h1><i class="fas fa-box-open me-3"></i>Product Management</h1>
                     <p class="mb-0">Manage your product inventory and listings with style</p>
                 </div>
-                <a href="/admin/addProducts" class="add-product-btn">
+                <a href="/admin/products/add" class="add-product-btn">
                     <i class="fas fa-plus"></i>Add New Product
                 </a>
             </div>
@@ -1052,18 +1052,18 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <a href="/admin/editProduct?id=<%= data[i]._id %>" class="action-btn btn-edit">
+                        <a href="/admin/products/edit?id=<%= data[i]._id %>" class="action-btn btn-edit">
                             <i class="fas fa-edit"></i>Edit
                         </a>
                         <button onclick="deleteProduct('<%= data[i]._id %>')" class="action-btn btn-delete">
                             <i class="fas fa-trash"></i>Delete
                         </button>
                         <% if (data[i].isBlocked) { %>
-                            <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="action-btn btn-unblock">
+                            <a href="/admin/products/unblock?id=<%= data[i]._id %>" class="action-btn btn-unblock">
                                 <i class="fas fa-check"></i>Unblock
                             </a>
                         <% } else { %>
-                            <a href="/admin/blockProduct?id=<%= data[i]._id %>" class="action-btn btn-block">
+                            <a href="/admin/products/block?id=<%= data[i]._id %>" class="action-btn btn-block">
                                 <i class="fas fa-ban"></i>Block
                             </a>
                         <% } %>
@@ -1080,7 +1080,7 @@
                         <i class="fas fa-box-open"></i>
                         <h4>No Products Found</h4>
                         <p>Add your first product to get started</p>
-                        <a href="/admin/addProducts" class="add-product-btn">
+                        <a href="/admin/products/add" class="add-product-btn">
                             <i class="fas fa-plus"></i>Add Product
                         </a>
                     </div>
@@ -1157,7 +1157,7 @@ function deleteProduct(productId) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/admin/deleteProduct/${productId}`, {
+            fetch(`/admin/products/delete/${productId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

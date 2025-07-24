@@ -666,7 +666,7 @@
         <!-- Order Actions -->
         <div class="order-actions">
             <% if (order.paymentStatus === 'Failed' || (order.paymentMethod === 'ONLINE' && order.paymentStatus === 'Pending')) { %>
-                <a href="/retry-payment/<%= order.orderId %>" class="btn btn-danger">
+                <a href="/checkout/retry-payment/<%= order.orderId %>" class="btn btn-danger">
                     <i class="fas fa-redo"></i>
                     Retry Payment
                 </a>
@@ -787,7 +787,7 @@
                     requestBody.cancellationReason = cancellationReason;
                 }
 
-                const response = await fetch('/cancel-order', {
+                const response = await fetch('/orders/cancel', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -841,7 +841,7 @@
                     return;
                 }
 
-                const response = await fetch('/return-order', {
+                const response = await fetch('/orders/return', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1054,7 +1054,7 @@
         // Helper function to process return all items
         async function processReturnAllItems(orderId, returnReason) {
             try {
-                const response = await fetch('/return-all-items', {
+                const response = await fetch('/orders/return-all-items', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1084,7 +1084,7 @@
         // Helper function to process cancel item
         async function processCancelItem(orderId, itemId, cancellationReason) {
             try {
-                const response = await fetch('/cancel-item', {
+                const response = await fetch('/orders/cancel-item', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1126,6 +1126,9 @@
                             }
                         }
                     });
+                    
+                    // Update the payment section with recalculated totals
+                    await updatePaymentSection(orderId);
                 } else {
                     showToast(result.message || 'Failed to submit cancel request', 'error');
                 }
@@ -1138,7 +1141,7 @@
         // Helper function to process return item
         async function processReturnItem(orderId, itemId, returnReason) {
             try {
-                const response = await fetch('/return-item', {
+                const response = await fetch('/orders/return-item', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1193,7 +1196,7 @@
         // Helper function to process cancel all items
         async function processCancelAllItems(orderId, cancellationReason) {
             try {
-                const response = await fetch('/cancel-all-items', {
+                const response = await fetch('/orders/cancel-all-items', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1269,7 +1272,7 @@
                     this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
                     // Get retry payment order details
-                    const response = await fetch('/retry-payment', {
+                    const response = await fetch('/checkout/retry-payment', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -1296,7 +1299,7 @@
                         handler: async function(response) {
                             try {
                                 // Verify payment
-                                const verifyResponse = await fetch('/verify-payment', {
+                                const verifyResponse = await fetch('/checkout/verify-payment', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -1320,7 +1323,7 @@
                                             window.location.href = verifyResult.redirectUrl;
                                         } else {
                                             console.error('No redirect URL provided in response');
-                                            window.location.href = `/payment-success/${verifyResult.orderId}`;
+                                            window.location.href = `/checkout/payment-success/${verifyResult.orderId}`;
                                         }
                                     }, 1500);
                                 } else {
@@ -1659,3 +1662,76 @@
 
 </body>
 </html>
+
+<script>
+// Function to update payment section with recalculated totals
+async function updatePaymentSection(orderId) {
+    try {
+        const response = await fetch(`/orders/get-updated-totals/${orderId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Update the order summary section
+            const summaryRows = document.querySelectorAll('.summary-row');
+            
+            // Update subtotal
+            const subtotalRow = summaryRows[0];
+            if (subtotalRow) {
+                const subtotalValue = subtotalRow.querySelector('.summary-value');
+                if (subtotalValue) {
+                    subtotalValue.textContent = `₹${Math.round(result.totals.subtotal).toLocaleString()}`;
+                }
+            }
+
+            // Update coupon discount
+            const discountRow = summaryRows[2]; // Third row is discount
+            if (discountRow) {
+                const discountValue = discountRow.querySelector('.summary-value');
+                const discountLabel = discountRow.querySelector('.summary-label');
+                if (discountValue && discountLabel) {
+                    if (result.totals.couponDiscount > 0) {
+                        discountValue.textContent = `-₹${result.totals.couponDiscount.toLocaleString()}`;
+                        discountValue.style.color = '#28a745';
+                        if (result.totals.couponCode) {
+                            discountLabel.innerHTML = `Coupon Discount (${result.totals.couponCode})`;
+                        } else {
+                            discountLabel.textContent = 'Coupon Discount';
+                        }
+                    } else {
+                        discountValue.textContent = '0';
+                        discountValue.style.color = '';
+                        discountLabel.textContent = 'Discount';
+                    }
+                }
+            }
+
+            // Update total
+            const totalRow = summaryRows[3]; // Fourth row is total
+            if (totalRow) {
+                const totalValue = totalRow.querySelector('.summary-value');
+                if (totalValue) {
+                    totalValue.textContent = `₹${Math.round(result.totals.finalAmount).toLocaleString()}`;
+                }
+            }
+
+            // Update the total amount in the order header
+            const headerTotalValue = document.querySelector('.order-info-grid .info-card:last-child .info-value');
+            if (headerTotalValue) {
+                headerTotalValue.textContent = `₹${Math.round(result.totals.finalAmount).toLocaleString()}`;
+            }
+
+            console.log('Payment section updated successfully');
+        } else {
+            console.error('Failed to get updated totals:', result.message);
+        }
+    } catch (error) {
+        console.error('Error updating payment section:', error);
+    }
+}
+</script>

@@ -3,195 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Categories Management - 1NOTONE Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/admin/category.css">
-    <style>
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        .btn-delete:hover {
-            background: #dc2626;
-            color: white;
-            text-decoration: none;
-        }
-        .action-buttons-container {
-            display: flex;
-            gap: 8px;
-        }
-    </style>
 </head>
 <body>
-     <%- include("../partials/admin/header") %>
-     <nav class="breadcrumb-nav" aria-label="breadcrumb" style="margin-bottom: 20px;">
-        <ol class="breadcrumb" style="display: flex; list-style: none; padding: 0; font-size: 14px;">
-            <li class="breadcrumb-item">
-                <a href="/admin/dashboard" style="text-decoration: none; color: #007bff;">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-            </li>
-            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
-            <li class="breadcrumb-separator" style="margin: 0 5px;">/</li>
-            <li class="breadcrumb-item active" style="color: #6c757d;">
-                 Category
-            </li>
-        </ol>
-    </nav>
-    <div class="container">
-        <!-- Header Section -->
-        <div class="header">
+    <%- include("../partials/admin/header") %>
+    
+    <!-- Enhanced Breadcrumb Navigation -->
+    <div class="breadcrumb-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/admin/dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-separator">/</li>
+                <li class="breadcrumb-item active">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                </li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
             <div class="header-content">
-                <div class="header-left">
-                    <h1>Categories Management</h1>
-                    <p>Manage your content categories with ease</p>
+                <div class="header-info">
+                    <h1 class="page-title">
+                        <i class="fas fa-tags"></i>
+                        Categories Management
+                    </h1>
+                    <p class="page-subtitle">Organize and manage your product categories efficiently</p>
                 </div>
-                <button class="btn-add" onclick="showAddModal()">
-                    <i class="fas fa-plus"></i>
-                    Add New Category
-                </button>
-            </div>
-            
-        </div>
-        
-            <!-- Search Section -->
-            <div class="search-container">
-                <form action="/admin/category/" method="get" class="search-wrapper">
-                    <input type="text" class="search-input" placeholder="Search categories..." name="search" value="<%=search%>">
-                    <button type="submit" class="search-btn">
-                        <i class="fas fa-search"></i>
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="showAddModal()">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Category</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= cat.length %></h3>
+                    <p>Total Categories</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= cat.filter(c => c.isListed).length %></h3>
+                    <p>Active Categories</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon offers">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= cat.filter(c => c.categoryOffer && c.categoryOffer > 0).length %></h3>
+                    <p>With Offers</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon inactive">
+                    <i class="fas fa-eye-slash"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= cat.filter(c => !c.isListed).length %></h3>
+                    <p>Inactive Categories</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="controls-section">
+            <div class="search-container">
+                <form action="/admin/category/" method="get" class="search-form">
+                    <div class="search-input-group">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search categories by name or description..." name="search" value="<%=search%>">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </form>
             </div>
+        </div>
 
-        <!-- Main Content -->
-        <div class="main-card">
+        <!-- Categories Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3>
+                    <i class="fas fa-list"></i>
+                    Categories List
+                </h3>
+                <div class="table-actions">
+                    <span class="results-count">Showing <%= cat.length %> categories</span>
+                </div>
+            </div>
+            
             <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Category Name</th>
-                            <th>Description</th>
-                            <th>Offer Price</th>
-                            <th>Offer Actions</th>
-                            <th>Status</th>
-                            <th>List/Unlist</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                      
-                        <!-- Add more sample rows or replace with your EJS loop -->
-                        <%cat.reverse().forEach((category,index)=>{ %>
-                        <tr>
-                            <td>
-                                <div class="category-name"><%=category.name%></div>
-                            </td>
-                            <td>
-                                <div class="category-description"><%=category.description%></div>
-                            </td>
-                            <td>
-                                <% if (category.categoryOffer && category.categoryOffer > 0) { %>
-                                    <span style="color: #e74c3c; font-weight: 600;"><%= category.categoryOffer %>% OFF</span>
-                                <% } else { %>
-                                    <span style="color: #64748b;">No Offer</span>
-                                <% } %>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="#" class="btn btn-offer" onclick="openOfferModal('<%= category._id %>', '<%= category.name %>', <%= category.categoryOffer || 0 %>)">
-                                        <i class="fas fa-tag"></i>
-                                        <% if (category.categoryOffer && category.categoryOffer > 0) { %>
-                                            Edit Offer
+                <% if (cat.length > 0) { %>
+                    <table class="categories-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <i class="fas fa-tag"></i>
+                                    Category
+                                </th>
+                                <th>
+                                    <i class="fas fa-align-left"></i>
+                                    Description
+                                </th>
+                                <th>
+                                    <i class="fas fa-percentage"></i>
+                                    Offer
+                                </th>
+                                <th>
+                                    <i class="fas fa-cog"></i>
+                                    Offer Actions
+                                </th>
+                                <th>
+                                    <i class="fas fa-info-circle"></i>
+                                    Status
+                                </th>
+                                <th>
+                                    <i class="fas fa-toggle-on"></i>
+                                    Visibility
+                                </th>
+                                <th>
+                                    <i class="fas fa-tools"></i>
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% cat.reverse().forEach((category, index) => { %>
+                                <tr class="category-row" data-category-id="<%= category._id %>">
+                                    <td>
+                                        <div class="category-info">
+                                            <div class="category-name"><%= category.name %></div>
+                                            
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="description-cell">
+                                            <p class="description-text"><%= category.description %></p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="offer-display">
+                                            <% if (category.categoryOffer && category.categoryOffer > 0) { %>
+                                                <span class="offer-badge active">
+                                                    <i class="fas fa-tag"></i>
+                                                    <%= category.categoryOffer %>% OFF
+                                                </span>
+                                            <% } else { %>
+                                                <span class="offer-badge inactive">
+                                                    <i class="fas fa-minus"></i>
+                                                    No Offer
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="offer-actions">
+                                            <button class="action-btn offer-btn" onclick="openOfferModal('<%= category._id %>', '<%= category.name %>', <%= category.categoryOffer || 0 %>)">
+                                                <i class="fas fa-<%= category.categoryOffer && category.categoryOffer > 0 ? 'edit' : 'plus' %>"></i>
+                                                <%= category.categoryOffer && category.categoryOffer > 0 ? 'Edit' : 'Add' %>
+                                            </button>
+                                            <% if (category.categoryOffer && category.categoryOffer > 0) { %>
+                                                <button class="action-btn remove-btn" onclick="removeOffer('<%= category._id %>', '<%= category.name %>')">
+                                                    <i class="fas fa-times"></i>
+                                                    Remove
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <% if (category.isListed) { %>
+                                            <span class="status-badge active">
+                                                <i class="fas fa-check-circle"></i>
+                                                Active
+                                            </span>
                                         <% } else { %>
-                                            Add Offer
+                                            <span class="status-badge inactive">
+                                                <i class="fas fa-times-circle"></i>
+                                                Inactive
+                                            </span>
                                         <% } %>
-                                    </a>
-                                    <% if (category.categoryOffer && category.categoryOffer > 0) { %>
-                                        <a href="#" class="btn btn-remove" onclick="removeOffer('<%= category._id %>', '<%= category.name %>')">
-                                            <i class="fas fa-times"></i>
-                                            Remove
-                                        </a>
-                                    <% } %>
-                                </div>
-                            </td>
-                            <td>
-                                <%if(category.isListed){%>
-                                <span class="status-badge status-listed">
-                                    <i class="fas fa-check-circle"></i>
-                                    Listed
-                                </span>
-                                <%}else{%>
-                                <span class="status-badge status-unlisted">
-                                    <i class="fas fa-times-circle"></i>
-                                    Unlisted
-                                </span>
-                                <%}%>
-
-                            </td>
-                            <td>
-                                <%if(category.isListed){%>
-                                <div class="action-buttons">
-                                    <button onclick="confirmUnlist('<%=category._id%>', '<%=category.name%>')" class="btn btn-unlist">
-                                        <i class="fas fa-eye-slash"></i>
-                                        Unlist
-                                    </button>
-                                    <%}else{%>
-                                    <button onclick="confirmList('<%=category._id%>', '<%=category.name%>')" class="btn btn-list">
-                                        <i class="fas fa-eye"></i>
-                                        List
-                                    </button>
-                                    <%}%>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="action-buttons-container">
-                                    <button onclick="showEditModal('<%=category._id%>', '<%=category.name%>', '<%=category.description%>')" class="btn btn-edit">
-                                        <i class="fas fa-edit"></i>
-                                        Edit
-                                    </button>
-                                    <button onclick="deleteCategory('<%=category._id%>', '<%=category.name%>')" class="btn-delete">
-                                        <i class="fas fa-trash"></i>
-                                        Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <%})%>
-                    </tbody>
-                </table>
+                                    </td>
+                                    <td>
+                                        <div class="visibility-toggle">
+                                            <% if (category.isListed) { %>
+                                                <button class="toggle-btn unlist" onclick="confirmUnlist('<%= category._id %>', '<%= category.name %>')">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                    Hide
+                                                </button>
+                                            <% } else { %>
+                                                <button class="toggle-btn list" onclick="confirmList('<%= category._id %>', '<%= category.name %>')">
+                                                    <i class="fas fa-eye"></i>
+                                                    Show
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn edit-btn" onclick="showEditModal('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')">
+                                                <i class="fas fa-edit"></i>
+                                                Edit
+                                            </button>
+                                            <button class="action-btn delete-btn" onclick="deleteCategory('<%= category._id %>', '<%= category.name %>')">
+                                                <i class="fas fa-trash"></i>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <h3>No Categories Found</h3>
+                        <p>Get started by creating your first category</p>
+                        <button class="btn-primary" onclick="showAddModal()">
+                            <i class="fas fa-plus"></i>
+                            Add First Category
+                        </button>
+                    </div>
+                <% } %>
             </div>
 
-            <!-- Pagination -->
-            <div class="pagination">
-               
-                
-               
-                <% if (currentPage > 1) { %>
-                    <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
-                <% } %>
-                <% for (let i = 1; i <= totalPages; i++) { %>
-                    <% if (i === currentPage) { %>
-                        <span class="current-page"><%= i %></span>
-                    <% } else { %>
-                        <a href="?page=<%= i %>"><%= i %></a>
-                    <% } %>
-                <% } %>
-                <% if (currentPage < totalPages) { %>
-                    <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
-                <% } %>
-               
-            </div>
+            <!-- Enhanced Pagination -->
+            <% if (totalPages > 1) { %>
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        <span>Page <%= currentPage %> of <%= totalPages %></span>
+                    </div>
+                    <div class="pagination-controls">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=1&search=<%= search %>" class="page-btn first">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                            <a href="?page=<%= currentPage - 1 %>&search=<%= search %>" class="page-btn prev">
+                                <i class="fas fa-angle-left"></i>
+                                Previous
+                            </a>
+                        <% } %>
+                        
+                        <div class="page-numbers">
+                            <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                                <% if (i === currentPage) { %>
+                                    <span class="page-number active"><%= i %></span>
+                                <% } else { %>
+                                    <a href="?page=<%= i %>&search=<%= search %>" class="page-number"><%= i %></a>
+                                <% } %>
+                            <% } %>
+                        </div>
+                        
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>&search=<%= search %>" class="page-btn next">
+                                Next
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="?page=<%= totalPages %>&search=<%= search %>" class="page-btn last">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            <% } %>
         </div>
     </div>
 
@@ -352,7 +455,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/admin/deleteCategory`, {
+                    fetch(`/admin/category/delete`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json'
@@ -413,7 +516,7 @@
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch(`/admin/listCategory?id=${categoryId}`, {
+                        const response = await fetch(`/admin/category/list?id=${categoryId}`, {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json'
@@ -464,7 +567,7 @@
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch(`/admin/unlistCategory?id=${categoryId}`, {
+                        const response = await fetch(`/admin/category/unlist?id=${categoryId}`, {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json'
@@ -551,7 +654,7 @@
             const name = document.getElementsByName("name")[0].value.trim();
             const description = document.getElementById("descriptionId").value.trim();
             
-            fetch("/admin/addCategory", {
+            fetch("/admin/category/add", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -611,7 +714,7 @@
             const categoryName = document.getElementById("editCategoryName").value.trim();
             const description = document.getElementById("editCategoryDescription").value.trim();
             
-            fetch(`/admin/editCategory/${categoryId}`, {
+            fetch(`/admin/category/edit/${categoryId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

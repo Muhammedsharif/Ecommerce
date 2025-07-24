@@ -746,7 +746,7 @@
         // View return request details
         function viewReturnRequest(orderId) {
             // Reuse the existing order details modal functionality
-            fetch(`/admin/order-details/${orderId}`)
+            fetch(`/admin/orders/details/${orderId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -813,7 +813,7 @@
                     });
 
                     // Call backend API
-                    fetch('/admin/approve-return-request', {
+                    fetch('/admin/orders/approve-return-request', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -879,7 +879,7 @@
                     });
 
                     // Call backend API
-                    fetch('/admin/approve-return-request', {
+                    fetch('/admin/orders/approve-return-request', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -953,7 +953,7 @@
                     });
 
                     // Call backend API
-                    fetch('/admin/reject-return-request', {
+                    fetch('/admin/orders/reject-return-request', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1030,7 +1030,7 @@
                     });
 
                     // Call backend API
-                    fetch('/admin/reject-return-request', {
+                    fetch('/admin/orders/reject-return-request', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

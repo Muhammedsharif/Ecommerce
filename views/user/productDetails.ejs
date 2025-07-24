@@ -1639,7 +1639,7 @@
 
                     for (let i = 0; i < quantity; i++) {
                         try {
-                            const response = await fetch("/add-to-cart", {
+                            const response = await fetch("/cart/add", {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json"
@@ -1708,7 +1708,7 @@
                     return;
                 }
 
-                fetch('/addToWishlist', {
+                fetch('/wishlist/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

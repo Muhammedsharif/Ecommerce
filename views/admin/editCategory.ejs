@@ -47,7 +47,7 @@
                 </div>
             <% } %>
 
-            <form id="editCategoryForm" method="patch" action="/admin/editCategory/<%=category._id%>">
+            <form id="editCategoryForm" method="patch" action="/admin/category/edit/<%=category._id%>">
                 <div class="form-group">
                     <label for="categoryName">Category Name *</label>
                     <input type="text" id="categoryName" name="categoryName" value="<%=category.name%>" required

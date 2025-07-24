@@ -194,7 +194,7 @@
 
             <div class="menu-section">
                 <h4>Account</h4>
-                <a href="/Profile" class="menu-item <%= (typeof page !== 'undefined' && page === 'profile') ? 'active' : '' %>" data-page="profile">
+                <a href="/profile" class="menu-item <%= (typeof page !== 'undefined' && page === 'profile') ? 'active' : '' %>" data-page="profile">
                     <span class="menu-icon">👤</span>
                     My Profile
                 </a>
@@ -222,19 +222,16 @@
 
             <div class="menu-section">
                 <h4>Settings</h4>
-                <a href="/change-password" class="menu-item <%= (typeof page !== 'undefined' && page === 'password') ? 'active' : '' %>" data-page="password">
+                <a href="/profile/change-password" class="menu-item <%= (typeof page !== 'undefined' && page === 'password') ? 'active' : '' %>" data-page="password">
                     <span class="menu-icon">🔒</span>
                     Account Security
                 </a>
-                <a href="/referral" class="menu-item <%= (typeof page !== 'undefined' && page === 'referral') ? 'active' : '' %>" data-page="referral">
+                <a href="/profile/referral" class="menu-item <%= (typeof page !== 'undefined' && page === 'referral') ? 'active' : '' %>" data-page="referral">
                     <span class="menu-icon">🎁</span>
                     Referral Code
                 </a>
-                <a href="/coupons" class="menu-item <%= (typeof page !== 'undefined' && page === 'coupons') ? 'active' : '' %>" data-page="coupons">
-                    <span class="menu-icon">🎫</span>
-                    My Coupons
-                </a>
-                <a href="/logout" class="menu-item logout-item" style="color: #e74c3c;">
+                
+                <a href="/auth/logout" class="menu-item logout-item" style="color: #e74c3c;">
                     <span class="menu-icon">🚪</span>
                     Log out
                 </a>
@@ -285,20 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle logout confirmation
-    const logoutItem = document.querySelector('.logout-item');
-    if (logoutItem) {
-        logoutItem.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            if (confirm('Are you sure you want to log out?')) {
-                // Clear any stored page data
-                localStorage.removeItem('lastVisitedPage');
-                // Proceed with logout
-                window.location.href = this.getAttribute('href');
-            }
-        });
-    }
+   
 });
 </script>
 

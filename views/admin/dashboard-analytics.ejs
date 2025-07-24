@@ -487,7 +487,7 @@
                                 <i class="fas fa-tags"></i>
                                 <span>Categories</span>
                             </a>
-                            <a href="/admin/users" class="nav-btn customers-btn">
+                            <a href="/admin/customers" class="nav-btn customers-btn">
                                 <i class="fas fa-users"></i>
                                 <span>Customers</span>
                             </a>
@@ -653,7 +653,7 @@
         async function loadDashboardStats() {
             try {
                 console.log('Loading dashboard stats...');
-                const response = await fetch('/admin/dashboard-analytics/stats');
+                const response = await fetch('/admin/dashboard/analytics/stats');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -674,7 +674,7 @@
         async function loadSalesChart(period) {
             try {
                 console.log(`Loading sales chart for period: ${period}`);
-                const response = await fetch(`/admin/dashboard-analytics/sales-chart?period=${period}`);
+                const response = await fetch(`/admin/dashboard/analytics/sales-chart?period=${period}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -848,7 +848,7 @@
         // Load top products
         async function loadTopProducts() {
             try {
-                const response = await fetch('/admin/dashboard-analytics/top-products');
+                const response = await fetch('/admin/dashboard/analytics/top-products');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -863,7 +863,7 @@
         // Load top categories
         async function loadTopCategories() {
             try {
-                const response = await fetch('/admin/dashboard-analytics/top-categories');
+                const response = await fetch('/admin/dashboard/analytics/top-categories');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -939,7 +939,7 @@
                 if (status && status !== 'all') params.append('status', status);
                 if (customer) params.append('customer', customer);
                 
-                const response = await fetch(`/admin/dashboard-analytics/ledger?${params}`);
+                const response = await fetch(`/admin/dashboard/analytics/ledger?${params}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -980,7 +980,7 @@
                 downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Downloading...</span>';
                 downloadBtn.disabled = true;
                 
-                const response = await fetch(`/admin/dashboard-analytics/ledger?${params}`);
+                const response = await fetch(`/admin/dashboard/analytics/ledger?${params}`);
                 const data = await response.json();
                 
                 if (data.success) {

@@ -1378,7 +1378,7 @@
                         const originalText = button.innerHTML;
                         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
-                        const response = await fetch("/add-to-cart", {
+                        const response = await fetch("/cart/add", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
@@ -1486,7 +1486,7 @@ function hideToast() {
     }
 
     $.ajax({
-        url: '/addToWishlist',
+        url: '/wishlist/add',
             method: 'POST',
         data: { productId: productId },
         success: (response) => {

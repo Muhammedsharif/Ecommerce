@@ -25,7 +25,7 @@
         <a href="/auth/google" class="google-btn"><img src="https://img.icons8.com/color/16/google-logo.png" class="google-logo"/> Sign up with Google</a>
       </div>
       <div class="divider">– OR –</div>
-      <form  id="signform" action="/signup" method="POST">
+      <form  id="signform" action="/auth/signup" method="POST">
 
          <input type="text" name="name" id="name" placeholder="Full Name" value="<%= typeof name !== 'undefined' ? name : '' %>" />
         <div id="error1" class="error-message"></div>
@@ -55,7 +55,7 @@
     </div>
   <% } %>
         <button class="submit-btn" type="submit">Create Account</button>
-        <div class="login-link">Already have an account? <a href="/login">Log in</a></div>
+        <div class="login-link">Already have an account? <a href="/auth/login">Log in</a></div>
       </form>
       
     </div>

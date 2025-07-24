@@ -1142,7 +1142,7 @@ body {
         // Load categories from server
         async function loadCategories() {
             try {
-                const response = await fetch('/admin/get-categories');
+                const response = await fetch('/admin/coupons/categories');
                 const result = await response.json();
 
                 if (result.success) {
@@ -1157,7 +1157,7 @@ body {
         // Load products from server
         async function loadProducts() {
             try {
-                const response = await fetch('/admin/get-products');
+                const response = await fetch('/admin/coupons/products');
                 const result = await response.json();
 
                 if (result.success) {
@@ -1333,7 +1333,7 @@ body {
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch(`/admin/edit-coupon/${couponId}`, {
+                const response = await fetch(`/admin/coupons/edit/${couponId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1653,8 +1653,8 @@ body {
             tomorrow.setDate(tomorrow.getDate() + 1);
             
             // Get existing coupon dates
-            const existingStartDate = '<%= coupon.startDate ? coupon.startDate.toISOString().split("T")[0] : "" %>';
-            const existingExpireDate = '<%= coupon.expireOn.toISOString().split("T")[0] %>';
+            const existingStartDate = '<%= coupon.startDate ? new Date(coupon.startDate).toISOString().split("T")[0] : "" %>';
+            const existingExpireDate = '<%= coupon.expireOn ? new Date(coupon.expireOn).toISOString().split("T")[0] : "" %>';
             
             startCalendar = new CustomCalendar('startDate', 'startDateCalendar', {
                 minDate: today,

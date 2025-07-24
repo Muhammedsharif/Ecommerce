@@ -482,7 +482,7 @@ const processCheckout = async (req, res) => {
             success: true, 
             message: "Order placed successfully!",
             orderId: orderId,
-            redirectUrl: `/order-confirmation/${orderId}`
+            redirectUrl: `/checkout/confirmation/${orderId}`
         });
 
     } catch (error) {
@@ -501,7 +501,7 @@ const loadThankYou = async (req, res) => {
         const { orderId } = req.params;
 
         if (!userId) {
-            return res.redirect("/login");
+            return res.redirect("/auth/login");
         }
 
         // Find the order by orderId and userId for security
@@ -534,7 +534,7 @@ const loadThankYou = async (req, res) => {
         // Get user data
         const userData = await User.findById(userId);
         if (!userData) {
-            return res.redirect("/login");
+            return res.redirect("/auth/login");
         }
 
         res.render("thank-you", {

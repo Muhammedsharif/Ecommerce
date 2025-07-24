@@ -12,7 +12,7 @@ const userAuth =  (req,res,next) =>{
             }else{
                 // Only clear user session data, preserve admin session if exists
                 delete req.session.user;
-                res.redirect("/login")
+                res.redirect("/auth/login")
             }
         })
         .catch(error=>{
@@ -21,7 +21,7 @@ const userAuth =  (req,res,next) =>{
         })
     }else{
         // No user session found, redirect to login
-        res.redirect("/login")
+        res.redirect("/auth/login")
     }
 }
 

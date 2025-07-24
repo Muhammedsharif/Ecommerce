@@ -1154,7 +1154,7 @@
                             </div>
                             <div class="header-actions">
                                 <div class="notification-container">
-                                    <button class="notification-btn" onclick="window.location.href='/admin/return-requests'" title="Return Requests">
+                                    <button class="notification-btn" onclick="window.location.href='/admin/orders/return-requests'" title="Return Requests">
                                         <i class="fas fa-bell"></i>
                                         <% if (returnRequestCount > 0) { %>
                                             <span class="notification-badge" style="background:#dc3545;animation:pulse 1s infinite;"><%= returnRequestCount %></span>
@@ -1689,7 +1689,7 @@
             document.getElementById('orderDetailsModal').classList.add('show');
 
             // Fetch order details
-            fetch(`/admin/order-details/${orderId}`)
+            fetch(`/admin/orders/details/${orderId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1727,16 +1727,19 @@
             let activeItemsCount = 0;
             let cancelledItemsCount = 0;
 
-            order.orderedItems.forEach(item => {
-                const itemTotal = item.quantity * item.price;
-                if (item.status === 'Cancelled') {
-                    cancelledItemsSubtotal += itemTotal;
-                    cancelledItemsCount++;
-                } else {
-                    activeItemsSubtotal += itemTotal;
-                    activeItemsCount++;
-                }
-            });
+            // Safely handle orderedItems array
+            if (order.orderedItems && Array.isArray(order.orderedItems)) {
+                order.orderedItems.forEach(item => {
+                    const itemTotal = (item.quantity || 0) * (item.price || 0);
+                    if (item.status === 'Cancelled') {
+                        cancelledItemsSubtotal += itemTotal;
+                        cancelledItemsCount++;
+                    } else {
+                        activeItemsSubtotal += itemTotal;
+                        activeItemsCount++;
+                    }
+                });
+            }
 
             // Calculate proportional discount for active items
             const originalSubtotal = order.totalPrice || (activeItemsSubtotal + cancelledItemsSubtotal);
@@ -1802,7 +1805,7 @@
             summaryHtml += `
                 <div class="summary-row total">
                     <span>Total Amount:</span>
-                    <span>${formatCurrency(cancelledItemsCount > 0 ? adjustedFinalAmount : order.finalAmount)}</span>
+                    <span>${formatCurrency(order.finalAmount || 0)}</span>
                 </div>
             `;
 
@@ -1844,27 +1847,39 @@
             };
 
             let itemsHtml = '';
-            order.orderedItems.forEach(item => {
-                itemsHtml += `
-                    <div class="item-card">
-                        <img src="/uploads/product-images/${item.product.productImage[0]}"
-                             alt="${item.product.productName}"
-                             class="item-image"
-                             onerror="this.src='/uploads/placeholder.jpg'">
-                        <div class="item-details">
-                            <div class="item-name">${item.product.productName}</div>
-                            <div class="item-specs">
-                                Brand: ${item.product.brand} | Category: ${item.product.category}
-                                ${item.size ? ` | Size: ${item.size}` : ''}
-                                ${item.color ? ` | Color: ${item.color}` : ''}
-                            </div>
-                            <div class="item-price">
-                                Quantity: ${item.quantity} × ${formatCurrency(item.price)} = ${formatCurrency(item.quantity * item.price)}
+            if (order.orderedItems && Array.isArray(order.orderedItems)) {
+                order.orderedItems.forEach(item => {
+                    const product = item.product || {};
+                    const productImage = product.productImage && product.productImage[0] ? product.productImage[0] : 'placeholder.jpg';
+                    const productName = product.productName || 'Unknown Product';
+                    const brand = product.brand || 'Unknown Brand';
+                    const category = product.category || 'Unknown Category';
+                    const quantity = item.quantity || 0;
+                    const price = item.price || 0;
+                    
+                    itemsHtml += `
+                        <div class="item-card">
+                            <img src="/uploads/product-images/${productImage}"
+                                 alt="${productName}"
+                                 class="item-image"
+                                 onerror="this.src='/uploads/placeholder.jpg'">
+                            <div class="item-details">
+                                <div class="item-name">${productName}</div>
+                                <div class="item-specs">
+                                    Brand: ${brand} | Category: ${category}
+                                    ${item.size ? ` | Size: ${item.size}` : ''}
+                                    ${item.color ? ` | Color: ${item.color}` : ''}
+                                </div>
+                                <div class="item-price">
+                                    Quantity: ${quantity} × ${formatCurrency(price)} = ${formatCurrency(quantity * price)}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } else {
+                itemsHtml = '<p>No items found for this order.</p>';
+            }
 
             const content = `
                 <div class="order-info-grid">
@@ -2032,7 +2047,7 @@
             updateBtn.textContent = 'Updating...';
 
             // Send AJAX request to update status
-            fetch('/admin/update-order-status', {
+            fetch('/admin/orders/update-status', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

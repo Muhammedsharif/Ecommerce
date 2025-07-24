@@ -1,92 +1,45 @@
+// Main admin router - imports and organizes all admin-related route modules
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin/adminController');
-const dashboardController = require('../controllers/admin/dashboardController');
-const customerController = require("../controllers/admin/customerController");
-const productController = require("../controllers/admin/productController");
-const categoryController = require("../controllers/admin/categoryController");
-const orderController = require("../controllers/admin/orderController")
-const bannerController = require("../controllers/admin/bannerController")
-const couponController = require("../controllers/admin/couponController")
-const salesReportController = require("../controllers/admin/salesReportController")
-const multer = require("multer");
-const storage = require("../helpers/multer")
-const uploads = multer({storage:storage})
-const {userAuth, adminAuth} = require('../middlewares/auth');
+const { adminAuth } = require('../middlewares/auth');
 
+// Import route modules
+const authRoutes = require('./admin/authRoutes');
+const customerRoutes = require('./admin/customerRoutes');
+const categoryRoutes = require('./admin/categoryRoutes');
+const productRoutes = require('./admin/productRoutes');
+const orderRoutes = require('./admin/orderRoutes');
+const bannerRoutes = require('./admin/bannerRoutes');
+const couponRoutes = require('./admin/couponRoutes');
+const dashboardRoutes = require('./admin/dashboardRoutes');
+const salesReportRoutes = require('./admin/salesReportRoutes');
 
-router.get("/pageerror",adminController.pageerror)
-//Login Management
-router.get("/login",adminController.loadLogin)
-router.post("/login",adminController.login)
-router.get("/dashboard",adminAuth,adminController.loadDashboard)
-router.get("/logout",adminController.logout)
+// Error page route (keep at root level)
+router.get("/pageerror", adminController.pageerror);
 
-//Customer Management
-router.get("/users",adminAuth,customerController.customerInfo)
-router.get("/blockCustomer",adminAuth,customerController.customerBlocked)
-router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
+// Keep some essential routes at root level for backward compatibility
+router.get("/login", adminController.loadLogin);
+router.post("/login", adminController.login);
+router.get("/dashboard", adminAuth, adminController.loadDashboard);
+router.get("/logout", adminController.logout);
 
-//Category Management
-router.get("/category",adminAuth,categoryController.categoryInfo)
-router.post("/addCategory",adminAuth,categoryController.addCategory)
-router.get("/listCategory",adminAuth,categoryController.getListCategory)
-router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory)
-router.get("/editCategory",adminAuth,categoryController.geteditCategory)
-router.patch("/editCategory/:id",adminAuth,categoryController.editCategory)
-router.patch("/deletecategory", adminAuth,categoryController.deleteCategory);
-router.post("/category/offer", adminAuth,categoryController.addCategoryOffer);
-router.delete("/category/offer", adminAuth,categoryController.removeCategoryOffer);
+// Import customer controller for backward compatibility routes
+const customerController = require('../controllers/admin/customerController');
 
-//Product Management
-router.get("/addProducts",adminAuth,productController.getProductAddPage);
-router.post("/addProducts",adminAuth,uploads.array("images",4),productController.addProducts);
-router.get("/products",adminAuth,productController.getAllProducts);
-router.patch('/deleteProduct/:id',adminAuth, productController.deleteProduct);
-router.get("/blockProduct",adminAuth,productController.blockProduct)
-router.get("/unblockProduct",adminAuth,productController.unblockProduct)
-router.get("/editProduct",productController.getEditProduct) // Temporarily disabled auth for debugging
-router.patch("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
-router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
+// Backward compatibility routes for block/unblock (old route patterns)
+router.get("/blockCustomer", adminAuth, customerController.customerBlocked);
+router.get("/unblockCustomer", adminAuth, customerController.customerunBlocked);
 
-//Order Management
-router.get("/orders",adminAuth,orderController.getOrderPage)
-router.post("/update-order-status",adminAuth,orderController.updateOrderStatus)
-router.get("/order-details/:orderId",adminAuth,orderController.getOrderDetails)
-router.get("/return-requests",adminAuth,orderController.getReturnRequestsPage)
-router.post("/approve-return-request",adminAuth,orderController.approveReturnRequest)
-router.post("/reject-return-request",adminAuth,orderController.rejectReturnRequest)
-router.post("/approve-item-cancellation",adminAuth,orderController.approveItemCancellation)
-router.post("/reject-item-cancellation",adminAuth,orderController.rejectItemCancellation)
-
-//Banner Management
-router.get("/banner",adminAuth,bannerController.getBannerPage)
-router.get("/addBanner",adminAuth,bannerController.getAddBannerPage)
-router.post("/addBanner",adminAuth,uploads.single("images"),bannerController.addBanner)
-
-//Coupon Management
-router.get("/coupons",adminAuth,couponController.getCouponListPage)
-router.get("/add-coupon",adminAuth,couponController.getAddCouponPage)
-router.post("/add-coupon",adminAuth,couponController.addCoupon)
-router.get("/edit-coupon",adminAuth,couponController.getEditCoupon)
-router.put("/edit-coupon/:id",adminAuth,couponController.editCoupon)
-router.delete("/delete-coupon/:id",adminAuth,couponController.deleteCoupon)
-router.get("/get-categories",adminAuth,couponController.getCategories)
-router.get("/get-products",adminAuth,couponController.getProducts)
-router.get("/coupon-usage/:id",adminAuth,couponController.getCouponUsageDetails)
-
-// Dashboard Analytics Routes
-router.get("/dashboard-analytics",adminAuth,dashboardController.getDashboard)
-router.get("/dashboard-analytics/stats",adminAuth,dashboardController.getDashboardStats)
-router.get("/dashboard-analytics/sales-chart",adminAuth,dashboardController.getSalesChartData)
-router.get("/dashboard-analytics/top-products",adminAuth,dashboardController.getTopProducts)
-router.get("/dashboard-analytics/top-categories",adminAuth,dashboardController.getTopCategories)
-router.get("/dashboard-analytics/ledger",adminAuth,dashboardController.getLedgerData)
-
-// Sales Report Routes
-router.get("/sales-report",adminAuth,salesReportController.getSalesReportDashboard)
-router.get("/sales-report/data",adminAuth,salesReportController.generateSalesReport)
-router.get("/sales-report/download/pdf",adminAuth,salesReportController.downloadPDFReport)
-router.get("/sales-report/download/excel",adminAuth,salesReportController.downloadExcelReport)
+// Mount route modules with prefixes for better organization
+router.use("/auth", authRoutes);
+router.use("/customers", customerRoutes);
+router.use("/category", categoryRoutes);
+router.use("/products", productRoutes);
+router.use("/orders", orderRoutes);
+router.use("/banner", bannerRoutes);
+router.use("/coupons", couponRoutes);
+router.use("/dashboard", dashboardRoutes);
+router.use("/sales-report", salesReportRoutes);
 
 module.exports = router;

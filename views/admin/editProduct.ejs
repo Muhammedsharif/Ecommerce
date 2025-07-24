@@ -758,7 +758,7 @@ body {
             </div>
 
             <div class="form-body">
-                <form method="post" action="/admin/editProduct/<%=product._id%>" enctype="multipart/form-data" id="productForm">
+                <form method="post" action="/admin/products/edit/<%=product._id%>" enctype="multipart/form-data" id="productForm">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="product_name" class="form-label">
@@ -1155,7 +1155,7 @@ async function validateAndSubmit() {
             // Add size variants data
             formData.append('sizeVariants', JSON.stringify(sizeVariants));
 
-            const response = await fetch(`/admin/editProduct/${productId}`, {
+            const response = await fetch(`/admin/products/edit/${productId}`, {
                 method: 'PATCH',
                 body: formData
             });
@@ -1615,7 +1615,7 @@ function deleteSingleImage(imageId, productId) {
                 showConfirmButton: false,
                 didOpen: () => Swal.showLoading()
             });
-            fetch('/admin/deleteImage', {
+            fetch('/admin/products/delete-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -409,7 +409,7 @@
                             </h3>
                             <div class="item-specs">
                                 <span>Size: <%= item.size || 'N/A' %></span>
-                                <span>Color: <%= item.color || 'N/A' %></span>
+                                
                             </div>
                             <div class="item-price">
                                 <div style="color:#6b7280; font-size:0.9rem; margin-bottom:0.25rem;">
@@ -590,7 +590,7 @@
             try {
                 console.log('Updating cart quantity:', { itemId, quantity });
 
-                const response = await fetch('/update-cart-quantity', {
+                const response = await fetch('/cart/update-quantity', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -619,8 +619,8 @@
                     // Update the UI without page reload
                     updateUI();
 
-                    // Update cart counter in header using the response cartCount
-                    const cartCount = data.cartCount || cartItems.reduce((total, item) => total + item.quantity, 0);
+                    // Update cart counter in header using the response cartCount (number of unique items)
+                    const cartCount = data.cartCount || cartItems.length;
                     console.log('Updating cart badge to:', cartCount);
 
                     // Use the global updateCartCounter function from header
@@ -631,7 +631,7 @@
                         const cartBadge = document.getElementById('cartBadge');
                         if (cartBadge) {
                             cartBadge.textContent = cartCount;
-                            cartBadge.style.display = cartCount > 0 ? 'block' : 'none';
+                            cartBadge.style.display = cartCount > 0 ? 'inline' : 'none';
                         } else {
                             console.warn('Cart badge element not found');
                         }
@@ -652,7 +652,7 @@
                 'Are you sure you want to remove this item?',
                 async () => {
                     try {
-                        const response = await fetch('/remove-from-cart', {
+                        const response = await fetch('/cart/remove', {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -680,15 +680,15 @@
 
                             showToast('Item removed from cart', 'success');
 
-                            // Update cart counter in header
-                            const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+                            // Update cart counter in header using server response (number of unique items)
+                            const cartCount = data.cartCount || cartItems.length;
                             if (typeof updateCartCounter === 'function') {
-                                updateCartCounter(totalItems);
+                                updateCartCounter(cartCount);
                             } else {
                                 const cartBadge = document.getElementById('cartBadge');
                                 if (cartBadge) {
-                                    cartBadge.textContent = totalItems;
-                                    cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
+                                    cartBadge.textContent = cartCount;
+                                    cartBadge.style.display = cartCount > 0 ? 'inline' : 'none';
                                 }
                             }
 
@@ -875,7 +875,7 @@
                 'Are you sure you want to empty your entire cart?',
                 async () => {
                     try {
-                        const response = await fetch('/empty-cart', {
+                        const response = await fetch('/cart/empty', {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -963,16 +963,16 @@
                 subtotalElement.textContent = `₹${Math.round(subtotal)}`;
             }
 
-            // Update cart badge using the global function
-            const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+            // Update cart badge using the global function (number of unique items, not total quantity)
+            const uniqueItemsCount = cartItems.length;
             if (typeof updateCartCounter === 'function') {
-                updateCartCounter(totalItems);
+                updateCartCounter(uniqueItemsCount);
             } else {
                 // Fallback to direct element update
                 const cartBadge = document.getElementById('cartBadge');
                 if (cartBadge) {
-                    cartBadge.textContent = totalItems;
-                    cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
+                    cartBadge.textContent = uniqueItemsCount;
+                    cartBadge.style.display = uniqueItemsCount > 0 ? 'inline' : 'none';
                 }
             }
 

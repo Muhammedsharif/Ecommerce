@@ -481,11 +481,11 @@
 
         <div class="action-buttons">
             <% if (typeof failedOrderId !== 'undefined' && failedOrderId) { %>
-            <a href="/retry-payment/<%= failedOrderId %>" class="btn btn-danger">
+            <a href="/checkout/retry-payment/<%= failedOrderId %>" class="btn btn-danger">
                 <i class="fas fa-redo"></i>
                 Retry Payment
             </a>
-            <a href="/order-details/<%= failedOrderId %>" class="btn btn-primary">
+            <a href="/orders/details/<%= failedOrderId %>" class="btn btn-primary">
                 <i class="fas fa-receipt"></i>
                 View Orders
             </a>
@@ -531,7 +531,7 @@
             const retryButton = document.getElementById('retryPaymentBtn');
             
             const viewOrdersButton = document.createElement('a');
-            viewOrdersButton.href = `/order-details/${failedOrderId}`;
+            viewOrdersButton.href = `/orders/details/${failedOrderId}`;
             viewOrdersButton.className = 'btn btn-primary';
             viewOrdersButton.innerHTML = `
                 <i class="fas fa-receipt"></i>
@@ -555,7 +555,7 @@
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
                 // Get retry payment order details
-                const response = await fetch('/retry-payment', {
+                const response = await fetch('/checkout/retry-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -582,7 +582,7 @@
                     handler: async function(response) {
                         try {
                             // Verify payment
-                            const verifyResponse = await fetch('/verify-payment', {
+                            const verifyResponse = await fetch('/checkout/verify-payment', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -605,7 +605,7 @@
                                     window.location.href = verifyResult.redirectUrl;
                                 } else {
                                     console.error('No redirect URL provided in response');
-                                    window.location.href = `/payment-success/${verifyResult.orderId}`;
+                                    window.location.href = `/checkout/payment-success/${verifyResult.orderId}`;
                                 }
                             } else {
                                 console.error('Payment verification failed:', verifyResult.message);
@@ -632,7 +632,7 @@
                 rzp.on('payment.failed', function(response) {
                     console.error('Payment failed:', response.error);
                     // Stay on the same page and show the error
-                    window.location.href = `/payment-failure?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
+                    window.location.href = `/checkout/payment-failure?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
                 });
 
                 rzp.open();

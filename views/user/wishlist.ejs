@@ -990,7 +990,7 @@
                 const originalHTML = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Moving...</span>';
 
-                console.log('🚀 Sending request to /move-to-cart-from-wishlist');
+                console.log('🚀 Sending request to /move-from-wishlist');
                 console.log('📤 Request data:', { productId, size: selectedSize, color: 'Default', variantPrice });
 
                 const requestBody = {
@@ -1004,7 +1004,7 @@
                     requestBody.variantPrice = variantPrice;
                 }
 
-                const response = await fetch('/move-to-cart-from-wishlist', {
+                const response = await fetch('/cart/move-from-wishlist', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1146,7 +1146,7 @@
                     if (typeof window.decrementWishlistCounter === 'function') {
                         window.decrementWishlistCounter();
                     }
-                    window.location.href = `removeFromWishlist?productId=${productId}`
+                    window.location.href = `/wishlist/remove?productId=${productId}`
                 }
             })
         }

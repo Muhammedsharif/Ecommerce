@@ -602,7 +602,14 @@ const removeFromCart = async(req, res) => {
         cart.items = cart.items.filter(item => item._id.toString() !== itemId);
         await cart.save();
 
-        res.json({ success: true, message: 'Item removed from cart' });
+        // Get updated cart count (number of unique items, not total quantity)
+        const cartCount = cart.items.length;
+
+        res.json({ 
+            success: true, 
+            message: 'Item removed from cart',
+            cartCount: cartCount
+        });
 
     } catch (error) {
         console.error("Error removing item from cart:", error);
@@ -635,6 +642,7 @@ const emptyCart = async(req, res) => {
         res.status(500).json({ success: false, message: 'Failed to empty cart' });
     }
 }
+
 
 module.exports = {
     loadCart,

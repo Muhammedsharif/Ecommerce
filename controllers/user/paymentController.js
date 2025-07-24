@@ -448,7 +448,7 @@ const verifyPayment = async (req, res) => {
             success: true,
             message: 'Payment verified and order created successfully',
             orderId: orderId,
-            redirectUrl: `/payment-success/${orderId}`
+            redirectUrl: `/checkout/payment-success/${orderId}`
         });
 
     } catch (error) {
@@ -645,8 +645,8 @@ const handlePaymentFailure = async (req, res) => {
         }
         
         const redirectUrl = failedOrderId 
-            ? `/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}&orderId=${failedOrderId}`
-            : `/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}`;
+            ? `/checkout/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}&orderId=${failedOrderId}`
+            : `/checkout/payment-failure?error=${encodeURIComponent(error.description || 'Payment failed')}`;
         
         res.json({
             success: false,

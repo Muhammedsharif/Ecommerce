@@ -13,102 +13,139 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8fafc;
+            color: #1a202c;
             line-height: 1.6;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2rem 1rem;
         }
 
         /* Success Header */
         .success-header {
             text-align: center;
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
+            background: white;
             padding: 3rem 2rem;
-            border-radius: 15px;
+            border-radius: 12px;
             margin-bottom: 2rem;
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
         }
 
         .success-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            animation: bounce 1s ease-in-out;
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: scaleIn 0.5s ease-out;
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+        .success-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .success-title {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
             margin-bottom: 0.5rem;
         }
 
         .success-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
         }
 
-        /* Order Details Card */
-        .order-card {
+        .order-number {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Main Content Card */
+        .content-card {
             background: white;
-            border-radius: 15px;
-            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
         }
 
         .card-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-            color: #2c3e50;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a202c;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .order-info-grid {
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* Order Summary */
+        .order-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .info-item {
+        .summary-item {
+            text-align: center;
             padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #007bff;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
 
-        .info-label {
-            font-size: 0.9rem;
-            color: #6c757d;
+        .summary-label {
+            font-size: 0.875rem;
+            color: #64748b;
             margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             font-weight: 500;
         }
 
-        .info-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #2c3e50;
+        .summary-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1a202c;
         }
 
-        .order-id {
-            color: #007bff;
-            font-family: 'Courier New', monospace;
+        .summary-value.amount {
+            color: #10b981;
+            font-size: 1.25rem;
         }
 
         /* Order Items */
@@ -119,26 +156,22 @@
         .item {
             display: flex;
             align-items: center;
-            padding: 1rem;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            background: #fff;
-            transition: transform 0.2s ease;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .item:last-child {
+            border-bottom: none;
         }
 
         .item-image {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
             border-radius: 8px;
             margin-right: 1rem;
-            border: 2px solid #e9ecef;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
         }
 
         .item-details {
@@ -146,102 +179,108 @@
         }
 
         .item-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
         }
 
         .item-specs {
-            color: #6c757d;
-            font-size: 0.9rem;
+            color: #64748b;
+            font-size: 0.875rem;
         }
 
         .item-price {
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #28a745;
+            font-weight: 600;
+            color: #1a202c;
+            font-size: 1rem;
+        }
+
+        /* Order Total */
+        .order-total {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .total-row:last-child {
+            margin-bottom: 0;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .total-label {
+            color: #64748b;
+        }
+
+        .total-value {
+            color: #1a202c;
+            font-weight: 500;
+        }
+
+        .total-value.discount {
+            color: #10b981;
+        }
+
+        .total-value.final {
+            color: #10b981;
+            font-size: 1.25rem;
+            font-weight: 700;
         }
 
         /* Delivery Info */
         .delivery-info {
-            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e1bee7;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
-        .delivery-timeline {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1.5rem;
-            position: relative;
-        }
-
-        .timeline-step {
-            text-align: center;
-            flex: 1;
-            position: relative;
-        }
-
-        .timeline-step::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            right: -50%;
-            height: 2px;
-            background: #ddd;
-            z-index: 1;
-        }
-
-        .timeline-step:last-child::before {
-            display: none;
-        }
-
-        .timeline-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #28a745;
-            color: white;
+        .delivery-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 0.5rem;
-            position: relative;
-            z-index: 2;
+            gap: 0.5rem;
         }
 
-        .timeline-step.pending .timeline-icon {
-            background: #ddd;
-            color: #666;
-        }
-
-        .timeline-text {
-            font-size: 0.9rem;
-            color: #666;
+        .delivery-text {
+            color: #1e40af;
+            font-size: 0.95rem;
         }
 
         /* Action Buttons */
         .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
             gap: 1rem;
             margin-top: 2rem;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 1rem 2rem;
+            flex: 1;
+            min-width: 200px;
+            padding: 0.875rem 1.5rem;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
             text-decoration: none;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -250,55 +289,68 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: #3b82f6;
             color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            color: white;
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
         }
 
         .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+            background: #f8fafc;
+            color: #475569;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        /* Contact Info */
-        .contact-info {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 15px;
+        /* Support Section */
+        .support-section {
+            background: white;
+            border-radius: 12px;
             padding: 2rem;
-            margin-top: 2rem;
             text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
         }
 
-        .contact-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #856404;
+        .support-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
         }
 
-        .contact-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+        .support-text {
+            color: #64748b;
+            margin-bottom: 1.5rem;
         }
 
-        .contact-item {
+        .support-contacts {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .support-contact {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
-            color: #856404;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .support-contact i {
+            color: #3b82f6;
         }
 
         /* Responsive Design */
@@ -312,16 +364,22 @@
             }
 
             .success-title {
-                font-size: 2rem;
+                font-size: 1.75rem;
             }
 
-            .order-info-grid {
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .order-summary {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
 
             .item {
                 flex-direction: column;
                 text-align: center;
+                padding: 1.5rem 0;
             }
 
             .item-image {
@@ -329,17 +387,29 @@
                 margin-bottom: 1rem;
             }
 
-            .delivery-timeline {
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                min-width: auto;
+            }
+
+            .support-contacts {
                 flex-direction: column;
                 gap: 1rem;
             }
+        }
 
-            .timeline-step::before {
-                display: none;
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
             }
-
-            .action-buttons {
-                grid-template-columns: 1fr;
+            
+            .action-buttons,
+            .support-section {
+                display: none;
             }
         }
     </style>
@@ -359,123 +429,117 @@
         <!-- Success Header -->
         <div class="success-header">
             <div class="success-icon">
-                <i class="fas fa-check-circle"></i>
+                <i class="fas fa-check"></i>
             </div>
-            <h1 class="success-title">Order Placed Successfully!</h1>
-            <p class="success-subtitle">Thank you for your purchase. Your order has been confirmed and is being processed.</p>
+            <h1 class="success-title">Thank You for Your Order!</h1>
+            <p class="success-subtitle">Your order has been successfully placed and is being processed.</p>
+            <div class="order-number">Order #<%= order.orderId %></div>
         </div>
 
         <!-- Order Details Card -->
-        <div class="order-card">
-            <h2 class="card-title">
-                <i class="fas fa-receipt"></i>
-                Order Details
-            </h2>
-            
-            <div class="order-info-grid">
-                <div class="info-item">
-                    <div class="info-label">Order ID</div>
-                    <div class="info-value order-id">#<%= order.orderId %></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Order Date</div>
-                    <div class="info-value"><%= new Date(order.createdOn).toLocaleDateString('en-IN', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    }) %></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Total Amount</div>
-                    <div class="info-value"> ₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Payment Method</div>
-                    <div class="info-value"><%=order.paymentMethod%></div>
-                </div>
-                <% if (order.couponApplied && order.couponCode) { %>
-                <div class="info-item">
-                    <div class="info-label">Coupon Applied</div>
-                    <div class="info-value" style="color: #28a745; font-weight: bold;">
-                        <%= order.couponCode %> 
-                        <span style="font-size: 0.9rem; color: #6c757d;">(-₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %>)</span>
-                    </div>
-                </div>
-                <% } %>
-            </div>
-
-            <!-- Order Items -->
-            <div class="order-items">
-                <h3 class="card-title">
-                    <i class="fas fa-box"></i>
-                    Items Ordered (<%= order.orderedItems.length %> item<%= order.orderedItems.length > 1 ? 's' : '' %>)
-                </h3>
-                
-                <% order.orderedItems.forEach(item => { %>
-                    <div class="item">
-                        <% if (item.product.productImage && item.product.productImage.length > 0) { %>
-                            <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
-                                 alt="<%= item.product.productName %>" 
-                                 class="item-image"
-                                 onerror="this.src='/uploads/placeholder.jpg'">
-                        <% } else { %>
-                            <div class="item-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-image" style="color: #ccc; font-size: 2rem;"></i>
-                            </div>
-                        <% } %>
-                        <div class="item-details">
-                            <div class="item-name"><%= item.product.productName %></div>
-                            <div class="item-specs">
-                                Quantity: <%= item.quantity %> | 
-                                Size: <%= item.size || 'N/A' %>
-                                <% 
-                                    let variant = null;
-                                    if (item.product && item.product.variant && item.size) {
-                                        variant = item.product.variant.find(v => String(v.size) === String(item.size));
-                                    }
-                                    let productOffer = item.product.productOffer || 0;
-                                    let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
-                                    let bestOffer = Math.max(productOffer, categoryOffer);
-                                    let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
-                                    let unitPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
-                                    let totalPrice = unitPrice * item.quantity;
-                                %>
-                                <br>
-                                <span style="color: #6c757d; font-size: 0.85rem;">
-                                    ₹<%= Math.round(unitPrice).toLocaleString('en-IN') %> × <%= item.quantity %> = ₹<%= Math.round(totalPrice).toLocaleString('en-IN') %>
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="item-price">
-                            ₹<%= Math.round(totalPrice).toLocaleString('en-IN') %>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-
-            <!-- Order Summary -->
-            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e9ecef;">
-                <h3 class="card-title">
-                    <i class="fas fa-calculator"></i>
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-receipt"></i>
                     Order Summary
-                </h3>
-                
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; max-width: 400px; margin-left: auto;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span>Subtotal:</span>
-                        <span>₹<%= Math.round(order.totalPrice).toLocaleString('en-IN') %></span>
+                </h2>
+            </div>
+            <div class="card-body">
+                <!-- Order Info Grid -->
+                <div class="order-summary">
+                    <div class="summary-item">
+                        <div class="summary-label">Order Date</div>
+                        <div class="summary-value"><%= new Date(order.createdOn).toLocaleDateString('en-IN', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }) %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Payment Method</div>
+                        <div class="summary-value"><%= order.paymentMethod %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Items</div>
+                        <div class="summary-value"><%= order.orderedItems.length %> item<%= order.orderedItems.length > 1 ? 's' : '' %></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Total Amount</div>
+                        <div class="summary-value amount">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></div>
+                    </div>
+                </div>
+
+                <!-- Delivery Information -->
+                <div class="delivery-info">
+                    <div class="delivery-title">
+                        <i class="fas fa-truck"></i>
+                        Estimated Delivery
+                    </div>
+                    <div class="delivery-text">
+                        Your order will be delivered within 5-7 business days. You'll receive tracking information via email once your order ships.
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="order-items">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; color: #1a202c;">
+                        <i class="fas fa-box" style="margin-right: 0.5rem; color: #64748b;"></i>
+                        Items Ordered
+                    </h3>
+                    
+                    <% order.orderedItems.forEach(item => { %>
+                        <div class="item">
+                            <% if (item.product.productImage && item.product.productImage.length > 0) { %>
+                                <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
+                                     alt="<%= item.product.productName %>" 
+                                     class="item-image"
+                                     onerror="this.src='/uploads/placeholder.jpg'">
+                            <% } else { %>
+                                <div class="item-image" style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image" style="color: #cbd5e1; font-size: 1.5rem;"></i>
+                                </div>
+                            <% } %>
+                            <div class="item-details">
+                                <div class="item-name"><%= item.product.productName %></div>
+                                <div class="item-specs">
+                                    Qty: <%= item.quantity %> • Size: <%= item.size || 'N/A' %>
+                                    <% 
+                                        let variant = null;
+                                        if (item.product && item.product.variant && item.size) {
+                                            variant = item.product.variant.find(v => String(v.size) === String(item.size));
+                                        }
+                                        let productOffer = item.product.productOffer || 0;
+                                        let categoryOffer = (item.product.category && item.product.category.categoryOffer) || 0;
+                                        let bestOffer = Math.max(productOffer, categoryOffer);
+                                        let variantPrice = variant && typeof variant.varientPrice === 'number' ? variant.varientPrice : (typeof item.price === 'number' ? item.price : 0);
+                                        let unitPrice = bestOffer > 0 ? (variantPrice - (variantPrice * bestOffer / 100)) : variantPrice;
+                                        let totalPrice = unitPrice * item.quantity;
+                                    %>
+                                    • ₹<%= Math.round(unitPrice).toLocaleString('en-IN') %> each
+                                </div>
+                            </div>
+                            <div class="item-price">
+                                ₹<%= Math.round(totalPrice).toLocaleString('en-IN') %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Order Total -->
+                <div class="order-total">
+                    <div class="total-row">
+                        <span class="total-label">Subtotal</span>
+                        <span class="total-value">₹<%= Math.round(order.totalPrice).toLocaleString('en-IN') %></span>
                     </div>
                     
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span>Shipping:</span>
-                        <span>
+                    <div class="total-row">
+                        <span class="total-label">Shipping</span>
+                        <span class="total-value">
                             <% 
                                 let shippingCost = order.totalPrice > 500 ? 0 : 50;
-                                let originalAmount = order.originalAmount || (order.totalPrice + shippingCost);
                             %>
                             <% if (shippingCost === 0) { %>
-                                <span style="color: #28a745;">FREE</span>
+                                <span style="color: #10b981;">FREE</span>
                             <% } else { %>
                                 ₹<%= shippingCost.toLocaleString('en-IN') %>
                             <% } %>
@@ -483,62 +547,16 @@
                     </div>
 
                     <% if (order.couponApplied && order.couponDiscount > 0) { %>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #28a745;">
-                        <span>Coupon Discount (<%= order.couponCode %>):</span>
-                        <span>-₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %></span>
+                    <div class="total-row">
+                        <span class="total-label">Discount (<%= order.couponCode %>)</span>
+                        <span class="total-value discount">-₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %></span>
                     </div>
                     <% } %>
 
-                    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #dee2e6;">
-                    
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem;">
-                        <span>Total Amount:</span>
-                        <span style="color: #28a745;">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></span>
+                    <div class="total-row">
+                        <span class="total-label">Total</span>
+                        <span class="total-value final">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></span>
                     </div>
-
-                    <% if (order.couponApplied && order.couponDiscount > 0) { %>
-                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #6c757d; text-align: center;">
-                        You saved ₹<%= Math.round(order.couponDiscount).toLocaleString('en-IN') %> with coupon <%= order.couponCode %>!
-                    </div>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-
-        <!-- Delivery Information -->
-        <div class="delivery-info">
-            <h2 class="card-title">
-                <i class="fas fa-truck"></i>
-                Delivery Information
-            </h2>
-            <p style="margin-bottom: 1rem; color: #666;">
-                Your order will be delivered to your selected address within 5-7 business days.
-            </p>
-
-            <div class="delivery-timeline">
-                <div class="timeline-step">
-                    <div class="timeline-icon">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <div class="timeline-text">Order Confirmed</div>
-                </div>
-                <div class="timeline-step pending">
-                    <div class="timeline-icon">
-                        <i class="fas fa-box"></i>
-                    </div>
-                    <div class="timeline-text">Processing</div>
-                </div>
-                <div class="timeline-step pending">
-                    <div class="timeline-icon">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <div class="timeline-text">Shipped</div>
-                </div>
-                <div class="timeline-step pending">
-                    <div class="timeline-icon">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <div class="timeline-text">Delivered</div>
                 </div>
             </div>
         </div>
@@ -547,7 +565,7 @@
         <div class="action-buttons">
             <a href="/orders" class="btn btn-primary">
                 <i class="fas fa-list"></i>
-                View All Orders
+                Track Your Order
             </a>
             <a href="/" class="btn btn-secondary">
                 <i class="fas fa-shopping-bag"></i>
@@ -555,26 +573,22 @@
             </a>
         </div>
 
-        <!-- Customer Service Contact -->
-        <div class="contact-info">
-            <h3 class="contact-title">
-                <i class="fas fa-headset"></i>
-                Need Help?
-            </h3>
-            <p style="margin-bottom: 1rem; color: #856404;">
-                Our customer service team is here to help you with any questions about your order.
+        <!-- Customer Support -->
+        <div class="support-section">
+            <h3 class="support-title">Need Help?</h3>
+            <p class="support-text">
+                Our customer service team is ready to assist you with any questions about your order.
             </p>
-
-            <div class="contact-details">
-                <div class="contact-item">
+            <div class="support-contacts">
+                <div class="support-contact">
                     <i class="fas fa-phone"></i>
                     <span>+91 9876543210</span>
                 </div>
-                <div class="contact-item">
+                <div class="support-contact">
                     <i class="fas fa-envelope"></i>
                     <span>support@1notone.com</span>
                 </div>
-                <div class="contact-item">
+                <div class="support-contact">
                     <i class="fas fa-clock"></i>
                     <span>Mon-Sat: 9AM-6PM</span>
                 </div>
@@ -585,29 +599,28 @@
     <%- include("../partials/user/footer") %>
 
     <script>
-        // Add some interactive effects
+        // Smooth scroll to top on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Animate order items on scroll
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Add subtle animation to items
             const items = document.querySelectorAll('.item');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            });
-
-            items.forEach(item => {
+            items.forEach((item, index) => {
                 item.style.opacity = '0';
-                item.style.transform = 'translateY(20px)';
-                item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                observer.observe(item);
+                item.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
             });
-
-            // Auto-scroll to top on page load
-            window.scrollTo(0, 0);
         });
+
+        // Print functionality
+        function printOrder() {
+            window.print();
+        }
     </script>
 </body>
 </html>
