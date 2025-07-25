@@ -861,18 +861,18 @@
                     <div class="thumbnail-container">
                         <% for (let i = 0; i < product.productImage.length; i++) { %>
                         <div class="thumbnail <%= i === 0 ? 'active' : '' %>" data-image-index="<%= i %>">
-                            <img src="/Uploads/product-images/<%=product.productImage[i]%>" alt="product image <%= i + 1 %>">
+                            <img src="/uploads/product-images/<%=product.productImage[i]%>" alt="product image <%= i + 1 %>">
                         </div>
                         <% } %>
                     </div>
                     <div class="zoom-container">
                         <div class="main-image" id="productZoomContainer">
-                            <img id="mainProductImage" src="/Uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.productName %>">
+                            <img id="mainProductImage" src="/uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.productName %>">
                             <div class="zoom-lens" id="zoomLens"></div>
                             <!-- <div class="zoom-indicator">🔍 Hover to zoom</div> -->
                         </div>
                         <div class="zoom-result" id="zoomResult">
-                            <img id="zoomResultImage" src="/Uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.productName %>">
+                            <img id="zoomResultImage" src="/uploads/product-images/<%=product.productImage[0]%>" alt="<%= product.productName %>">
                         </div>
                     </div>
                 </div>
@@ -1177,7 +1177,7 @@
                         <div class="product-card">
                             <div class="product-image">
                                 <a href="/productDetails?id=<%=currentProduct._id%>">
-                                    <img src="/Uploads/product-images/<%= currentProduct.productImage[0] %>" alt="<%= currentProduct.productName %>">
+                                    <img src="/uploads/product-images/<%= currentProduct.productImage[0] %>" alt="<%= currentProduct.productName %>">
                                 </a>
                             </div>
                             <h3 class="product-name"><%= currentProduct.productName %></h3>
