@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
+<head> <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1NOTONE - Premium Footwear Collection</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
+    <link href="/styles/user/shop-responsive.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -129,18 +129,20 @@
 
         .filter-sidebar {
             position: sticky;
-            top: 120px;
+            top: 20px;
             left: 0;
             width: 300px;
             height: fit-content;
-            max-height: calc(100vh - 140px);
+            max-height: calc(100vh - 40px);
             background: #ffffff;
             padding: 30px 20px;
             border-right: 1px solid #e9ecef;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 10;
             flex-shrink: 0;
+            align-self: flex-start;
+        
         }
 
         .filter-title {
@@ -242,18 +244,55 @@
 
         .filter-toggle {
             display: none;
-            position: fixed;
-            top: 90px;
-            left: 20px;
             background: linear-gradient(45deg, #667eea, #764ba2);
             border: none;
-            padding: 12px 15px;
-            border-radius: 50%;
+            padding: 8px 12px;
+            border-radius: 8px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            z-index: 1001;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1002;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            display: none;
+        }
+
+        .filter-overlay.show {
+            opacity: 1;
+            visibility: visible;
+            display: block;
+        }
+
+        .filter-close {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-close:hover {
+            background-color: #f0f0f0;
         }
 
         .main-content {
@@ -725,49 +764,135 @@
                 font-size: 2.5rem;
             }
 
+            .hero-section {
+                min-height: 60vh;
+                margin-bottom: 0;
+            }
+
             .products-section {
                 flex-direction: column;
+                min-height: auto;
+                margin-top: 0;
+                padding-top: 0;
             }
 
             .filter-sidebar {
-                transform: translateX(-100%);
-                width: 280px;
-                position: fixed;
-                top: 100px;
-                left: 0;
-                height: calc(100vh - 100px);
-                z-index: 1001;
+                position: static;
+                transform: none;
+                width: 100%;
+                height: auto;
+                max-height: none;
+                z-index: auto;
+                transition: none;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                padding: 20px 15px;
+                margin-bottom: 0;
+                background: #ffffff;
+                order: 1;
             }
 
             .filter-sidebar.open {
-                transform: translateX(0);
+                transform: none;
+            }
+
+            .filter-close {
+                display: none;
             }
 
             .filter-toggle {
-                display: block;
+                display: none;
+            }
+
+            .filter-title {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+
+            .filter-group {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+            }
+
+            .filter-btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+                margin-top: 15px;
+            }
+
+            .clear-filters {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+                margin-top: 8px;
             }
 
             .main-content {
-                padding: 20px;
-            }
-
-            .products-grid {
-                grid-template-columns: 1fr;
+                padding: 15px;
+                width: 100%;
+                order: 2;
             }
 
             .section-title {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+
+            .products-toolbar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .products-count {
+                font-size: 16px;
+                text-align: center;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .filter-dropdown {
+                width: 100%;
+            }
+
+            .filter-dropdown select {
+                width: 100%;
+                padding: 10px 15px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .product-card {
+                padding: 15px;
+            }
+
+            .product-image {
+                height: 150px;
+            }
+
+            .product-name {
+                font-size: 1.1rem;
+            }
+
+            .product-price {
+                font-size: 1rem;
             }
 
             .pagination {
                 gap: 5px;
-                margin: 40px 0;
+                margin: 30px 0;
             }
 
             .pagination .page-link {
-                min-width: 40px;
-                height: 40px;
-                font-size: 0.9rem;
+                min-width: 35px;
+                height: 35px;
+                font-size: 0.85rem;
+                padding: 0 8px;
             }
         }
 
@@ -776,11 +901,36 @@
                 width: 100%;
             }
 
+            .main-content {
+                padding: 10px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .product-card {
+                padding: 20px;
+            }
+
+            .product-image {
+                height: 200px;
+            }
+
+            .products-toolbar {
+                padding: 10px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
             .pagination .page-link {
-                min-width: 35px;
-                height: 35px;
-                padding: 0 10px;
-                font-size: 0.85rem;
+                min-width: 30px;
+                height: 30px;
+                padding: 0 6px;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -796,14 +946,17 @@
             
             <div class="floating-elements">
                 <img src="/images/close-up-futuristic-sneakers-showcase_23-2151005675.avif" alt="">
+                
             </div>
          
         </section>
 
         <section class="products-section" id="products">
-            <button class="filter-toggle" onclick="toggleFilter()">☰</button>
-
+            <!-- Mobile Filter Overlay -->
+            <div class="filter-overlay" id="filterOverlay" onclick="closeFilter()"></div>
+            
             <div class="filter-sidebar" id="filterSidebar">
+                <button class="filter-close" onclick="closeFilter()">×</button>
                 <h3 class="filter-title">Filter Products</h3>
                 <form id="filterForm">
                     <div class="filter-group">
@@ -862,6 +1015,7 @@
             </div>
 
             <div class="main-content">
+                <button class="filter-toggle" onclick="openFilter()">🔍 Filter Products</button>
                 <h2 class="section-title">Featured Products</h2>
                 <div class="products-toolbar">
                     <div class="products-count">
@@ -1038,6 +1192,28 @@
                 function toggleFilter() {
                     const sidebar = document.getElementById('filterSidebar');
                     sidebar.classList.toggle('open');
+                }
+
+                function openFilter() {
+                    const sidebar = document.getElementById('filterSidebar');
+                    const overlay = document.getElementById('filterOverlay');
+                    
+                    sidebar.classList.add('open');
+                    overlay.classList.add('show');
+                    
+                    // Prevent body scroll when filter is open
+                    document.body.style.overflow = 'hidden';
+                }
+
+                function closeFilter() {
+                    const sidebar = document.getElementById('filterSidebar');
+                    const overlay = document.getElementById('filterOverlay');
+                    
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('show');
+                    
+                    // Restore body scroll
+                    document.body.style.overflow = '';
                 }
 
                 function clearFilters() {
@@ -1280,24 +1456,7 @@
                         });
                     });
 
-                    // Sticky sidebar logic
-                    window.addEventListener('scroll', () => {
-                        const sidebar = document.getElementById('filterSidebar');
-                        const mainContent = document.querySelector('.main-content');
-                        const footer = document.querySelector('footer');
-                        const mainContentBottom = mainContent.getBoundingClientRect().bottom + window.scrollY;
-                        const footerTop = footer.getBoundingClientRect().top + window.scrollY;
-
-                        if (footerTop <= mainContentBottom) {
-                            sidebar.style.position = 'absolute';
-                            sidebar.style.bottom = '0';
-                            sidebar.style.top = 'auto';
-                        } else {
-                            sidebar.style.position = 'sticky';
-                            sidebar.style.top = '120px';
-                            sidebar.style.bottom = 'auto';
-                        }
-                    });
+                    // Removed sticky sidebar logic - filter now scrolls naturally with content
                 });
 
 

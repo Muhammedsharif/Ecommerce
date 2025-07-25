@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Failed - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,8 +14,8 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #ff4757 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,45 +25,57 @@
             position: relative;
         }
 
-        /* Animated background */
-        body::before {
-            content: '';
+        /* Animated background particles */
+        .particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 25% 75%, #ff006760 0%, transparent 50%),
-                        radial-gradient(circle at 75% 25%, #ff667c60 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, #ff003360 0%, transparent 50%);
-            animation: backgroundPulse 10s ease-in-out infinite alternate;
-            z-index: -1;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        @keyframes backgroundPulse {
-            0% { transform: scale(1) rotate(0deg); }
-            100% { transform: scale(1.1) rotate(-5deg); }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { width: 20px; height: 20px; top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 15px; height: 15px; top: 60%; left: 20%; animation-delay: 1.5s; }
+        .particle:nth-child(3) { width: 25px; height: 25px; top: 40%; left: 70%; animation-delay: 3s; }
+        .particle:nth-child(4) { width: 18px; height: 18px; top: 80%; left: 80%; animation-delay: 4.5s; }
+        .particle:nth-child(5) { width: 22px; height: 22px; top: 30%; left: 90%; animation-delay: 6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-40px) rotate(180deg); opacity: 0.8; }
         }
 
         .failure-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 32px;
+            border-radius: 30px;
             padding: 3rem;
             text-align: center;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3),
-                        0 0 0 1px rgba(255, 255, 255, 0.1);
-            max-width: 750px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            max-width: 850px;
             width: 90%;
-            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: slideInUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        @keyframes slideUp {
+        @keyframes slideInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px) scale(0.9);
+                transform: translateY(60px) scale(0.8);
             }
             to {
                 opacity: 1;
@@ -70,42 +83,76 @@
             }
         }
 
+        .failure-header {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .failure-icon-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
         .failure-icon {
-            width: 140px;
-            height: 140px;
-            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 2rem;
-            animation: pulseGlow 2s ease-in-out infinite alternate;
+            margin: 0 auto;
+            animation: failurePulse 2s ease-in-out infinite;
             position: relative;
-            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+            box-shadow: 
+                0 20px 40px rgba(255, 107, 107, 0.3),
+                0 0 0 10px rgba(255, 107, 107, 0.1),
+                0 0 0 20px rgba(255, 107, 107, 0.05);
         }
 
         .failure-icon::before {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             border-radius: 50%;
             z-index: -1;
-            opacity: 0.3;
-            animation: rotate 4s linear infinite reverse;
+            opacity: 0.2;
+            animation: rotate 8s linear infinite reverse;
         }
 
-        @keyframes pulseGlow {
-            0% { 
+        .failure-icon::after {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: -25px;
+            right: -25px;
+            bottom: -25px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            border-radius: 50%;
+            z-index: -2;
+            opacity: 0.1;
+            animation: rotate 12s linear infinite;
+        }
+
+        @keyframes failurePulse {
+            0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+                box-shadow: 
+                    0 20px 40px rgba(255, 107, 107, 0.3),
+                    0 0 0 10px rgba(255, 107, 107, 0.1),
+                    0 0 0 20px rgba(255, 107, 107, 0.05);
             }
-            100% { 
+            50% { 
                 transform: scale(1.05);
-                box-shadow: 0 25px 50px rgba(255, 107, 107, 0.5);
+                box-shadow: 
+                    0 25px 50px rgba(255, 107, 107, 0.4),
+                    0 0 0 15px rgba(255, 107, 107, 0.15),
+                    0 0 0 30px rgba(255, 107, 107, 0.08);
             }
         }
 
@@ -115,293 +162,422 @@
         }
 
         .failure-icon i {
-            font-size: 4rem;
+            font-size: 4.5rem;
             color: white;
             z-index: 1;
             position: relative;
+            animation: shakeX 1s ease-in-out 0.5s both;
+        }
+
+        @keyframes shakeX {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
 
         .failure-title {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52, #ff4757);
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
-            letter-spacing: -2px;
+            letter-spacing: -3px;
+            animation: gradientShift 3s ease-in-out infinite, titleBounce 1s ease-out 0.8s both;
         }
 
-        .failure-message {
-            font-size: 1.2rem;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes titleBounce {
+            0% { 
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            60% { 
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .failure-subtitle {
+            font-size: 1.3rem;
             color: #666;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             line-height: 1.6;
-            font-weight: 400;
+            font-weight: 500;
+            animation: fadeInUp 1s ease-out 1s both;
         }
 
-        .error-info {
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 55, 66, 0.1));
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid rgba(255, 107, 107, 0.2);
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-section {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(238, 90, 82, 0.08));
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            border: 2px solid rgba(255, 107, 107, 0.1);
             position: relative;
             overflow: hidden;
+            animation: slideInLeft 1s ease-out 1.2s both;
             text-align: left;
         }
 
-        .error-info::before {
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .error-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #ff6b6b, #ff3742);
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a52, #ff4757);
+            background-size: 200% 100%;
+            animation: gradientFlow 2s ease-in-out infinite;
         }
 
-        .error-info h3 {
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
+        }
+
+        .error-section h3 {
             color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
 
         .error-details {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            padding: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 18px;
+            padding: 1.5rem;
             color: #555;
             font-weight: 500;
             border: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
 
-        .help-info {
-            background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 86, 179, 0.1));
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid rgba(0, 123, 255, 0.2);
+        .help-section {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(41, 128, 185, 0.08));
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            border: 2px solid rgba(52, 152, 219, 0.1);
             position: relative;
             overflow: hidden;
+            animation: slideInRight 1s ease-out 1.4s both;
             text-align: left;
         }
 
-        .help-info::before {
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .help-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #007bff, #0056b3);
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2980b9, #3498db);
+            background-size: 200% 100%;
+            animation: gradientFlow 2s ease-in-out infinite;
         }
 
-        .help-info h4 {
-            color: #007bff;
-            margin-bottom: 1rem;
+        .help-section h4 {
+            color: #3498db;
+            margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
         }
 
-        .help-info ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
         }
 
-        .help-info li {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 0.8rem 0;
-            color: #555;
-            font-weight: 500;
+        .help-item {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 18px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .help-info li:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.1);
+        .help-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+            transition: left 0.6s ease;
         }
 
-        .help-info li::before {
-            content: '•';
-            color: #007bff;
-            font-weight: bold;
-            margin-right: 0.5rem;
+        .help-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(52, 152, 219, 0.15);
         }
 
-        .contact-info {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid rgba(255, 193, 7, 0.2);
+        .help-item:hover::before {
+            left: 100%;
+        }
+
+        .help-item-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .help-item h5 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .help-item p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 152, 0, 0.08));
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            border: 2px solid rgba(255, 193, 7, 0.1);
             position: relative;
             overflow: hidden;
+            animation: fadeInUp 1s ease-out 1.6s both;
         }
 
-        .contact-info::before {
+        .contact-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #ffc107, #ff9800);
+            height: 4px;
+            background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107);
+            background-size: 200% 100%;
+            animation: gradientFlow 2s ease-in-out infinite;
         }
 
-        .contact-info h4 {
+        .contact-section h4 {
             color: #ff9800;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .contact-item {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 152, 0, 0.15);
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .contact-info h5 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
         }
 
         .contact-info p {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 0.8rem 0;
-            color: #555;
-            font-weight: 500;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
         }
 
         .action-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             justify-content: center;
-            margin-top: 2rem;
+            margin-top: 3rem;
             flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 1.8s both;
         }
 
         .btn {
-            padding: 16px 32px;
+            padding: 18px 36px;
             border: none;
-            border-radius: 16px;
-            font-size: 1rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            gap: 0.8rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ff6b6b, #ff3742);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             color: white;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
         }
 
         .btn-danger:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 45px rgba(255, 107, 107, 0.4);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
-            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 15px 35px rgba(52, 152, 219, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(0, 123, 255, 0.4);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 45px rgba(52, 152, 219, 0.4);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
             color: white;
-            box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
+            box-shadow: 0 15px 35px rgba(149, 165, 166, 0.3);
         }
 
         .btn-secondary:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(108, 117, 125, 0.4);
-        }
-
-        .floating-elements {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .floating-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 55, 66, 0.1));
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-circle:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .floating-circle:nth-child(2) {
-            width: 60px;
-            height: 60px;
-            top: 60%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .floating-circle:nth-child(3) {
-            width: 40px;
-            height: 40px;
-            top: 30%;
-            right: 30%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 45px rgba(149, 165, 166, 0.4);
         }
 
         @media (max-width: 768px) {
             .failure-container {
                 padding: 2rem;
                 margin: 1rem;
-                border-radius: 24px;
+                border-radius: 25px;
             }
 
             .failure-title {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
+                letter-spacing: -2px;
             }
 
             .failure-icon {
-                width: 100px;
-                height: 100px;
+                width: 120px;
+                height: 120px;
             }
 
             .failure-icon i {
-                font-size: 2.5rem;
+                font-size: 3rem;
+            }
+
+            .help-grid,
+            .contact-grid {
+                grid-template-columns: 1fr;
             }
 
             .action-buttons {
@@ -412,6 +588,7 @@
             .btn {
                 width: 100%;
                 justify-content: center;
+                max-width: 300px;
             }
         }
 
@@ -421,62 +598,131 @@
             }
 
             .failure-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
 
             .failure-icon {
-                width: 80px;
-                height: 80px;
+                width: 100px;
+                height: 100px;
             }
 
             .failure-icon i {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="floating-elements">
-        <div class="floating-circle"></div>
-        <div class="floating-circle"></div>
-        <div class="floating-circle"></div>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
     </div>
 
     <div class="failure-container">
-        <div class="failure-icon">
-            <i class="fas fa-times"></i>
+        <div class="failure-header">
+            <div class="failure-icon-container">
+                <div class="failure-icon">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <h1 class="failure-title">Payment Failed!</h1>
+            <p class="failure-subtitle">
+                😔 We're sorry, but your payment could not be processed. 
+                Don't worry - we're here to help you complete your purchase!
+            </p>
         </div>
 
-        <h1 class="failure-title">Payment Failed!</h1>
-        <p class="failure-message">
-            We're sorry, but your payment could not be processed. Please try again or use a different payment method.
-        </p>
-
         <% if (typeof error !== 'undefined' && error) { %>
-        <div class="error-info">
-            <h3><i class="fas fa-exclamation-triangle"></i> Error Details</h3>
+        <div class="error-section">
+            <h3><i class="fas fa-exclamation-triangle"></i> What went wrong?</h3>
             <div class="error-details">
                 <%= error %>
             </div>
         </div>
         <% } %>
 
-        <div class="help-info">
-            <h4><i class="fas fa-lightbulb"></i> What can you do?</h4>
-            <ul>
-                <li>Check your internet connection and try again</li>
-                <li>Verify your card details and available balance</li>
-                <li>Try using a different payment method</li>
-                <li>Contact your bank if the issue persists</li>
-                <li>Use Cash on Delivery as an alternative</li>
-            </ul>
+        <div class="help-section">
+            <h4><i class="fas fa-lightbulb"></i> Quick Solutions</h4>
+            <div class="help-grid">
+                <div class="help-item">
+                    <div class="help-item-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h5>Check Connection</h5>
+                    <p>Ensure you have a stable internet connection and try again</p>
+                </div>
+                <div class="help-item">
+                    <div class="help-item-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h5>Verify Card Details</h5>
+                    <p>Double-check your card number, expiry date, and CVV</p>
+                </div>
+                <div class="help-item">
+                    <div class="help-item-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h5>Check Balance</h5>
+                    <p>Make sure you have sufficient funds in your account</p>
+                </div>
+                <div class="help-item">
+                    <div class="help-item-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h5>Try Different Method</h5>
+                    <p>Use another card, UPI, or Cash on Delivery option</p>
+                </div>
+                <div class="help-item">
+                    <div class="help-item-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h5>Contact Bank</h5>
+                    <p>If the issue persists, contact your bank for assistance</p>
+                </div>
+                <div class="help-item">
+                    <div class="help-item-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h5>Cash on Delivery</h5>
+                    <p>Choose COD as a safe alternative payment method</p>
+                </div>
+            </div>
         </div>
 
-        <div class="contact-info">
-            <h4><i class="fas fa-headset"></i> Need Help?</h4>
-            <p><strong>Customer Support:</strong> support@1notone.com</p>
-            <p><strong>Phone:</strong> +91-XXXXXXXXXX (9 AM - 9 PM)</p>
-            <p><strong>Live Chat:</strong> Available on our website</p>
+        <div class="contact-section">
+            <h4><i class="fas fa-headset"></i> Need Personal Assistance?</h4>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-info">
+                        <h5>Email Support</h5>
+                        <p>support@1notone.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-info">
+                        <h5>Phone Support</h5>
+                        <p>+91-XXXXXXXXXX (9 AM - 9 PM)</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="contact-info">
+                        <h5>Live Chat</h5>
+                        <p>Available on our website</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="action-buttons">
@@ -487,7 +733,7 @@
             </a>
             <a href="/orders/details/<%= failedOrderId %>" class="btn btn-primary">
                 <i class="fas fa-receipt"></i>
-                View Orders
+                View Order
             </a>
             <% } else { %>
             <button id="retryPaymentBtn" class="btn btn-danger">
@@ -513,142 +759,195 @@
         const errorMessage = urlParams.get('error');
         const failedOrderId = urlParams.get('orderId');
         
-        if (errorMessage && !document.querySelector('.error-info')) {
+        if (errorMessage && !document.querySelector('.error-section')) {
             const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-info';
+            errorDiv.className = 'error-section';
             errorDiv.innerHTML = `
-                <h3><i class="fas fa-exclamation-triangle"></i> Error Details</h3>
+                <h3><i class="fas fa-exclamation-triangle"></i> What went wrong?</h3>
                 <div class="error-details">${errorMessage}</div>
             `;
             
-            const failureMessage = document.querySelector('.failure-message');
-            failureMessage.parentNode.insertBefore(errorDiv, failureMessage.nextSibling);
+            const failureSubtitle = document.querySelector('.failure-subtitle');
+            failureSubtitle.parentNode.insertBefore(errorDiv, failureSubtitle.nextSibling);
         }
 
-        // Add "View Orders" button if failedOrderId is available in URL and button doesn't exist
-        if (failedOrderId && !document.querySelector('a[href*="/order-details/"]')) {
+        // Add "View Order" button if failedOrderId is available in URL and button doesn't exist
+        if (failedOrderId && !document.querySelector('a[href*="/orders/details/"]')) {
             const actionButtons = document.querySelector('.action-buttons');
             const retryButton = document.getElementById('retryPaymentBtn');
             
-            const viewOrdersButton = document.createElement('a');
-            viewOrdersButton.href = `/orders/details/${failedOrderId}`;
-            viewOrdersButton.className = 'btn btn-primary';
-            viewOrdersButton.innerHTML = `
+            const viewOrderButton = document.createElement('a');
+            viewOrderButton.href = `/orders/details/${failedOrderId}`;
+            viewOrderButton.className = 'btn btn-primary';
+            viewOrderButton.innerHTML = `
                 <i class="fas fa-receipt"></i>
-                View Orders
+                View Order
             `;
             
-            // Insert the View Orders button after the Retry Payment button
+            // Insert the View Order button after the Retry Payment button
             if (retryButton && retryButton.nextSibling) {
-                actionButtons.insertBefore(viewOrdersButton, retryButton.nextSibling);
+                actionButtons.insertBefore(viewOrderButton, retryButton.nextSibling);
             } else if (retryButton) {
-                retryButton.parentNode.insertBefore(viewOrdersButton, retryButton.nextSibling);
+                retryButton.parentNode.insertBefore(viewOrderButton, retryButton.nextSibling);
             } else {
-                actionButtons.insertBefore(viewOrdersButton, actionButtons.firstChild);
+                actionButtons.insertBefore(viewOrderButton, actionButtons.firstChild);
             }
         }
 
         // Retry payment functionality - opens Razorpay directly
-        document.getElementById('retryPaymentBtn').addEventListener('click', async function() {
-            try {
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        const retryBtn = document.getElementById('retryPaymentBtn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', async function() {
+                try {
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-                // Get retry payment order details
-                const response = await fetch('/checkout/retry-payment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        failedOrderId: failedOrderId
-                    })
-                });
+                    // Get retry payment order details
+                    const response = await fetch('/checkout/retry-payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            failedOrderId: failedOrderId
+                        })
+                    });
 
-                const result = await response.json();
+                    const result = await response.json();
 
-                if (!result.success) {
-                    throw new Error(result.message || 'Failed to initiate payment');
-                }
-
-                // Initialize Razorpay directly on this page
-                const options = {
-                    key: result.key,
-                    amount: result.amount,
-                    currency: result.currency,
-                    name: '1NOTONE',
-                    description: 'Retry Payment',
-                    order_id: result.orderId,
-                    handler: async function(response) {
-                        try {
-                            // Verify payment
-                            const verifyResponse = await fetch('/checkout/verify-payment', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    addressId: result.addressId
-                                })
-                            });
-
-                            const verifyResult = await verifyResponse.json();
-                            console.log('Payment verification result:', verifyResult);
-
-                            if (verifyResult.success) {
-                                console.log('Payment verified successfully, redirecting to:', verifyResult.redirectUrl);
-                                // Redirect to success page
-                                if (verifyResult.redirectUrl) {
-                                    window.location.href = verifyResult.redirectUrl;
-                                } else {
-                                    console.error('No redirect URL provided in response');
-                                    window.location.href = `/checkout/payment-success/${verifyResult.orderId}`;
-                                }
-                            } else {
-                                console.error('Payment verification failed:', verifyResult.message);
-                                throw new Error(verifyResult.message || 'Payment verification failed');
-                            }
-                        } catch (error) {
-                            console.error('Payment verification error:', error);
-                            alert('Payment verification failed. Please contact support.');
-                        }
-                    },
-                    modal: {
-                        ondismiss: function() {
-                            // Re-enable button when modal is dismissed
-                            document.getElementById('retryPaymentBtn').disabled = false;
-                            document.getElementById('retryPaymentBtn').innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
-                        }
-                    },
-                    theme: {
-                        color: '#667eea'
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to initiate payment');
                     }
-                };
 
-                const rzp = new Razorpay(options);
-                rzp.on('payment.failed', function(response) {
-                    console.error('Payment failed:', response.error);
-                    // Stay on the same page and show the error
-                    window.location.href = `/checkout/payment-failure?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
-                });
+                    // Initialize Razorpay directly on this page
+                    const options = {
+                        key: result.key,
+                        amount: result.amount,
+                        currency: result.currency,
+                        name: '1NOTONE',
+                        description: 'Retry Payment',
+                        order_id: result.orderId,
+                        handler: async function(response) {
+                            try {
+                                // Verify payment
+                                const verifyResponse = await fetch('/checkout/verify-payment', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        addressId: result.addressId
+                                    })
+                                });
 
-                rzp.open();
+                                const verifyResult = await verifyResponse.json();
+                                console.log('Payment verification result:', verifyResult);
 
-            } catch (error) {
-                console.error('Error initiating retry payment:', error);
-                alert(error.message || 'Failed to initiate payment. Please try again.');
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
-            }
+                                if (verifyResult.success) {
+                                    console.log('Payment verified successfully, redirecting to:', verifyResult.redirectUrl);
+                                    // Redirect to success page
+                                    if (verifyResult.redirectUrl) {
+                                        window.location.href = verifyResult.redirectUrl;
+                                    } else {
+                                        console.error('No redirect URL provided in response');
+                                        window.location.href = `/checkout/payment-success/${verifyResult.orderId}`;
+                                    }
+                                } else {
+                                    console.error('Payment verification failed:', verifyResult.message);
+                                    throw new Error(verifyResult.message || 'Payment verification failed');
+                                }
+                            } catch (error) {
+                                console.error('Payment verification error:', error);
+                                alert('Payment verification failed. Please contact support.');
+                            }
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                // Re-enable button when modal is dismissed
+                                document.getElementById('retryPaymentBtn').disabled = false;
+                                document.getElementById('retryPaymentBtn').innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                            }
+                        },
+                        theme: {
+                            color: '#ff6b6b'
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function(response) {
+                        console.error('Payment failed:', response.error);
+                        // Stay on the same page and show the error
+                        window.location.href = `/checkout/payment-failure?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
+                    });
+
+                    rzp.open();
+
+                } catch (error) {
+                    console.error('Error initiating retry payment:', error);
+                    alert(error.message || 'Failed to initiate payment. Please try again.');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-redo"></i> Retry Payment';
+                }
+            });
+        }
+
+        // Add hover effects to help items
+        document.querySelectorAll('.help-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
         });
+
+        // Add click animation to buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 255, 255, 0.5)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Add ripple animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
         // Auto-focus on retry button for better UX
         window.addEventListener('load', () => {
-            const retryButton = document.querySelector('#retryPaymentBtn');
-             if (retryButton) {
+            const retryButton = document.querySelector('#retryPaymentBtn, .btn-danger');
+            if (retryButton) {
                 retryButton.focus();
             }
         });

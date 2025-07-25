@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Wallet - 1NOTONE</title>
+    <link rel="stylesheet" href="/styles/user/wallet-responsive.css">
     <style>
         * {
             margin: 0;
@@ -17,13 +17,6 @@
             line-height: 1.6;
         }
 
-       
-       
-
-
-      
-
-
         /* Main Layout */
         .main-container {
             max-width: 1350px;
@@ -33,9 +26,6 @@
             gap: 30px;
             min-height: calc(100vh - 80px);
         }
-
-       
-    
 
         /* Main Content Area */
         .main-content {
@@ -225,6 +215,34 @@
             color: #ef4444 !important;
         }
 
+        /* Profile Hamburger Button for Profile Pages */
+        .profile-hamburger {
+            position: fixed;
+            top: 65px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 999;
+            display: none;
+        }
+
+        .profile-hamburger:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .profile-hamburger:active {
+            transform: scale(0.95);
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .main-container {
@@ -232,24 +250,28 @@
                 padding: 15px;
             }
             
-            .profile-sidebar {
-                width: 100%;
+            .sidebar {
+                display: none;
             }
             
             .wallet-stats {
                 grid-template-columns: 1fr;
             }
             
-            .nav-menu {
-                display: none;
+            .profile-hamburger {
+                display: block;
             }
         }
     </style>
 </head>
 <body>
     <!-- Header -->
-   
     <%- include("../partials/user/header") %>
+
+    <!-- Profile Hamburger Button for Mobile -->
+    <button class="profile-hamburger" onclick="openProfileSidebar(event)" title="Profile Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <!-- Breadcrumb Navigation -->
     <%- include("../partials/user/breadcrumb", {

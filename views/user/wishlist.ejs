@@ -521,8 +521,7 @@
             }
 
             .sidebar {
-                width: 100%;
-                position: static;
+                display: none;
             }
 
             .header-content {
@@ -627,6 +626,11 @@
     <!-- Header -->
  <%- include("../partials/user/header") %>
 
+    <!-- Profile Hamburger Button for Mobile -->
+    <button class="profile-hamburger" onclick="openProfileSidebar(event)" title="Profile Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
     <!-- Breadcrumb Navigation -->
     <%- include("../partials/user/breadcrumb", {
         breadcrumbs: [
@@ -650,7 +654,7 @@
                     <div class="header-info">
                         <h2>My Wishlist</h2>
                         <p>Items you've saved for later</p>
-                        <span class="item-count-badge">3 items</span>
+                        <span class="item-count-badge"><%=wishlist.length%> Items</span>
                     </div>
                 </div>
                 

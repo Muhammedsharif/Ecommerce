@@ -19,6 +19,7 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
+            transition: all 0.3s ease;
         }
 
         .hero-content {
@@ -391,6 +392,34 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 992px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                padding: 0 15px;
+            }
+
+            .featured {
+                padding: 60px 30px;
+            }
+
+            .new-arrivals-title {
+                margin-left: 15px;
+                font-size: 1.8rem;
+            }
+
+            /* Video optimization for tablets */
+            .hero video {
+                transform: scale(0.95);
+                
+                object-fit: cover;
+            }
+
+            .hero {
+                height: 85vh;
+            }
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 padding: 15px 20px;
@@ -413,6 +442,15 @@
                 padding: 0 20px;
                 justify-content: center;
                 text-align: center;
+                height: 75vh;
+            }
+
+            /* Enhanced video responsiveness for mobile */
+            .hero video {
+                transform: scale(0.85);
+                opacity: 0.7;
+                object-fit: cover;
+                object-position: center;
             }
 
             .hero h1 {
@@ -423,8 +461,8 @@
                 font-size: 1rem;
             }
 
-            .featured, .collections {
-                padding: 50px 20px;
+            .featured {
+                padding: 40px 15px;
             }
 
             .section-title {
@@ -432,19 +470,63 @@
             }
 
             .product-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 0 10px;
             }
 
-    .banner-container {
-        flex-direction: column;
-        flex-wrap: wrap;
-    }
-    .banner-card {
-        margin-bottom: 20px;
-        min-height: 350px;
-        width: 100%;
-    }
+            .product-card {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            .product-image {
+                height: 160px;
+                margin-bottom: 15px;
+            }
+
+            .product-name {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+            }
+
+            .product-price {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+
+            .add-to-cart {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+
+            .new-arrivals-title {
+                margin-left: 10px;
+                font-size: 1.6rem;
+                margin-bottom: 1rem;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .banner-container {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 10px;
+            }
+
+            .banner-card {
+                margin-bottom: 15px;
+                min-height: 250px;
+                width: 100%;
+            }
+
+            .banner-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+                bottom: 15px;
+            }
 
             .collection-grid {
                 grid-template-columns: 1fr;
@@ -464,21 +546,110 @@
                 font-size: 14px;
                 padding: 6px 12px;
             }
+
+            .slideshow-container {
+                margin: 20px 10px;
+            }
+
+            .slide img {
+                border-radius: 8px;
+            }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 576px) {
+            .hero {
+                height: 65vh;
+                padding: 0 15px;
+            }
+
+            /* Further video optimization for small mobile */
+            .hero video {
+                transform: scale(0.8);
+                opacity: 0.6;
+                object-fit: cover;
+                object-position: center;
+                filter: blur(0.3px);
+            }
+
             .hero h1 {
                 font-size: 2rem;
+                margin-bottom: 15px;
             }
 
             .hero p {
                 font-size: 0.9rem;
+                margin-bottom: 20px;
             }
 
-           
+            .featured {
+                padding: 30px 10px;
+            }
 
             .product-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 0 5px;
+            }
+
+            .product-card {
+                padding: 15px;
+                margin: 0 5px;
+            }
+
+            .product-image {
+                height: 180px;
+                margin-bottom: 12px;
+            }
+
+            .product-name {
+                font-size: 1.1rem;
+                margin-bottom: 6px;
+            }
+
+            .product-price {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+
+            .add-to-cart {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+
+            .new-arrivals-title {
+                margin-left: 5px;
+                font-size: 1.4rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .container {
+                padding: 0 5px;
+            }
+
+            .banner-section {
+                padding: 30px 10px;
+            }
+
+            .banner-container {
+                gap: 10px;
+                padding: 0 5px;
+            }
+
+            .banner-card {
+                margin-bottom: 10px;
+                min-height: 200px;
+                border-radius: 10px;
+            }
+
+            .banner-card img {
+                border-radius: 10px;
+            }
+
+            .banner-button {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                bottom: 10px;
+                border-radius: 20px;
             }
 
             .search-box {
@@ -487,6 +658,94 @@
 
             .nav-actions {
                 gap: 8px;
+            }
+
+            .slideshow-container {
+                margin: 15px 5px;
+            }
+
+            .slide img {
+                border-radius: 6px;
+            }
+
+            /* Swiper adjustments for mobile */
+            .newArrivalsSwiper {
+                padding: 15px 0;
+                margin: 0 -5px;
+            }
+
+            .swiper-slide {
+                padding: 0 5px;
+            }
+
+            .swiper-button-next,
+            .swiper-button-prev {
+                display: none;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .hero {
+                height: 55vh;
+                padding: 0 10px;
+            }
+
+            /* Maximum video optimization for very small screens */
+            .hero video {
+                transform: scale(0.7);
+                opacity: 0.5;
+                object-fit: cover;
+                object-position: center;
+                filter: blur(0.5px);
+            }
+
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .hero p {
+                font-size: 0.8rem;
+            }
+
+            .featured {
+                padding: 25px 5px;
+            }
+
+            .product-card {
+                padding: 12px;
+                margin: 0 2px;
+            }
+
+            .product-image {
+                height: 150px;
+                margin-bottom: 10px;
+            }
+
+            .product-name {
+                font-size: 1rem;
+            }
+
+            .product-price {
+                font-size: 0.9rem;
+            }
+
+            .add-to-cart {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+
+            .new-arrivals-title {
+                font-size: 1.2rem;
+                margin-left: 2px;
+            }
+
+            .banner-card {
+                min-height: 180px;
+            }
+
+            .banner-button {
+                padding: 5px 10px;
+                font-size: 0.75rem;
             }
         }
     .swiper-slide {

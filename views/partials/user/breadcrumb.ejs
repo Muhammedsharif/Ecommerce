@@ -1,95 +1,382 @@
-<!-- Breadcrumb Navigation -->
-<nav class="breadcrumb-nav">
-    <div class="container">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="/">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                    </svg>
-                    Home
-                </a>
-            </li>
-            <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
-                <% breadcrumbs.forEach((crumb, index) => { %>
-                    <li class="breadcrumb-item <%= index === breadcrumbs.length - 1 ? 'active' : '' %>">
-                        <% if (index === breadcrumbs.length - 1) { %>
-                            <%= crumb.name %>
-                        <% } else { %>
-                            <a href="<%= crumb.url %>"><%= crumb.name %></a>
-                        <% } %>
-                    </li>
-                <% }) %>
-            <% } %>
-        </ol>
-    </div>
-</nav>
+<!-- Clean Breadcrumb Navigation -->
+<div class="breadcrumb-wrapper" id="breadcrumbWrapper">
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <div class="breadcrumb-container">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/" class="breadcrumb-link home-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                
+                <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
+                    <% breadcrumbs.forEach((crumb, index) => { %>
+                        <li class="breadcrumb-item">
+                            <span class="breadcrumb-separator">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            
+                            <% if (index === breadcrumbs.length - 1) { %>
+                                <span class="breadcrumb-current">
+                                    <%= crumb.name %>
+                                </span>
+                            <% } else { %>
+                                <a href="<%= crumb.url %>" class="breadcrumb-link">
+                                    <span><%= crumb.name %></span>
+                                </a>
+                            <% } %>
+                        </li>
+                    <% }) %>
+                <% } %>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const breadcrumbWrapper = document.getElementById('breadcrumbWrapper');
+    if (!breadcrumbWrapper) return;
+    
+    // Determine page type and apply appropriate positioning
+    const currentPath = window.location.pathname;
+    let positionClass = 'position-default';
+    
+    // Apply consistent positioning based on page context
+    if (currentPath.includes('/profile') || 
+        currentPath.includes('/orders') || 
+        currentPath.includes('/address') || 
+        currentPath.includes('/wallet') || 
+        currentPath.includes('/change-password') ||
+        currentPath.includes('/editProfile')) {
+        positionClass = 'position-profile';
+    } else if (currentPath.includes('/shop')) {
+        positionClass = 'position-shop';
+    } else if (currentPath.includes('/productDetails')) {
+        positionClass = 'position-product';
+    } else if (currentPath.includes('/cart')) {
+        positionClass = 'position-cart';
+    } else if (currentPath.includes('/checkout')) {
+        positionClass = 'position-checkout';
+    } else if (currentPath.includes('/wishlist')) {
+        positionClass = 'position-wishlist';
+    }
+    
+    breadcrumbWrapper.classList.add(positionClass);
+    
+    // Add smooth entrance animation
+    setTimeout(() => {
+        breadcrumbWrapper.classList.add('animate-in');
+    }, 100);
+    
+    // Add hover effects to links
+    const breadcrumbLinks = breadcrumbWrapper.querySelectorAll('.breadcrumb-link');
+    breadcrumbLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-1px)';
+        });
+        
+        link.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
 
 <style>
-.breadcrumb-nav {
-    background-color: #f8f9fa;
-    padding: 12px 0;
-    border-bottom: 1px solid #e9ecef;
+/* ===== CLEAN BREADCRUMB DESIGN ===== */
+
+.breadcrumb-wrapper {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
     margin-bottom: 20px;
+}
+
+.breadcrumb-wrapper.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.breadcrumb-nav {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.breadcrumb-container {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .breadcrumb {
     display: flex;
-    flex-wrap: wrap;
-    padding: 0;
-    margin: 0;
-    list-style: none;
     align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .breadcrumb-item {
     display: flex;
     align-items: center;
+    font-size: 14px;
 }
 
-.breadcrumb-item + .breadcrumb-item::before {
-    content: "/";
+.breadcrumb-separator {
     color: #6c757d;
     margin: 0 8px;
-    font-weight: normal;
+    font-size: 12px;
 }
 
-.breadcrumb-item a {
-    color: #007bff;
+.breadcrumb-link {
+    color: #6366f1;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 4px;
-    transition: color 0.2s ease;
-}
-
-.breadcrumb-item a:hover {
-    color: #0056b3;
-    text-decoration: underline;
-}
-
-.breadcrumb-item.active {
-    color: #6c757d;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
     font-weight: 500;
 }
 
-.breadcrumb-item svg {
-    width: 16px;
-    height: 16px;
-    margin-right: 4px;
+.breadcrumb-link:hover {
+    color: #4f46e5;
+    background-color: rgba(99, 102, 241, 0.1);
+    text-decoration: none;
 }
 
+.breadcrumb-link.home-link i {
+    font-size: 14px;
+}
+
+.breadcrumb-current {
+    color: #495057;
+    font-weight: 600;
+    padding: 4px 8px;
+    background-color: rgba(73, 80, 87, 0.1);
+    border-radius: 4px;
+}
+
+/* ===== POSITIONING VARIANTS ===== */
+
+/* Default Position - Below header, above main content */
+.position-default {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+/* Profile Pages - Consistent positioning below header */
+.position-profile {
+    margin: 20px auto 30px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.position-profile .breadcrumb-nav {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Shop Page - Below hero section */
+.position-shop {
+    margin: 0 20px 20px 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.position-shop .breadcrumb-nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Product Details - Above product info */
+.position-product {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.position-product .breadcrumb-nav {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Cart Page - Above cart content */
+.position-cart {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.position-cart .breadcrumb-nav {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border: 1px solid #e9ecef;
+}
+
+/* Checkout Page - Above checkout form */
+.position-checkout {
+    margin: 0 auto 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.position-checkout .breadcrumb-nav {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #28a745;
+}
+
+/* Wishlist Page - Above wishlist items - FIXED TO MATCH CONSISTENT DESIGN */
+.position-wishlist {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.position-wishlist .breadcrumb-nav {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     .breadcrumb-nav {
-        padding: 8px 0;
+        padding: 10px 16px;
+    }
+    
+    .breadcrumb {
+        font-size: 13px;
+        gap: 6px;
+    }
+    
+    .breadcrumb-separator {
+        margin: 0 6px;
+        font-size: 11px;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        padding: 3px 6px;
+        font-size: 13px;
+    }
+    
+    .position-default,
+    .position-profile,
+    .position-product,
+    .position-cart,
+    .position-checkout,
+    .position-wishlist {
+        margin: 15px 10px;
+        padding: 0 10px;
+    }
+    
+    .position-shop {
+        margin: 0 10px 15px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .breadcrumb-nav {
+        padding: 8px 12px;
+    }
+    
+    .breadcrumb {
+        font-size: 12px;
+        gap: 4px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .breadcrumb::-webkit-scrollbar {
+        display: none;
     }
     
     .breadcrumb-item {
-        font-size: 14px;
+        flex-shrink: 0;
+        white-space: nowrap;
     }
     
-    .breadcrumb-item + .breadcrumb-item::before {
-        margin: 0 6px;
+    .breadcrumb-separator {
+        margin: 0 4px;
+        font-size: 10px;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        padding: 2px 4px;
+        font-size: 12px;
+    }
+    
+    .breadcrumb-link span {
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+    .breadcrumb-wrapper,
+    .breadcrumb-link {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .breadcrumb-wrapper {
+        display: none;
+    }
+}
+
+/* ===== FOCUS STYLES ===== */
+.breadcrumb-link:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+    background-color: rgba(99, 102, 241, 0.1);
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+    .breadcrumb-nav {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+    
+    .breadcrumb-link {
+        color: #93c5fd;
+    }
+    
+    .breadcrumb-link:hover {
+        color: #dbeafe;
+        background-color: rgba(147, 197, 253, 0.1);
+    }
+    
+    .breadcrumb-current {
+        color: #f3f4f6;
+        background-color: rgba(156, 163, 175, 0.2);
+    }
+    
+    .breadcrumb-separator {
+        color: #9ca3af;
     }
 }
 </style>

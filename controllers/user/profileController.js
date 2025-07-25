@@ -522,7 +522,17 @@ const loadeditAddress = async (req,res)=>{
     try {
 
         const addressId = req.query.id
-        const user = req.session.user
+        const userId = req.session.user
+        
+        if (!userId) {
+            return res.redirect("/login");
+        }
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.redirect("/pageNotFound");
+        }
+
         const currAddress = await Address.findOne({
             
             "adress._id":addressId
@@ -543,7 +553,7 @@ const loadeditAddress = async (req,res)=>{
             return res.redirect("/pageNotFound")
         }
 
-        res.render("editAddress",{address:addressData,user:user})
+        res.render("editAddress",{address:addressData,user:userData})
         
     } catch (error) {
 

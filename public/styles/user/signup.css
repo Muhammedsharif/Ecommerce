@@ -166,12 +166,161 @@ a[href="/auth/google"] img {
 }
 
 /* Responsive design */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        max-width: 400px;
+        flex-direction: column;
+        background: none;
+        border-radius: 0;
+        min-height: auto;
+    }
+    
+    .left {
+        display: none;
+    }
+    
+    .right {
+        border-radius: 24px;
+        margin: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 40px 30px;
+    }
+    
+    .lang {
+        position: static;
+        text-align: center;
+        margin-bottom: 20px;
+        color: #666;
+    }
+    
     a[href="/auth/google"],
     .google-btn {
+        margin-left: 0;
         width: 100%;
         min-width: auto;
         padding: 12px 16px;
+        justify-content: center;
+    }
+    
+    form input {
+        padding: 14px 10px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1.5px solid #e5e7eb;
+        border-bottom: 1.5px solid #e5e7eb;
+        background: #f9fafb;
+        margin: 10px 0;
+    }
+    
+    form input:focus {
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .submit-btn {
+        padding: 16px;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        background: #f8f9fa;
+        padding: 10px;
+    }
+    
+    .container {
+        margin: 0;
+    }
+    
+    .right {
+        margin: 10px;
+        padding: 30px 20px;
+        border-radius: 20px;
+    }
+    
+    .lang {
+        font-size: 11px;
+        margin-bottom: 15px;
+    }
+    
+    a[href="/auth/google"],
+    .google-btn {
+        padding: 14px 16px;
+        font-size: 16px;
+    }
+    
+    form input {
+        padding: 12px 8px;
+        margin: 8px 0;
+    }
+    
+    .password-input-group input {
+        padding-right: 35px;
+    }
+    
+    .password-toggle {
+        right: 8px;
+        font-size: 14px;
+    }
+    
+    .submit-btn {
+        padding: 14px;
+        margin-top: 15px;
+    }
+    
+    .login-link {
+        font-size: 13px;
+        margin-top: 15px;
+    }
+    
+    .divider {
+        margin: 15px 0;
+        font-size: 12px;
+    }
+    
+    .server-message {
+        padding: 8px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+    
+    .error-message {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 320px) {
+    .right {
+        margin: 5px;
+        padding: 25px 15px;
+    }
+    
+    form input {
+        padding: 10px 6px;
+    }
+    
+    .password-input-group input {
+        padding-right: 30px;
+    }
+    
+    .password-toggle {
+        right: 6px;
+        font-size: 13px;
+    }
+    
+    .submit-btn {
+        padding: 12px;
+        font-size: 15px;
+    }
+    
+    a[href="/auth/google"],
+    .google-btn {
+        padding: 12px 14px;
+        font-size: 15px;
     }
 }
     form input {

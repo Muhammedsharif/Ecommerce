@@ -389,20 +389,20 @@ const login = async (req,res)=>{
 
 const logout = async (req,res)=>{
     try {
-        req.session.destroy((err) => {
-            if(err){
-                console.log("Session destroy error",err.message)
-                return res.redirect("/pageNotFound")
+         delete req.session.user;
+
+        // Save the session to ensure the deletion is persisted
+        req.session.save((err) => {
+            if (err) {
+                console.log("Error in logout", err);
+                return res.redirect("/pageNotFound");
             }
-            res.clearCookie('connect.sid'); // Clear session cookie
-            return res.redirect("/auth/login")
-        })
+            res.redirect("/auth/login");
+        });
 
     } catch (error) {
-
-        console.log("Logout error",error);
-        res.redirect("/pageNotFound")
-
+        console.log("Error in logout", error);
+        res.redirect("/pageNotFound");
     }
 }
 

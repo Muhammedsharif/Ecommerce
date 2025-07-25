@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Successful - 1NOTONE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,8 +14,8 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,45 +25,57 @@
             position: relative;
         }
 
-        /* Animated background */
-        body::before {
-            content: '';
+        /* Animated background particles */
+        .particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 25% 25%, #00ff8760 0%, transparent 50%),
-                        radial-gradient(circle at 75% 75%, #ff006760 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, #0066ff60 0%, transparent 50%);
-            animation: backgroundPulse 8s ease-in-out infinite alternate;
-            z-index: -1;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        @keyframes backgroundPulse {
-            0% { transform: scale(1) rotate(0deg); }
-            100% { transform: scale(1.1) rotate(5deg); }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { width: 20px; height: 20px; top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 15px; height: 15px; top: 60%; left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { width: 25px; height: 25px; top: 40%; left: 70%; animation-delay: 2s; }
+        .particle:nth-child(4) { width: 18px; height: 18px; top: 80%; left: 80%; animation-delay: 3s; }
+        .particle:nth-child(5) { width: 22px; height: 22px; top: 30%; left: 90%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.8; }
         }
 
         .success-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 32px;
+            border-radius: 30px;
             padding: 3rem;
             text-align: center;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3),
-                        0 0 0 1px rgba(255, 255, 255, 0.1);
-            max-width: 700px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            max-width: 800px;
             width: 90%;
-            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: slideInUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        @keyframes slideUp {
+        @keyframes slideInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px) scale(0.9);
+                transform: translateY(60px) scale(0.8);
             }
             to {
                 opacity: 1;
@@ -70,42 +83,76 @@
             }
         }
 
+        .success-header {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .success-icon-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
         .success-icon {
-            width: 140px;
-            height: 140px;
-            background: linear-gradient(135deg, #00ff87, #00d4ff);
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #00C851, #00ff87);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 2rem;
-            animation: pulseGlow 2s ease-in-out infinite alternate;
+            margin: 0 auto;
+            animation: successPulse 2s ease-in-out infinite;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0, 255, 135, 0.3);
+            box-shadow: 
+                0 20px 40px rgba(0, 200, 81, 0.3),
+                0 0 0 10px rgba(0, 200, 81, 0.1),
+                0 0 0 20px rgba(0, 200, 81, 0.05);
         }
 
         .success-icon::before {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(135deg, #00ff87, #00d4ff);
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            background: linear-gradient(135deg, #00C851, #00ff87);
             border-radius: 50%;
             z-index: -1;
-            opacity: 0.3;
-            animation: rotate 4s linear infinite;
+            opacity: 0.2;
+            animation: rotate 8s linear infinite;
         }
 
-        @keyframes pulseGlow {
-            0% { 
+        .success-icon::after {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: -25px;
+            right: -25px;
+            bottom: -25px;
+            background: linear-gradient(135deg, #00C851, #00ff87);
+            border-radius: 50%;
+            z-index: -2;
+            opacity: 0.1;
+            animation: rotate 12s linear infinite reverse;
+        }
+
+        @keyframes successPulse {
+            0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 20px 40px rgba(0, 255, 135, 0.3);
+                box-shadow: 
+                    0 20px 40px rgba(0, 200, 81, 0.3),
+                    0 0 0 10px rgba(0, 200, 81, 0.1),
+                    0 0 0 20px rgba(0, 200, 81, 0.05);
             }
-            100% { 
+            50% { 
                 transform: scale(1.05);
-                box-shadow: 0 25px 50px rgba(0, 255, 135, 0.5);
+                box-shadow: 
+                    0 25px 50px rgba(0, 200, 81, 0.4),
+                    0 0 0 15px rgba(0, 200, 81, 0.15),
+                    0 0 0 30px rgba(0, 200, 81, 0.08);
             }
         }
 
@@ -115,245 +162,397 @@
         }
 
         .success-icon i {
-            font-size: 4rem;
+            font-size: 4.5rem;
             color: white;
             z-index: 1;
             position: relative;
+            animation: checkmarkDraw 1s ease-in-out 0.5s both;
+        }
+
+        @keyframes checkmarkDraw {
+            0% { 
+                transform: scale(0) rotate(-45deg);
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.2) rotate(-45deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
         }
 
         .success-title {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00ff87, #00d4ff);
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00C851, #00ff87, #667eea);
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
-            letter-spacing: -2px;
+            letter-spacing: -3px;
+            animation: gradientShift 3s ease-in-out infinite, titleBounce 1s ease-out 0.8s both;
         }
 
-        .success-message {
-            font-size: 1.2rem;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes titleBounce {
+            0% { 
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            60% { 
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-subtitle {
+            font-size: 1.3rem;
             color: #666;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             line-height: 1.6;
-            font-weight: 400;
+            font-weight: 500;
+            animation: fadeInUp 1s ease-out 1s both;
         }
 
-        .order-info {
-            background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(0, 212, 255, 0.1));
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid rgba(0, 255, 135, 0.2);
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .order-summary {
+            background: linear-gradient(135deg, rgba(0, 200, 81, 0.08), rgba(0, 255, 135, 0.08));
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            border: 2px solid rgba(0, 200, 81, 0.1);
             position: relative;
             overflow: hidden;
+            animation: slideInLeft 1s ease-out 1.2s both;
         }
 
-        .order-info::before {
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .order-summary::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #00ff87, #00d4ff);
+            height: 4px;
+            background: linear-gradient(90deg, #00C851, #00ff87, #667eea);
+            background-size: 200% 100%;
+            animation: gradientFlow 2s ease-in-out infinite;
         }
 
-        .order-info h3 {
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
+        }
+
+        .order-summary h3 {
             color: #333;
-            margin-bottom: 1.5rem;
-            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            font-size: 1.6rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
 
-        .order-details {
+        .order-details-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
             text-align: left;
         }
 
-        .detail-item {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            padding: 1rem;
+        .detail-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 18px;
+            padding: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
         }
 
-        .detail-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        .detail-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 200, 81, 0.15);
+        }
+
+        .detail-card:hover::before {
+            left: 100%;
         }
 
         .detail-label {
             font-weight: 600;
             color: #555;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .detail-value {
             color: #333;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 16px 32px;
-            border: none;
-            border-radius: 16px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
+        .celebration-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin: 2.5rem 0;
+            border: 2px solid rgba(102, 126, 234, 0.1);
             position: relative;
             overflow: hidden;
+            animation: slideInRight 1s ease-out 1.4s both;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #00ff87, #00d4ff);
-            color: white;
-            box-shadow: 0 10px 30px rgba(0, 255, 135, 0.3);
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(0, 255, 135, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .delivery-info {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .delivery-info::before {
+        .celebration-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: gradientFlow 2s ease-in-out infinite;
         }
 
-        .delivery-info h4 {
+        .celebration-section h4 {
             color: #667eea;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .delivery-timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .timeline-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 1;
+        }
+
+        .timeline-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            z-index: 2;
+            position: relative;
+            animation: timelineGlow 2s ease-in-out infinite alternate;
         }
 
-        .delivery-info p {
-            color: #555;
-            margin: 0.8rem 0;
-            font-weight: 500;
-            line-height: 1.6;
+        @keyframes timelineGlow {
+            0% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6); }
         }
 
-        .floating-elements {
+        .timeline-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 1.6s both;
+        }
+
+        .btn {
+            padding: 18px 36px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn::before {
+            content: '';
             position: absolute;
             top: 0;
-            left: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00C851, #00ff87);
+            color: white;
+            box-shadow: 0 15px 35px rgba(0, 200, 81, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 45px rgba(0, 200, 81, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 45px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            top: -10px;
+            z-index: 9999;
             pointer-events: none;
-            z-index: -1;
         }
 
-        .floating-circle {
+        .confetti-piece {
+            width: 10px;
+            height: 10px;
+            background: #00C851;
             position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(0, 212, 255, 0.1));
-            animation: float 6s ease-in-out infinite;
+            animation: confetti-fall 3s linear forwards;
         }
 
-        .floating-circle:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .floating-circle:nth-child(2) {
-            width: 60px;
-            height: 60px;
-            top: 60%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .floating-circle:nth-child(3) {
-            width: 40px;
-            height: 40px;
-            top: 30%;
-            right: 30%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
 
         @media (max-width: 768px) {
             .success-container {
                 padding: 2rem;
                 margin: 1rem;
-                border-radius: 24px;
+                border-radius: 25px;
             }
 
             .success-title {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
+                letter-spacing: -2px;
             }
 
             .success-icon {
-                width: 100px;
-                height: 100px;
+                width: 120px;
+                height: 120px;
             }
 
             .success-icon i {
-                font-size: 2.5rem;
+                font-size: 3rem;
             }
 
-            .order-details {
+            .order-details-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -365,60 +564,143 @@
             .btn {
                 width: 100%;
                 justify-content: center;
+                max-width: 300px;
+            }
+
+            .delivery-timeline {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .timeline-step:not(:last-child)::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 1.5rem;
+            }
+
+            .success-title {
+                font-size: 2.2rem;
+            }
+
+            .success-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .success-icon i {
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="floating-elements">
-        <div class="floating-circle"></div>
-        <div class="floating-circle"></div>
-        <div class="floating-circle"></div>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
     </div>
 
     <div class="success-container">
-        <div class="success-icon">
-            <i class="fas fa-check"></i>
+        <div class="success-header">
+            <div class="success-icon-container">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <h1 class="success-title">Payment Successful!</h1>
+            <p class="success-subtitle">
+                🎉 Congratulations! Your order has been confirmed and is being processed. 
+                Get ready to receive your amazing products!
+            </p>
         </div>
 
-        <h1 class="success-title">Payment Successful!</h1>
-        <p class="success-message">
-            Thank you for your order! Your payment has been processed successfully and your order is being prepared for shipment.
-        </p>
-
-        <div class="order-info">
-            <h3><i class="fas fa-receipt"></i> Order Information</h3>
-            <div class="order-details">
-                <div class="detail-item">
-                    <span class="detail-label">Order ID:</span>
-                    <span class="detail-value"><%= order.orderId %></span>
+        <div class="order-summary">
+            <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+            <div class="order-details-grid">
+                <div class="detail-card">
+                    <div class="detail-label">
+                        <i class="fas fa-hashtag"></i>
+                        Order ID
+                    </div>
+                    <div class="detail-value"><%= order.orderId %></div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Order Date:</span>
-                    <span class="detail-value"><%= new Date(order.createdOn).toLocaleDateString('en-IN') %></span>
+                <div class="detail-card">
+                    <div class="detail-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Order Date
+                    </div>
+                    <div class="detail-value"><%= new Date(order.createdOn).toLocaleDateString('en-IN') %></div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Total Amount:</span>
-                    <span class="detail-value">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></span>
+                <div class="detail-card">
+                    <div class="detail-label">
+                        <i class="fas fa-rupee-sign"></i>
+                        Total Amount
+                    </div>
+                    <div class="detail-value">₹<%= Math.round(order.finalAmount).toLocaleString('en-IN') %></div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Payment Method:</span>
-                    <span class="detail-value">Online Payment</span>
+                <div class="detail-card">
+                    <div class="detail-label">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Method
+                    </div>
+                    <div class="detail-value">Online Payment</div>
                 </div>
             </div>
         </div>
 
-        <div class="delivery-info">
-            <h4><i class="fas fa-truck"></i> Delivery Information</h4>
-            <p><strong>Estimated Delivery:</strong> 3-5 business days</p>
-            <p><strong>Tracking:</strong> You will receive tracking information via email once your order is shipped.</p>
-            <p><strong>Support:</strong> For any queries, contact us at support@1notone.com or call +91-XXXXXXXXXX</p>
+        <div class="celebration-section">
+            <h4><i class="fas fa-shipping-fast"></i> What's Next?</h4>
+            
+            <div class="delivery-timeline">
+                <div class="timeline-step">
+                    <div class="timeline-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="timeline-label">Order Confirmed</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="timeline-label">Processing</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="timeline-label">Shipped</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="timeline-label">Delivered</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.8); border-radius: 15px; padding: 1.5rem; margin-top: 2rem;">
+                <p style="margin: 0.5rem 0; color: #555; font-weight: 500;">
+                    <strong>📦 Estimated Delivery:</strong> 3-5 business days
+                </p>
+                <p style="margin: 0.5rem 0; color: #555; font-weight: 500;">
+                    <strong>📧 Email Updates:</strong> You'll receive tracking information via email
+                </p>
+                <p style="margin: 0.5rem 0; color: #555; font-weight: 500;">
+                    <strong>🎧 Support:</strong> Need help? Contact us at support@1notone.com
+                </p>
+            </div>
         </div>
 
         <div class="action-buttons">
             <a href="/orders/details/<%= order._id %>" class="btn btn-primary">
                 <i class="fas fa-eye"></i>
-                View Order Details
+                Track Your Order
             </a>
             <a href="/shop" class="btn btn-secondary">
                 <i class="fas fa-shopping-bag"></i>
@@ -428,50 +710,136 @@
     </div>
 
     <script>
-        // Add confetti effect
+        // Enhanced confetti effect
         function createConfetti() {
-            const colors = ['#00ff87', '#00d4ff', '#667eea', '#764ba2', '#ff6b6b'];
+            const colors = ['#00C851', '#00ff87', '#667eea', '#764ba2', '#FFD700', '#FF6B6B'];
+            const shapes = ['circle', 'square', 'triangle'];
             
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < 150; i++) {
                 setTimeout(() => {
                     const confetti = document.createElement('div');
+                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                    
                     confetti.style.position = 'fixed';
                     confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.top = '-10px';
-                    confetti.style.width = Math.random() * 8 + 6 + 'px';
+                    confetti.style.top = '-20px';
+                    confetti.style.width = Math.random() * 12 + 8 + 'px';
                     confetti.style.height = confetti.style.width;
                     confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.borderRadius = '50%';
                     confetti.style.pointerEvents = 'none';
                     confetti.style.zIndex = '9999';
-                    confetti.style.animation = 'fall 4s ease-out forwards';
-                    confetti.style.boxShadow = '0 0 10px rgba(0, 255, 135, 0.5)';
+                    confetti.style.opacity = '0.8';
+                    
+                    if (shape === 'circle') {
+                        confetti.style.borderRadius = '50%';
+                    } else if (shape === 'triangle') {
+                        confetti.style.width = '0';
+                        confetti.style.height = '0';
+                        confetti.style.backgroundColor = 'transparent';
+                        confetti.style.borderLeft = '6px solid transparent';
+                        confetti.style.borderRight = '6px solid transparent';
+                        confetti.style.borderBottom = '12px solid ' + colors[Math.floor(Math.random() * colors.length)];
+                    }
+                    
+                    const animationDuration = Math.random() * 2 + 3;
+                    const rotationSpeed = Math.random() * 360 + 180;
+                    
+                    confetti.style.animation = `confetti-fall ${animationDuration}s linear forwards`;
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                     
                     document.body.appendChild(confetti);
                     
                     setTimeout(() => {
-                        confetti.remove();
-                    }, 4000);
-                }, i * 80);
+                        if (confetti.parentNode) {
+                            confetti.remove();
+                        }
+                    }, animationDuration * 1000);
+                }, i * 50);
             }
         }
 
-        // Add CSS for confetti animation
+        // Success sound effect (optional)
+        function playSuccessSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Trigger effects on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                createConfetti();
+                // Uncomment the line below if you want sound effects
+                // playSuccessSound();
+            }, 1000);
+            
+            // Create additional confetti bursts
+            setTimeout(() => createConfetti(), 3000);
+            setTimeout(() => createConfetti(), 5000);
+        });
+
+        // Add hover effects to cards
+        document.querySelectorAll('.detail-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add click animation to buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 255, 255, 0.5)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Add ripple animation CSS
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes fall {
+            @keyframes ripple {
                 to {
-                    transform: translateY(100vh) rotate(720deg);
+                    transform: scale(4);
                     opacity: 0;
                 }
             }
         `;
         document.head.appendChild(style);
-
-        // Trigger confetti on page load
-        window.addEventListener('load', () => {
-            setTimeout(createConfetti, 800);
-        });
     </script>
 </body>
 </html>

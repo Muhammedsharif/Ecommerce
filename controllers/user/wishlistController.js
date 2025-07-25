@@ -45,6 +45,11 @@ const addToWishlist = async (req, res) => {
             return res.status(404).json({ status: false, message: 'Product not found' });
         }
 
+        // Ensure wishlist is an array
+        if (!Array.isArray(user.wishlist)) {
+            user.wishlist = [];
+        }
+
         // Check if product is already in wishlist
         const productIndex = user.wishlist.indexOf(productId);
 
@@ -82,9 +87,17 @@ const removeProduct = async (req,res)=>{
         const productId = req.query.productId
         const userId = req.session.user
         const user = await User.findById(userId)
+        
+        // Ensure wishlist is an array
+        if (!Array.isArray(user.wishlist)) {
+            user.wishlist = [];
+        }
+        
         const index = user.wishlist.indexOf(productId)
-        user.wishlist.splice(index,1)
-        await user.save()
+        if (index > -1) {
+            user.wishlist.splice(index, 1)
+            await user.save()
+        }
         return res.redirect("/wishlist")
         
     } catch (error) {
@@ -106,8 +119,23 @@ const getWishlistCount = async(req, res) => {
         }
 
         const user = await User.findById(userId);
-        const wishlistCount = user ? user.wishlist.length : 0;
+        
+        if (!user) {
+            return res.json({ success: true, wishlistCount: 0 });
+        }
 
+        // Ensure wishlist is an array
+        let wishlistCount = 0;
+        if (Array.isArray(user.wishlist)) {
+            wishlistCount = user.wishlist.length;
+        } else {
+            // If wishlist is not an array, fix it
+            user.wishlist = [];
+            await user.save();
+            wishlistCount = 0;
+        }
+
+        console.log(`API: User ${userId} wishlist count: ${wishlistCount}`); // Debug log
         res.json({ success: true, wishlistCount: wishlistCount });
 
     } catch (error) {

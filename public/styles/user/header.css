@@ -199,14 +199,21 @@
 
         /* Mobile Navigation */
         .mobile-nav {
-            display: none;
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
             background: white;
-            border-top: 1px solid #e5e5e5;
-            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+            z-index: 1001;
+            padding: 80px 0 20px 0;
+            overflow-y: auto;
         }
 
         .mobile-nav.show {
-            display: block;
+            left: 0;
         }
 
         .mobile-nav ul {
@@ -216,14 +223,60 @@
         }
 
         .mobile-nav ul li {
-            margin-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         .mobile-nav ul li a {
             text-decoration: none;
             color: #111;
             font-weight: 500;
-            font-size: 16px;
+            font-size: 18px;
+            display: block;
+            padding: 20px 30px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .mobile-nav ul li a:hover {
+            background-color: #f8f9fa;
+            color: #667eea;
+        }
+
+        /* Mobile Navigation Overlay */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .mobile-nav-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Close button for mobile nav */
+        .mobile-nav-close {
+            position: absolute;
+            top: 65px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #111;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-nav-close:hover {
+            background-color: #f0f0f0;
         }
 
         .dropdown {
@@ -257,6 +310,187 @@
         .dropdown:hover .dropdown-content {
             display: block;
         }
+
+        /* Profile Sidebar Modal Styles */
+        .profile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.15);
+            transition: left 0.3s ease;
+            z-index: 1002;
+            overflow-y: auto;
+        }
+
+        .profile-sidebar.show {
+            left: 0;
+        }
+
+        .profile-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .profile-sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .profile-sidebar-close {
+            position: absolute;
+            top: 65px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #111;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+        }
+
+        .profile-sidebar-close:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-sidebar-content {
+            padding: 80px 2rem 2rem 2rem;
+        }
+
+        .profile-sidebar .profile-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .profile-sidebar .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-sidebar .profile-avatar-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            display: block;
+        }
+
+        .profile-sidebar .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #111;
+        }
+
+        .profile-sidebar .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #28a745;
+            font-size: 0.9rem;
+        }
+
+        .profile-sidebar .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+        }
+
+        .profile-sidebar .menu-section h4 {
+            color: #6c757d;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        .profile-sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+
+        .profile-sidebar .menu-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateX(5px);
+            border-left-color: #667eea;
+        }
+
+        .profile-sidebar .menu-item.logout-item:hover {
+            background: rgba(231, 76, 60, 0.1) !important;
+            color: #e74c3c !important;
+            border-left-color: #e74c3c !important;
+        }
+
+        .profile-sidebar .menu-icon {
+            width: 20px;
+            font-size: 1rem;
+        }
+
+        /* Profile Hamburger Button for Profile Pages */
+        .profile-hamburger {
+            position: fixed;
+            top: 65px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 999;
+            display: none;
+        }
+
+        .profile-hamburger:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .profile-hamburger:active {
+            transform: scale(0.95);
+        }
         
         
         @media (max-width: 992px) {
@@ -279,8 +513,15 @@
 
 
                 @media (max-width: 768px) {
-           
-          
+            /* Hide Profile Menu item from dropdown on mobile */
+            .profile-menu-item {
+                display: none !important;
+            }
+
+            /* Show profile hamburger button on profile pages */
+            .profile-hamburger {
+                display: block;
+            }
 
             .search-box {
                 width: 120px;
@@ -311,7 +552,15 @@
         }
 
                @media (max-width: 480px) {
+            .mobile-nav {
+                width: 280px;
+                left: -280px;
+            }
 
+            .mobile-nav ul li a {
+                font-size: 16px;
+                padding: 18px 25px;
+            }
 
             .cta-button {
                 padding: 12px 24px;
@@ -328,5 +577,25 @@
 
             .nav-actions {
                 gap: 8px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .mobile-nav {
+                width: 260px;
+                left: -260px;
+            }
+
+            .mobile-nav ul li a {
+                font-size: 15px;
+                padding: 16px 20px;
+            }
+
+            .header {
+                padding: 0 15px;
+            }
+
+            .logo {
+                font-size: 20px;
             }
         }

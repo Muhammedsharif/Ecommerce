@@ -451,7 +451,7 @@
             }
             
             .sidebar {
-                width: 100%;
+                display: none;
             }
             
             .stats-grid {
@@ -630,6 +630,11 @@
 <body>
    
  <%- include("../partials/user/header") %>
+
+    <!-- Profile Hamburger Button for Mobile -->
+    <button class="profile-hamburger" onclick="openProfileSidebar(event)" title="Profile Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <!-- Breadcrumb Navigation -->
     <%- include("../partials/user/breadcrumb", { breadcrumbs: [{ name: "My Account", url: "/profile" }] }) %>

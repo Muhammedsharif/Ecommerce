@@ -335,7 +335,8 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Full Name *</label>
-                            <input type="text" name="name" class="form-input" value="<%= user.name %>" required>
+                            <input type="text" name="name" id="nameInput" class="form-input" value="<%= user.name %>" required>
+                            <div id="nameError" class="error-message" style="display: none;"></div>
                             <% if (errors && errors.name) { %>
                                 <div class="error-message"><%= errors.name %></div>
                             <% } %>
@@ -443,5 +444,6 @@
             showToast('<%= error %>', 'error');
         <% } %>
     </script>
+    <script src="/js/profile-validation.js"></script>
 </body>
 </html>

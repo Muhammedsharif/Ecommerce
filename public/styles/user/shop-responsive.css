@@ -1,0 +1,238 @@
+/* Enhanced responsive styles for Shop page */
+
+/* Hero section image responsiveness */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 50vh; /* Reduce hero height on mobile */
+    }
+    
+    .floating-elements img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Better image scaling */
+        transform: scale(0.9); /* Slightly smaller image */
+        opacity: 0.8; /* Reduce opacity for better text readability */
+    }
+    
+    .hero-content {
+        padding: 0 15px;
+    }
+    
+    .hero-title {
+        font-size: 2.2rem; /* Smaller title */
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 30px;
+    }
+    
+    .hero-btn {
+        padding: 15px 30px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        min-height: 40vh; /* Further reduce hero height */
+    }
+    
+    .floating-elements img {
+        transform: scale(0.8); /* Smaller image on small mobile */
+        opacity: 0.7;
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    .hero-content {
+        padding: 0 10px;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+    
+    .hero-btn {
+        padding: 12px 25px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        min-height: 35vh; /* Minimal height for very small screens */
+    }
+    
+    .floating-elements img {
+        transform: scale(0.7); /* Much smaller image */
+        opacity: 0.6;
+        filter: blur(0.5px); /* Slight blur for better text contrast */
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+    }
+    
+    .hero-btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero-section {
+        min-height: 30vh; /* Very compact for smallest screens */
+    }
+    
+    .floating-elements img {
+        transform: scale(0.6); /* Smallest image size */
+        opacity: 0.5;
+        filter: blur(1px); /* More blur for better text readability */
+    }
+    
+    .hero-title {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.75rem;
+        margin-bottom: 15px;
+    }
+    
+    .hero-btn {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Additional product grid improvements for mobile */
+@media (max-width: 768px) {
+    .product-image {
+        height: 140px; /* Smaller product images */
+    }
+    
+    .product-card {
+        padding: 12px; /* Reduced padding */
+    }
+    
+    .product-name {
+        font-size: 1rem;
+    }
+    
+    .product-price {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-image {
+        height: 160px; /* Slightly larger for single column */
+    }
+    
+    .product-card {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-image {
+        height: 180px; /* Optimal size for small screens */
+    }
+    
+    .product-card {
+        padding: 12px;
+    }
+    
+    .product-name {
+        font-size: 0.95rem;
+    }
+    
+    .product-price {
+        font-size: 0.9rem;
+    }
+}
+
+/* Filter sidebar improvements */
+@media (max-width: 768px) {
+    .filter-sidebar {
+        padding: 15px 10px;
+    }
+    
+    .filter-title {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    
+    .filter-group {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+    
+    .filter-btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Search and toolbar improvements */
+@media (max-width: 768px) {
+    .products-toolbar {
+        padding: 12px;
+    }
+    
+    .products-count {
+        font-size: 14px;
+    }
+    
+    .search-input-wrapper {
+        height: 38px;
+    }
+    
+    #product-search {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .products-toolbar {
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .products-count {
+        font-size: 13px;
+    }
+    
+    .search-input-wrapper {
+        height: 35px;
+        padding-left: 12px;
+    }
+    
+    #product-search {
+        font-size: 13px;
+    }
+    
+    .search-btn {
+        font-size: 16px;
+        padding: 6px;
+    }
+    
+    .clear-search-btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}

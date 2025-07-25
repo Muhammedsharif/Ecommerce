@@ -695,6 +695,14 @@
 <body>
     <%- include("../partials/user/header") %>
 
+    <!-- Breadcrumb Navigation -->
+    <%- include("../partials/user/breadcrumb", {
+        breadcrumbs: [
+            { name: "Shopping Cart", url: "/cart" },
+            { name: "Checkout", url: "/checkout" }
+        ]
+    }) %>
+
     <div class="checkout-container">
         <div class="checkout-main">
             <!-- Cart Review Section -->

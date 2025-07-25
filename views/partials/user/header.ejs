@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,8 +28,20 @@
                     <button class="nav-icon wishlist-icon" title="Wishlist" id="wishlistIcon">
                         <i class="fas fa-heart"></i>
                         <% if (locals.wishlistCount && wishlistCount > 0) { %>
-                            <span class="wishlist-badge" id="wishlistBadge"><%= wishlistCount %></span>
+                            <span class="wishlist-badge" id="wishlistBadge" style="display: inline;"><%= wishlistCount %></span>
+                        <% } else { %>
+                            <span class="wishlist-badge" id="wishlistBadge" style="display: none;">0</span>
                         <% } %>
+                        <!-- Debug info (remove in production) -->
+                        <script>
+                            console.log('Server-side wishlistCount:', '<%= locals.wishlistCount || 0 %>');
+                            console.log('User logged in:', '<%= locals.user ? "true" : "false" %>');
+                            <% if (locals.user) { %>
+                            console.log('User ID:', '<%= user._id %>');
+                            console.log('User email:', '<%= user.email %>');
+                            console.log('User googleId:', '<%= user.googleId || "none" %>');
+                            <% } %>
+                        </script>
                     </button>
                 </a>
                 <a href="/cart">
@@ -46,6 +57,9 @@
                         <i class="fas fa-user-circle"></i>
                     </button>
                     <div id="dropdownContent" class="dropdown-content">
+                        <a href="#" onclick="openProfileSidebar(event)" class="profile-menu-item">
+                            <i class="fas fa-bars"></i> Profile Menu
+                        </a>
                         <a href="/profile">Profile</a>
                         <a href="/auth/logout">Logout</a>
                     </div>
@@ -61,15 +75,99 @@
                 </button>
             </div>
         </nav>
+        
+        <!-- Mobile Navigation Overlay -->
+        <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+        
         <!-- Mobile Navigation -->
         <div class="mobile-nav" id="mobileNav">
+            <button class="mobile-nav-close" onclick="closeMobileNav()">
+                <i class="fas fa-times"></i>
+            </button>
             <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/shop">Shop</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="/" onclick="closeMobileNav()">Home</a></li>
+                <li><a href="/shop" onclick="closeMobileNav()">Shop</a></li>
+                <li><a href="#about" onclick="closeMobileNav()">About</a></li>
+                <li><a href="#contact" onclick="closeMobileNav()">Contact</a></li>
+                <% if (locals.user) { %>
+                    <li><a href="/auth/logout" onclick="closeMobileNav()">Logout</a></li>
+                <% } else { %>
+                    <li><a href="/auth/login" onclick="closeMobileNav()">Login</a></li>
+                <% } %>
             </ul>
         </div>
+
+        <!-- Profile Sidebar Modal -->
+        <% if (locals.user) { %>
+        <div class="profile-sidebar-overlay" id="profileSidebarOverlay" onclick="closeProfileSidebar()"></div>
+        <div class="profile-sidebar" id="profileSidebar">
+            <button class="profile-sidebar-close" onclick="closeProfileSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="profile-sidebar-content">
+                <div class="profile-section">
+                    <% if (user.profileImage) { %>
+                        <img src="/uploads/profile-images/<%= user.profileImage %>"
+                             alt="Profile"
+                             class="profile-avatar-img">
+                    <% } else { %>
+                        <div class="profile-avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+                    <% } %>
+                    <div class="profile-name"><%= user.name %></div>
+                    <div class="status">
+                        <div class="status-dot"></div>
+                        Online
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <h4>Account</h4>
+                    <a href="/profile" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">👤</span>
+                        My Profile
+                    </a>
+                    <a href="/address" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">📍</span>
+                        My Address
+                    </a>
+                    <a href="/orders" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">📦</span>
+                        My Orders
+                    </a>
+                    <a href="/wishlist" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">♡</span>
+                        My Wishlist
+                    </a>
+                </div>
+
+                <div class="menu-section">
+                    <h4>Payments</h4>
+                    <a href="/wallet" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">💳</span>
+                        My Wallet
+                    </a>
+                </div>
+
+                <div class="menu-section">
+                    <h4>Settings</h4>
+                    <a href="/profile/change-password" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">🔒</span>
+                        Account Security
+                    </a>
+                    <a href="/profile/referral" class="menu-item" onclick="closeProfileSidebar()">
+                        <span class="menu-icon">🎁</span>
+                        Referral Code
+                    </a>
+                    
+                    <a href="/auth/logout" class="menu-item logout-item" style="color: #e74c3c;">
+                        <span class="menu-icon">🚪</span>
+                        Log out
+                    </a>
+                </div>
+            </div>
+        </div>
+        <% } %>
     </header>
 
     <script>
@@ -80,7 +178,53 @@
 
         function toggleMobileNav() {
             const mobileNav = document.getElementById("mobileNav");
+            const overlay = document.getElementById("mobileNavOverlay");
+            
             mobileNav.classList.toggle("show");
+            overlay.classList.toggle("show");
+            
+            // Prevent body scroll when mobile nav is open
+            if (mobileNav.classList.contains("show")) {
+                document.body.style.overflow = "hidden";
+            } else {
+                document.body.style.overflow = "";
+            }
+        }
+
+        function closeMobileNav() {
+            const mobileNav = document.getElementById("mobileNav");
+            const overlay = document.getElementById("mobileNavOverlay");
+            
+            mobileNav.classList.remove("show");
+            overlay.classList.remove("show");
+            document.body.style.overflow = "";
+        }
+
+        // Profile Sidebar Functions
+        function openProfileSidebar(event) {
+            event.preventDefault();
+            const profileSidebar = document.getElementById("profileSidebar");
+            const overlay = document.getElementById("profileSidebarOverlay");
+            const dropdown = document.getElementById("dropdownContent");
+            
+            // Close the dropdown first
+            dropdown.style.display = "none";
+            
+            // Open the profile sidebar
+            profileSidebar.classList.add("show");
+            overlay.classList.add("show");
+            
+            // Prevent body scroll when profile sidebar is open
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeProfileSidebar() {
+            const profileSidebar = document.getElementById("profileSidebar");
+            const overlay = document.getElementById("profileSidebarOverlay");
+            
+            profileSidebar.classList.remove("show");
+            overlay.classList.remove("show");
+            document.body.style.overflow = "";
         }
 
         // Close dropdown when clicking outside
@@ -92,6 +236,7 @@
 
         // Wishlist counter functions
         function updateWishlistCounter(count) {
+            console.log('updateWishlistCounter called with count:', count);
             const badge = document.getElementById('wishlistBadge');
             const icon = document.getElementById('wishlistIcon');
 
@@ -100,6 +245,7 @@
                     badge.textContent = count;
                     badge.style.display = 'inline';
                     badge.classList.remove('hidden');
+                    console.log('Badge updated to show count:', count);
                 } else {
                     // Create badge if it doesn't exist
                     const newBadge = document.createElement('span');
@@ -108,11 +254,16 @@
                     newBadge.textContent = count;
                     newBadge.style.display = 'inline';
                     icon.appendChild(newBadge);
+                    console.log('New badge created with count:', count);
                 }
             } else {
                 if (badge) {
                     badge.style.display = 'none';
                     badge.classList.add('hidden');
+                    badge.textContent = '0';
+                    console.log('Badge hidden because count is 0');
+                } else {
+                    console.log('No badge found to hide');
                 }
             }
         }
@@ -176,16 +327,23 @@
             try {
                 const response = await fetch('/wishlist/count');
                 const data = await response.json();
+                console.log('Wishlist count API response:', data);
                 if (data.success) {
+                    console.log('Calling updateWishlistCounter with:', data.wishlistCount);
                     updateWishlistCounter(data.wishlistCount);
+                } else {
+                    console.log('API call failed, setting count to 0');
+                    updateWishlistCounter(0);
                 }
             } catch (error) {
                 console.error('Error loading wishlist count:', error);
+                updateWishlistCounter(0);
             }
         }
 
         // Load both counts when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, loading counts...');
             loadCartCount();
             loadWishlistCount();
         });
