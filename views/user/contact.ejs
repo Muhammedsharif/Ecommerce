@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - 1NOTONE</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/styles/user/header.css">
+    <link rel="stylesheet" href="/styles/user/footer.css">
+    <link rel="stylesheet" href="/styles/user/theme-override.css">
+    
+    <style>
+        /* Contact Page Specific Styles */
+        .contact-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/images/pattern.png') repeat;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .contact-hero .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .contact-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .contact-hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .contact-section {
+            padding: 80px 0;
+        }
+
+        .contact-section:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            line-height: 1.6;
+        }
+
+        .contact-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+
+        .contact-info-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .contact-info-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .contact-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .contact-info-card h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .contact-info-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .contact-info-card a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-info-card a:hover {
+            color: #764ba2;
+        }
+
+        .contact-form-section {
+            background: white;
+        }
+
+        .contact-form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .contact-form {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control.textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .contact-info-text {
+            padding-right: 20px;
+        }
+
+        .contact-info-text h3 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .contact-info-text p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .contact-details {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-details li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .contact-details li i {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+            font-size: 1rem;
+        }
+
+        .contact-details li span {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .map-section {
+            padding: 0;
+            background: #f8f9fa;
+        }
+
+        .map-container {
+            height: 400px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .faq-section {
+            background: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-question {
+            padding: 25px 30px;
+            background: white;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: #f8f9fa;
+        }
+
+        .faq-question i {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 30px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .faq-answer.active {
+            padding: 25px 30px;
+            max-height: 200px;
+        }
+
+        .faq-answer p {
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .contact-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .contact-hero p {
+                font-size: 1.1rem;
+            }
+
+            .contact-form-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .contact-info-text {
+                padding-right: 0;
+            }
+
+            .contact-section {
+                padding: 60px 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .contact-info-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                margin-bottom: 60px;
+            }
+
+            .contact-form {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .contact-hero {
+                padding: 100px 0 60px;
+            }
+
+            .contact-hero h1 {
+                font-size: 2rem;
+            }
+
+            .contact-form {
+                padding: 25px 15px;
+            }
+
+            .form-control {
+                padding: 12px 15px;
+            }
+
+            .submit-btn {
+                padding: 12px 30px;
+            }
+
+            .faq-question {
+                padding: 20px 20px;
+                font-size: 1rem;
+            }
+
+            .faq-answer.active {
+                padding: 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/user/header") %>
+
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <div class="container">
+            <h1 data-aos="fade-up">Contact Us</h1>
+            <p data-aos="fade-up" data-aos-delay="200">
+                We'd love to hear from you. Get in touch with our team for any questions, support, or feedback.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contact Info Section -->
+    <section class="contact-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Get In Touch</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                Choose the best way to reach us. We're here to help and answer any questions you might have.
+            </p>
+
+            <div class="contact-info-grid">
+                <div class="contact-info-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h4>Visit Our Store</h4>
+                    <p>123 Fashion Street<br>Style District, SD 12345<br>United States</p>
+                    <a href="#map">Get Directions</a>
+                </div>
+
+                <div class="contact-info-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h4>Call Us</h4>
+                    <p>Customer Service</p>
+                    <a href="tel:+1234567890">+1 (234) 567-890</a>
+                    <p>Mon - Fri: 9AM - 6PM</p>
+                </div>
+
+                <div class="contact-info-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4>Email Us</h4>
+                    <p>General Inquiries</p>
+                    <a href="mailto:info@1notone.com">info@1notone.com</a>
+                    <p>Support</p>
+                    <a href="mailto:support@1notone.com">support@1notone.com</a>
+                </div>
+
+                <div class="contact-info-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>Business Hours</h4>
+                    <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
+                    <p>Saturday: 10:00 AM - 4:00 PM</p>
+                    <p>Sunday: Closed</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="contact-form-section contact-section">
+        <div class="container">
+            <div class="contact-form-container">
+                <div class="contact-info-text" data-aos="fade-right">
+                    <h3>Send Us a Message</h3>
+                    <p>
+                        Have a question about our products, need help with an order, or want to share feedback? 
+                        We're here to help! Fill out the form and we'll get back to you as soon as possible.
+                    </p>
+                    
+                    <ul class="contact-details">
+                        <li>
+                            <i class="fas fa-headset"></i>
+                            <span>24/7 Customer Support</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-shipping-fast"></i>
+                            <span>Free Shipping on Orders $50+</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-undo"></i>
+                            <span>30-Day Return Policy</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure Payment Processing</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <form class="contact-form" data-aos="fade-left" id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <select id="subject" name="subject" class="form-control" required>
+                            <option value="">Select a subject</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="order">Order Support</option>
+                            <option value="product">Product Question</option>
+                            <option value="return">Return/Exchange</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" class="form-control textarea" rows="5" required placeholder="Tell us how we can help you..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section contact-section" id="map">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Find Us</h2>
+            <div class="map-container" data-aos="fade-up" data-aos-delay="200">
+                <div class="map-placeholder">
+                    <div class="text-center">
+                        <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                        <p>Interactive Map Coming Soon</p>
+                        <p>123 Fashion Street, Style District, SD 12345</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section contact-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Frequently Asked Questions</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                Quick answers to common questions. Can't find what you're looking for? Contact us directly.
+            </p>
+
+            <div class="faq-container">
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        What is your return policy?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We offer a 30-day return policy for all unworn items in original packaging. Returns are free for defective items, and we provide prepaid return labels for exchanges.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        How long does shipping take?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Standard shipping takes 3-5 business days, while express shipping takes 1-2 business days. Free shipping is available on orders over $50.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        Do you offer international shipping?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes, we ship to over 25 countries worldwide. International shipping rates and delivery times vary by location. Check our shipping page for specific details.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        How do I track my order?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Once your order ships, you'll receive a tracking number via email. You can also track your order by logging into your account and visiting the "My Orders" section.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        What payment methods do you accept?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and bank transfers. All payments are processed securely.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include("../partials/user/footer") %>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // FAQ Toggle Function
+        function toggleFAQ(button) {
+            const answer = button.nextElementSibling;
+            const isActive = button.classList.contains('active');
+
+            // Close all FAQ items
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.classList.remove('active');
+                q.nextElementSibling.classList.remove('active');
+            });
+
+            // Open clicked item if it wasn't active
+            if (!isActive) {
+                button.classList.add('active');
+                answer.classList.add('active');
+            }
+        }
+
+        // Contact Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Simple validation
+            if (!data.name || !data.email || !data.subject || !data.message) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            // Simulate form submission
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                alert('Thank you for your message! We\'ll get back to you soon.');
+                this.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+
+        // Add smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

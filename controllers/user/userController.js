@@ -885,6 +885,38 @@ try {
 }
 };
 
+const loadAboutPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        let userData = null;
+        
+        if (user) {
+            userData = await User.findById(user);
+        }
+        
+        res.render("about", { user: userData });
+    } catch (error) {
+        console.log("Error loading about page:", error);
+        res.redirect("/pageNotFound");
+    }
+};
+
+const loadContactPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        let userData = null;
+        
+        if (user) {
+            userData = await User.findById(user);
+        }
+        
+        res.render("contact", { user: userData });
+    } catch (error) {
+        console.log("Error loading contact page:", error);
+        res.redirect("/pageNotFound");
+    }
+};
+
 
 
 
@@ -903,6 +935,8 @@ module.exports = {
     filterProducts,
     searchProduct,
     getAllProducts,
+    loadAboutPage,
+    loadContactPage,
 }
 
 

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - 1NOTONE</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/styles/user/header.css">
+    <link rel="stylesheet" href="/styles/user/footer.css">
+    <link rel="stylesheet" href="/styles/user/theme-override.css">
+    
+    <style>
+        /* About Page Specific Styles */
+        .about-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/images/pattern.png') repeat;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .about-hero .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .about-hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .about-section {
+            padding: 80px 0;
+        }
+
+        .about-section:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            line-height: 1.6;
+        }
+
+        .story-content {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .story-content:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .story-text {
+            flex: 1;
+        }
+
+        .story-text h3 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .story-text p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .story-image {
+            flex: 1;
+            text-align: center;
+        }
+
+        .story-image img {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .story-image img:hover {
+            transform: scale(1.05);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .value-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .value-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .value-card h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .value-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .team-member {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+        }
+
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .team-member h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .team-member .role {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .team-member p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .cta-section {
+            background: #f8f9fa;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .about-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .about-hero p {
+                font-size: 1.1rem;
+            }
+
+            .story-content {
+                flex-direction: column !important;
+                gap: 30px;
+            }
+
+            .story-content:nth-child(even) {
+                flex-direction: column !important;
+            }
+
+            .about-section {
+                padding: 60px 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .values-grid,
+            .team-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .about-hero {
+                padding: 100px 0 60px;
+            }
+
+            .about-hero h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-item h3 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/user/header") %>
+
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <h1 data-aos="fade-up">About 1NOTONE</h1>
+            <p data-aos="fade-up" data-aos-delay="200">
+                Empowering your style journey with premium footwear and fashion that speaks to your individuality.
+            </p>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="about-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Our Story</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                Born from a passion for excellence and a vision to redefine fashion, 1NOTONE has been at the forefront of style innovation since our inception.
+            </p>
+
+            <div class="story-content" data-aos="fade-right">
+                <div class="story-text">
+                    <h3>The Beginning</h3>
+                    <p>
+                        1NOTONE started with a simple belief: everyone deserves to express their unique style through high-quality, comfortable, and fashionable footwear. What began as a small venture has grown into a trusted brand that serves customers worldwide.
+                    </p>
+                    <p>
+                        Our founders recognized a gap in the market for shoes that combined cutting-edge design with exceptional comfort and durability. This vision drove us to create a brand that doesn't just follow trends but sets them.
+                    </p>
+                </div>
+                <div class="story-image">
+                    <img src="/images/about-story-1.jpg" alt="Our Beginning" onerror="this.src='https://via.placeholder.com/500x400/667eea/ffffff?text=Our+Beginning'">
+                </div>
+            </div>
+
+            <div class="story-content" data-aos="fade-left">
+                <div class="story-text">
+                    <h3>Innovation & Growth</h3>
+                    <p>
+                        Through years of research, development, and customer feedback, we've continuously evolved our products and services. Our commitment to innovation has led us to incorporate the latest technologies in footwear design and manufacturing.
+                    </p>
+                    <p>
+                        Today, 1NOTONE stands as a symbol of quality and style, trusted by millions of customers who choose us for their footwear needs. We've expanded our collection to include a diverse range of styles for every occasion.
+                    </p>
+                </div>
+                <div class="story-image">
+                    <img src="/images/about-story-2.jpg" alt="Innovation & Growth" onerror="this.src='https://via.placeholder.com/500x400/764ba2/ffffff?text=Innovation+%26+Growth'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Values Section -->
+    <section class="about-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Our Values</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                The principles that guide everything we do and shape our commitment to excellence.
+            </p>
+
+            <div class="values-grid">
+                <div class="value-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>Quality First</h4>
+                    <p>We never compromise on quality. Every product undergoes rigorous testing to ensure it meets our high standards and exceeds customer expectations.</p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h4>Innovation</h4>
+                    <p>We continuously push boundaries, embracing new technologies and design concepts to create products that are both functional and fashionable.</p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4>Customer Focus</h4>
+                    <p>Our customers are at the heart of everything we do. We listen, learn, and adapt to provide the best possible experience and products.</p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="value-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4>Sustainability</h4>
+                    <p>We're committed to responsible manufacturing practices and sustainable materials to minimize our environmental impact.</p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Community</h4>
+                    <p>We believe in building strong relationships with our customers, partners, and communities, fostering growth and positive impact.</p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Trust</h4>
+                    <p>We build trust through transparency, reliability, and consistent delivery of promises to our customers and stakeholders.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+                    <h3>50K+</h3>
+                    <p>Happy Customers</p>
+                </div>
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+                    <h3>500+</h3>
+                    <p>Products</p>
+                </div>
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
+                    <h3>25+</h3>
+                    <p>Countries Served</p>
+                </div>
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
+                    <h3>5+</h3>
+                    <p>Years of Excellence</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="about-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Meet Our Team</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                The passionate individuals behind 1NOTONE who work tirelessly to bring you the best in fashion and footwear.
+            </p>
+
+            <div class="team-grid">
+                <div class="team-member" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-photo">AS</div>
+                    <h4>Alex Smith</h4>
+                    <p class="role">Founder & CEO</p>
+                    <p>Visionary leader with 15+ years in fashion industry, driving innovation and growth at 1NOTONE.</p>
+                </div>
+
+                <div class="team-member" data-aos="fade-up" data-aos-delay="200">
+                    <div class="team-photo">MJ</div>
+                    <h4>Maria Johnson</h4>
+                    <p class="role">Head of Design</p>
+                    <p>Creative genius behind our stunning collections, bringing fresh perspectives to footwear design.</p>
+                </div>
+
+                <div class="team-member" data-aos="fade-up" data-aos-delay="300">
+                    <div class="team-photo">DW</div>
+                    <h4>David Wilson</h4>
+                    <p class="role">Operations Director</p>
+                    <p>Ensures seamless operations and quality control across all our manufacturing and distribution processes.</p>
+                </div>
+
+                <div class="team-member" data-aos="fade-up" data-aos-delay="400">
+                    <div class="team-photo">SL</div>
+                    <h4>Sarah Lee</h4>
+                    <p class="role">Customer Experience Manager</p>
+                    <p>Dedicated to ensuring every customer has an exceptional experience with our brand and products.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Ready to Experience 1NOTONE?</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                Join thousands of satisfied customers who have made 1NOTONE their go-to choice for premium footwear.
+            </p>
+            <a href="/shop" class="cta-button" data-aos="fade-up" data-aos-delay="200">
+                Shop Now
+            </a>
+        </div>
+    </section>
+
+    <%- include("../partials/user/footer") %>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // Add smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

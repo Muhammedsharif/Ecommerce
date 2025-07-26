@@ -18,8 +18,8 @@
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
                 <li><a href="/shop">Shop</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
             </ul>
             <% if (locals.user) { %>
             <div class="nav-actions">
@@ -87,8 +87,8 @@
             <ul>
                 <li><a href="/" onclick="closeMobileNav()">Home</a></li>
                 <li><a href="/shop" onclick="closeMobileNav()">Shop</a></li>
-                <li><a href="#about" onclick="closeMobileNav()">About</a></li>
-                <li><a href="#contact" onclick="closeMobileNav()">Contact</a></li>
+                <li><a href="/about" onclick="closeMobileNav()">About</a></li>
+                <li><a href="/contact" onclick="closeMobileNav()">Contact</a></li>
                 <% if (locals.user) { %>
                     <li><a href="/auth/logout" onclick="closeMobileNav()">Logout</a></li>
                 <% } else { %>

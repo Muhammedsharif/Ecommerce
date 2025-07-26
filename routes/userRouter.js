@@ -31,6 +31,10 @@ router.post("/search", userAuth, userController.searchProduct);
 router.get('/products', userAuth, userController.getAllProducts);
 router.get("/productDetails", userAuth, productController.loadProductDetails);
 
+// About and Contact pages
+router.get("/about", userController.loadAboutPage);
+router.get("/contact", userController.loadContactPage);
+
 // Legacy cart routes that need to remain at root level for backward compatibility
 router.post("/addToCart", userAuth, cartController.addToCart);
 router.post("/add-to-cart", userAuth, cartController.addToCart);
