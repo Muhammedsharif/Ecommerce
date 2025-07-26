@@ -1088,7 +1088,27 @@ img[src*="data:"] {
                         body: formData
                     });
 
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Server returned an unexpected response. Please check your session and try again.');
+                    }
+
                     const data = await response.json();
+                    
+                    // Handle authentication errors
+                    if (response.status === 401) {
+                        await Swal.fire({
+                            title: 'Session Expired',
+                            text: 'Your session has expired. Please log in again.',
+                            icon: 'warning',
+                            confirmButtonText: 'Login',
+                            confirmButtonColor: '#f59e0b'
+                        });
+                        window.location.href = data.redirect || '/admin/login';
+                        return;
+                    }
+                    
                     if (response.ok) {
                         await Swal.fire({
                             title: 'Success!',

@@ -47,9 +47,18 @@ const userAuth =  (req,res,next) =>{
 
 // Middleware to verify admin authentication
 const adminAuth = (req, res, next) => {
-    if ( req.session.admin) {
+    if (req.session.admin) {
         return next(); // Admin session exists, proceed
     }
+    
+    // Check if this is an AJAX request (expecting JSON response)
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(401).json({ 
+            error: 'Authentication required. Please log in again.',
+            redirect: '/admin/login'
+        });
+    }
+    
     res.redirect('/admin/login'); // No admin session, redirect to admin login
 }
 

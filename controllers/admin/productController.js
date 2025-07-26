@@ -73,155 +73,213 @@ const addProducts = async (req, res) => {
     const products = req.body;
     console.log("Received product data:", products);
 
+    // Basic validation
+    if (!products.productName || !products.productName.trim()) {
+      return res.status(400).json({ error: "Product name is required" });
+    }
+
+    if (!products.description || !products.description.trim()) {
+      return res.status(400).json({ error: "Product description is required" });
+    }
+
+    if (!products.category) {
+      return res.status(400).json({ error: "Category is required" });
+    }
+
+    if (!products.color || !products.color.trim()) {
+      return res.status(400).json({ error: "Color is required" });
+    }
+
     // Enhanced duplicate check: case-insensitive and exclude deleted products
     const productExists = await Product.findOne({
       productName: { $regex: new RegExp(`^${products.productName.trim()}$`, 'i') },
       isDeleted: false
     });
 
-    if (!productExists) {
-      const image = [];
+    if (productExists) {
+      return res.status(400).json({
+        error: "Product already exists, please try with another name",
+      });
+    }
 
-      if (req.files && req.files.length > 0) {
-        if (req.files.length !== 3) {
-             return res.status(400).json({ error: "select 3 images" });
+    const image = [];
+
+    // Validate images
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "Please select 3 images" });
+    }
+
+    if (req.files.length !== 3) {
+      return res.status(400).json({ error: "Please select exactly 3 images" });
+    }
+
+    // Process images
+    for (let i = 0; i < req.files.length; i++) {
+      try {
+        const originalImagePath = req.files[i].path;
+        const originalExtension = path
+          .extname(req.files[i].originalname)
+          .toLowerCase();
+        const isPng = originalExtension === ".png";
+        
+        // Generate a unique filename using timestamp or UUID
+        const uniqueFilename = `${Date.now()}-${Math.floor(
+          Math.random() * 1000
+        )}${path.extname(req.files[i].originalname)}`;
+        
+        const resizedImagePath = path.join(
+          "public",
+          "uploads",
+          "product-images",
+          uniqueFilename.replace(/\.[^/.]+$/, ".jpg")
+        );
+
+        const sharpInstance = sharp(originalImagePath)
+          .resize({ width: 440, height: 440, fit: "cover" })
+          .flatten({ background: "#ffffff" }); // Force white background
+          
+        if (isPng) {
+          // Output as PNG to preserve transparency handling
+          await sharpInstance.png({ quality: 90 }).toFile(resizedImagePath);
+        } else {
+          // Output as JPEG for other formats
+          await sharpInstance.jpeg({ quality: 90 }).toFile(resizedImagePath);
         }
-        for (let i = 0; i < req.files.length; i++) {
-          const originalImagePath = req.files[i].path;
-          const originalExtension = path
-            .extname(req.files[i].originalname)
-            .toLowerCase();
-          const isPng = originalExtension === ".png";
-          // Generate a unique filename using timestamp or UUID
-          const uniqueFilename = `${Date.now()}-${Math.floor(
-            Math.random() * 1000
-          )}${path.extname(req.files[i].originalname)}`;
-          const relativePath = path.join(
-            "uploads",
-            "product-images",
-            uniqueFilename
-          );
-          const resizedImagePath = path.join(
-            "public",
-            "uploads",
-            "product-images",
-            uniqueFilename.replace(/\.[^/.]+$/, ".jpg")
-          );
 
-          const sharpInstance = sharp(originalImagePath)
-            .resize({ width: 440, height: 440, fit: "cover" })
-            .flatten({ background: "#ffffff" }); // Force white background
-          if (isPng) {
-            // Output as PNG to preserve transparency handling
-            await sharpInstance.png({ quality: 90 }).toFile(resizedImagePath);
-          } else {
-            // Output as JPEG for other formats
-            await sharpInstance.jpeg({ quality: 90 }).toFile(resizedImagePath);
-          }
-
-          image.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
-        }
+        image.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
+      } catch (imageError) {
+        console.error("Error processing image:", imageError);
+        return res.status(400).json({ error: "Error processing images. Please try again." });
       }
+    }
 
-      const categoryId = await Category.findById(products.category);
-      if (!categoryId) {
-        return res.status(400).json({ error: "Invalid category ID" });
+    // Validate category
+    const categoryId = await Category.findById(products.category);
+    if (!categoryId) {
+      return res.status(400).json({ error: "Invalid category selected" });
+    }
+
+    // Handle selected sizes
+    let selectedSizes = req.body.sizes;
+    if (!selectedSizes) {
+      return res.status(400).json({ error: "Please select at least one size" });
+    }
+    
+    if (!Array.isArray(selectedSizes)) {
+      selectedSizes = [selectedSizes];
+    }
+
+    // Handle tags
+    let tags = [];
+    if (products.tags && products.tags.trim() !== '') {
+      tags = products.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+    }
+
+    // Parse size variants data from form
+    let sizeVariants = {};
+    try {
+      if (products.sizeVariants) {
+        sizeVariants = JSON.parse(products.sizeVariants);
       }
+    } catch (error) {
+      console.error("Error parsing size variants:", error);
+      return res.status(400).json({ error: "Invalid size variant data" });
+    }
 
-      // Handle selected sizes
-      let selectedSizes = req.body.sizes;
-      if (!selectedSizes) {
-        selectedSizes = [];
-      } else if (!Array.isArray(selectedSizes)) {
-        selectedSizes = [selectedSizes];
+    // Validate size variants
+    for (const size of selectedSizes) {
+      if (!sizeVariants[size] || !sizeVariants[size].price || !sizeVariants[size].quantity) {
+        return res.status(400).json({ error: `Please provide price and quantity for size ${size}` });
       }
       
-
-      // Handle tags
-      let tags = [];
-      if (products.tags && products.tags.trim() !== '') {
-        tags = products.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+      const price = parseFloat(sizeVariants[size].price);
+      const quantity = parseInt(sizeVariants[size].quantity);
+      
+      if (isNaN(price) || price <= 0) {
+        return res.status(400).json({ error: `Invalid price for size ${size}` });
       }
-
-      // Calculate sale price based on product offer (will be updated after regularPrice calculation)
-      let salePrice = 0;
-
-      // Parse size variants data from form
-      let sizeVariants = {};
-      try {
-        if (products.sizeVariants) {
-          sizeVariants = JSON.parse(products.sizeVariants);
-        }
-      } catch (error) {
-        console.error("Error parsing size variants:", error);
+      
+      if (isNaN(quantity) || quantity < 0) {
+        return res.status(400).json({ error: `Invalid quantity for size ${size}` });
       }
-
-      // Calculate regular price as the average of all variant prices
-      let varientPrice = 0;
-      if (selectedSizes.length > 0) {
-        const totalPrice = selectedSizes.reduce((sum, size) => {
-          return sum + (parseFloat(sizeVariants[size]?.price) || 0);
-        }, 0);
-        varientPrice = totalPrice / selectedSizes.length;
-      }
-
-
-      // Calculate sale price based on product offer using the calculated regular price
-      salePrice = varientPrice;
-      if (products.productOffer && products.productOffer > 0) {
-        const discountAmount = Math.round((varientPrice * products.productOffer) / 100);
-        salePrice = Math.round(varientPrice - discountAmount);
-      }
-
-      // Create variant array with quantities from size variants
-      const variantData = selectedSizes.map((size) => {
-        const variantPrice = parseFloat(sizeVariants[size]?.price) || varientPrice;
-        let variantSalePrice = variantPrice;
-        if (products.productOffer && products.productOffer > 0) {
-          const discountAmount = Math.round((variantPrice * products.productOffer) / 100);
-          variantSalePrice = Math.round(variantPrice - discountAmount);
-        }
-        return {
-          size,
-          varientPrice: variantPrice,
-          salePrice: variantSalePrice,
-          varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
-        };
-      });
-
-      const newProduct = new Product({
-        productName: products.productName,
-        description: products.description,
-        category: categoryId._id,
-        salePrice: salePrice,
-        varientPrice: varientPrice,
-        productOffer: products.productOffer || 0,
-        createdOn: new Date(),
-        quantity: 0, // Default quantity, managed through variants
-        color: products.color,
-        productImage: image,
-        variant: variantData,
-        tags: tags,
-        status: products.status || "Available",
-      });
-
-      await newProduct.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Product has been added successfully",
-        });
-    } else {
-      return res
-        .status(400)
-        .json({
-          error: "Product already exists, please try with another name",
-        });
     }
+
+    // Calculate regular price as the average of all variant prices
+    let varientPrice = 0;
+    if (selectedSizes.length > 0) {
+      const totalPrice = selectedSizes.reduce((sum, size) => {
+        return sum + (parseFloat(sizeVariants[size]?.price) || 0);
+      }, 0);
+      varientPrice = totalPrice / selectedSizes.length;
+    }
+
+    // Calculate sale price based on product offer using the calculated regular price
+    let salePrice = varientPrice;
+    if (products.productOffer && products.productOffer > 0) {
+      const discountAmount = Math.round((varientPrice * products.productOffer) / 100);
+      salePrice = Math.round(varientPrice - discountAmount);
+    }
+
+    // Create variant array with quantities from size variants
+    const variantData = selectedSizes.map((size) => {
+      const variantPrice = parseFloat(sizeVariants[size]?.price) || varientPrice;
+      let variantSalePrice = variantPrice;
+      if (products.productOffer && products.productOffer > 0) {
+        const discountAmount = Math.round((variantPrice * products.productOffer) / 100);
+        variantSalePrice = Math.round(variantPrice - discountAmount);
+      }
+      return {
+        size,
+        varientPrice: variantPrice,
+        salePrice: variantSalePrice,
+        varientquantity: parseInt(sizeVariants[size]?.quantity) || 0,
+      };
+    });
+
+    const newProduct = new Product({
+      productName: products.productName.trim(),
+      description: products.description.trim(),
+      category: categoryId._id,
+      salePrice: salePrice,
+      varientPrice: varientPrice,
+      productOffer: products.productOffer || 0,
+      createdOn: new Date(),
+      quantity: 0, // Default quantity, managed through variants
+      color: products.color.trim(),
+      productImage: image,
+      variant: variantData,
+      tags: tags,
+      status: products.status || "Available",
+    });
+
+    await newProduct.save();
+    return res.status(200).json({
+      success: true,
+      message: "Product has been added successfully",
+      createdOn: newProduct.createdOn
+    });
+
   } catch (error) {
     console.error("Error saving product:", error);
-    return res.redirect("/admin/pageerror");
+    
+    // Handle specific mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        error: `Validation error: ${validationErrors.join(', ')}`
+      });
+    }
+    
+    // Handle mongoose duplicate key errors
+    if (error.code === 11000) {
+      return res.status(400).json({
+        error: "Product with this name already exists"
+      });
+    }
+    
+    return res.status(500).json({
+      error: "An error occurred while saving the product. Please try again."
+    });
   }
 };
 

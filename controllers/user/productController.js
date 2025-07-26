@@ -19,6 +19,7 @@ const loadProductDetails = async (req,res)=>{
 
          const similarProducts = await Product.find({
         category: product.category,
+        isDeleted:false,
         _id: { $ne: product._id }  // exclude the current product
     }).limit(4);
 
