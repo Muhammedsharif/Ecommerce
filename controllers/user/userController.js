@@ -72,14 +72,14 @@ const user = req.session.user;
 
 // First, let's check all products in database
 const allProducts = await Product.find({});
-
+console.log('🔍 DEBUG: Total products in database:', allProducts.length);
 
 // Check products that are not blocked/deleted
 const activeProducts = await Product.find({
   isBlocked: false,
   isDeleted: false
 });
-
+console.log('🔍 DEBUG: Active products (not blocked/deleted):', activeProducts.length);
 
 // Get products with proper filters including category validation
 let productData = await Product.find({
@@ -90,20 +90,25 @@ let productData = await Product.find({
   match: { isListed: true }
 });
 
-
+console.log('🔍 DEBUG: Products after populate:', productData.length);
 
 // Debug: Check variant quantities for first product
-// if (productData.length > 0) {
-//   console.log('First product variant data:', JSON.stringify(productData[0].variant, null, 2));
-// }
+if (productData.length > 0) {
+  console.log('🔍 DEBUG: First product data:', {
+    name: productData[0].productName,
+    category: productData[0].category,
+    variant: productData[0].variant,
+    images: productData[0].productImage
+  });
+}
 
 // Filter out products with unlisted categories
 productData = productData.filter(product => product.category !== null);
-
+console.log('🔍 DEBUG: Products after category filter:', productData.length);
 
 productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 productData = productData.slice(0, 9);
-console.log('Final products to render:', productData.length);
+console.log('🔍 DEBUG: Final products to render:', productData.length);
 
 if (user) {
   const userData = await User.findById(user);
@@ -113,7 +118,7 @@ else {
   res.render("home", { products: productData, timestamp: new Date().toISOString() });
 }
 } catch (error) {
-console.log("Home page not found", error); // Log the full error
+console.log("🔍 DEBUG: Error in loadHomepage:", error); // Log the full error
 res.status(500).send("Server error");
 }
 };

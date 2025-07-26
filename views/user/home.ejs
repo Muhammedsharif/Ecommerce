@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1NOTONE - Just Do It</title>
     <!-- Debug timestamp: <%= typeof timestamp !== 'undefined' ? timestamp : 'No timestamp' %> -->
+    <!-- Debug products: <%= typeof products !== 'undefined' ? products.length : 'No products variable' %> -->
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -53,7 +54,7 @@
           </div>
           <div class="product-info">
             <h3 class="product-name"><%= products[i].productName %></h3>
-            <p class="product-price">₹<%= products[i].variant[0].varientPrice %></p>
+            <p class="product-price">₹<%= products[i].variant && products[i].variant.length > 0 ? products[i].variant[0].varientPrice : 'N/A' %></p>
           </div>
           <a href="/productDetails?id=<%= products[i]._id %>">
             <button class="add-to-cart">View Product</button>
@@ -86,7 +87,7 @@
                               
 
 <p class="product-price">
-    ₹<%= products[i].variant[0].varientPrice %>
+    ₹<%= products[i].variant && products[i].variant.length > 0 ? products[i].variant[0].varientPrice : 'N/A' %>
     
 </p>
                 </div>
@@ -135,7 +136,7 @@
 
                     
                     <p class="product-price">
-                        ₹<%= products[i].variant[0].varientPrice %>
+                        ₹<%= products[i].variant && products[i].variant.length > 0 ? products[i].variant[0].varientPrice : 'N/A' %>
                         
                     </p>
                 </div>

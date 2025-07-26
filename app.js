@@ -55,10 +55,6 @@ app.use(express.static('public'));
 // Register all routes
 registerRoutes(app);
 
-app.get('/', (req, res) => {
-    res.render('login'); // Make sure views/user/index.ejs exists
-});
-
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running at ${PORT}`));
