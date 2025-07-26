@@ -2,6 +2,7 @@
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 
+
 // Controller function to load and display user's wishlist page
 const loadWishlist = async(req,res)=>{
     try {
@@ -35,43 +36,53 @@ const addToWishlist = async (req, res) => {
             return res.status(401).json({ status: false, message: 'Please log in to add to wishlist' });
         }
 
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ status: false, message: 'User not found' });
-        }
-
-        const products = await Product.findById(productId);
-        if (!products) {
+        // Verify product exists
+        const product = await Product.findById(productId);
+        if (!product) {
             return res.status(404).json({ status: false, message: 'Product not found' });
         }
 
-        // Ensure wishlist is an array
-        if (!Array.isArray(user.wishlist)) {
-            user.wishlist = [];
-        }
+        // Check if product is already in wishlist using atomic operation
+        const userWithProduct = await User.findOne({
+            _id: userId,
+            wishlist: productId
+        });
 
-        // Check if product is already in wishlist
-        const productIndex = user.wishlist.indexOf(productId);
+        if (userWithProduct) {
+            // Product exists, remove it using atomic operation
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { $pull: { wishlist: productId } },
+                { new: true }
+            );
 
-        if (productIndex > -1) {
-            // Product exists, remove it
-            user.wishlist.splice(productIndex, 1);
-            await user.save();
+            if (!updatedUser) {
+                return res.status(404).json({ status: false, message: 'User not found' });
+            }
+
             return res.status(200).json({
                 status: true,
                 action: 'removed',
                 message: 'Product removed from wishlist',
-                wishlistCount: user.wishlist.length
+                wishlistCount: updatedUser.wishlist.length
             });
         } else {
-            // Product doesn't exist, add it
-            user.wishlist.push(productId);
-            await user.save();
+            // Product doesn't exist, add it using atomic operation
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { $addToSet: { wishlist: productId } },
+                { new: true }
+            );
+
+            if (!updatedUser) {
+                return res.status(404).json({ status: false, message: 'User not found' });
+            }
+
             return res.status(200).json({
                 status: true,
                 action: 'added',
                 message: 'Product added to wishlist',
-                wishlistCount: user.wishlist.length
+                wishlistCount: updatedUser.wishlist.length
             });
         }
     } catch (error) {
@@ -83,29 +94,24 @@ const addToWishlist = async (req, res) => {
 
 const removeProduct = async (req,res)=>{
     try {
-
         const productId = req.query.productId
         const userId = req.session.user
-        const user = await User.findById(userId)
-        
-        // Ensure wishlist is an array
-        if (!Array.isArray(user.wishlist)) {
-            user.wishlist = [];
+
+        if (!userId) {
+            return res.redirect("/login")
         }
-        
-        const index = user.wishlist.indexOf(productId)
-        if (index > -1) {
-            user.wishlist.splice(index, 1)
-            await user.save()
-        }
+
+        // Use atomic operation to remove product from wishlist
+        await User.findByIdAndUpdate(
+            userId,
+            { $pull: { wishlist: productId } }
+        )
+
         return res.redirect("/wishlist")
         
     } catch (error) {
-
         console.error(error)
         return res.status(500).json({status:false,message:"Server error"})
-
-        
     }
 }
 
@@ -144,6 +150,23 @@ const getWishlistCount = async(req, res) => {
     }
 }
 
+const emptyWishlist = async (req,res)=>{
+    try {
+        const userId = req.session.user;
+        
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not logged in" });
+        }
+
+        await User.findByIdAndUpdate(userId, { $set: { wishlist: [] } });
+
+        res.json({ success: true, message: "Wishlist emptied successfully" });
+    } catch (error) {
+        console.error("Error emptying wishlist:", error);
+        res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+}
+
 
 
 
@@ -152,5 +175,6 @@ module.exports={
     addToWishlist,
     removeProduct,
     getWishlistCount,
+    emptyWishlist,
     
 }

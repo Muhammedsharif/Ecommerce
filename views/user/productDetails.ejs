@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Static title for product details page -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <title>Premium Running Shoe - 1NOTONE</title>
     <style>
         /* Global CSS Reset - Remove default browser styling */
@@ -1006,16 +1007,14 @@
                             </svg>
                             Add to Cart
                         </button>
-                        <button class="btn2" onclick="proceedToCheckout()">⚡ Buy Now</button>
+                        <button class="btn2" onclick="addToWishlist('<%=product._id%>')">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            Add to Wishlist
+                        </button>
                     </div>
-
-                    <button class="btn btn-ghost" onclick="addToWishlist('<%=product._id%>')">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        Add to Wishlist
-                    </button>
                 </div>
             </section>
 
@@ -1207,6 +1206,7 @@
             </main>
         </div>
         <%- include("../partials/user/footer") %>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
        <script>
             document.addEventListener("DOMContentLoaded", () => {
@@ -1500,7 +1500,7 @@
                 newsletterForm.addEventListener("submit", function (e) {
                     e.preventDefault();
                     const email = this.querySelector(".newsletter-input").value;
-                    alert("Thank you for subscribing with email: " + email);
+                     showToast("Thank you for subscribing with email: " + email);
                     this.reset();
                 });
 
@@ -1670,7 +1670,15 @@
                             ? `${quantity} ${productName}${quantity > 1 ? 's' : ''} added to cart successfully!`
                             : `${successCount} of ${quantity} ${productName}${quantity > 1 ? 's' : ''} added to cart.`;
 
-                        showToast(message, 'success');
+                        Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'success',
+                        title: message || 'Success',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        });
 
                         // Update cart counter immediately
                         if (window.updateCartCounter) {
@@ -1687,13 +1695,29 @@
                             button.disabled = false;
                         }, 2000);
                     } else {
-                        showToast(errorMessage || "Failed to add to cart", 'error');
+                        Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'error',
+                        title: errorMessage || 'Failed to add to cart',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        });
                         button.innerHTML = originalHTML;
                         button.disabled = false;
                     }
                 } catch (error) {
                     console.error('Error adding to cart:', error);
-                    showToast('Failed to add to cart. Please try again.', 'error');
+                    Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'error',
+                    title: 'Failed to add to cart. Please try again.',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    });
 
                     const button = document.getElementById('addToCartBtn');
                     button.innerHTML = originalHTML;
@@ -1721,7 +1745,15 @@
                 
                 .then(response => {
                     if (response.status) {
-                        showToast(response.message || 'Product added to wishlist!', 'success');
+                        Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'success',
+                        title: response.message || 'Product added to wishlist!',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        });
                         
                         // Update wishlist counter immediately
                         if (window.updateWishlistCounter && response.wishlistCount !== undefined) {
@@ -1752,12 +1784,28 @@
                             }
                         }
                     } else {
-                        showToast(response.message || 'Failed to add to wishlist', 'error');
+                        Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'error',
+                        title: response.message || 'Failed to add to wishlist',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error adding to wishlist:', error);
-                    showToast('Failed to add to wishlist. Please try again.', 'error');
+                    Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'error',
+                    title: 'Failed to add to wishlist. Please try again.',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    });
                 });
             }
 
@@ -1811,87 +1859,7 @@
                     toast.style.transform = 'translateX(100%)';
                 }, 3000);
             }
-                   async function proceedToCheckout() {
-            try {
-                // Get selected size
-                const selectedSizeElement = document.querySelector('input[name="size"]:checked');
-                const selectedSize = selectedSizeElement ? selectedSizeElement.value : null;
-
-                // Validate size selection
-                if (!selectedSize) {
-                    showToast('Please select a size before proceeding', 'error');
-                    // Highlight size section to draw attention
-                    const sizeSection = document.querySelector('.size-options');
-                    if (sizeSection) {
-                        sizeSection.style.border = '2px solid #ef4444';
-                        sizeSection.style.borderRadius = '8px';
-                        sizeSection.style.padding = '10px';
-                        setTimeout(() => {
-                            sizeSection.style.border = '';
-                            sizeSection.style.borderRadius = '';
-                            sizeSection.style.padding = '';
-                        }, 3000);
-                    }
-                    return;
-                }
-
-                // Get quantity
-                const quantityInput = document.querySelector('.quantity-input');
-                const quantity = parseInt(quantityInput.value) || 1;
-
-                // Get selected color
-                const selectedColor = "<%=color%>";
-
-                // Get product ID
-                const productId = "<%=product._id%>";
-
-                // Show loading state
-                const buyNowButton = document.querySelector('.btn2');
-                const originalHTML = buyNowButton.innerHTML;
-                buyNowButton.disabled = true;
-                buyNowButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-                // Send Buy Now request
-                const response = await fetch('/buy-now', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        size: selectedSize,
-                        quantity: quantity,
-                        color: selectedColor
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Redirect to checkout page
-                    window.location.href = data.redirectUrl;
-                } else {
-                    // Handle error
-                    if (data.redirectUrl) {
-                        window.location.href = data.redirectUrl;
-                    } else {
-                        showToast(data.message || 'Failed to proceed to checkout', 'error');
-                        buyNowButton.disabled = false;
-                        buyNowButton.innerHTML = originalHTML;
-                    }
-                }
-
-            } catch (error) {
-                console.error('Error in Buy Now:', error);
-                showToast('Something went wrong. Please try again.', 'error');
-                
-                // Reset button state
-                const buyNowButton = document.querySelector('.btn2');
-                buyNowButton.disabled = false;
-                buyNowButton.innerHTML = '⚡ Buy Now';
-            }
-        }
-        </script>
+                           </script>
 </body>
 
 </html>

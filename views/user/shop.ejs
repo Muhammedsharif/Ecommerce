@@ -39,26 +39,51 @@
             width: 100%;
         }
 
+        .mobile-text-overlay {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            text-align: center;
+            color: rgb(0, 0, 0);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            width: 90%;
+        }
+
+        .mobile-text-overlay h2 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .mobile-text-overlay p {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
         .hero-title {
             font-size: 4rem;
             font-weight: bold;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #333, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #000000;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
             animation: fadeInUp 1s ease;
         }
 
         .hero-subtitle {
             font-size: 1.2rem;
             margin-bottom: 40px;
-            color: #666;
+            color: #000000;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
             animation: fadeInUp 1s ease 0.2s both;
         }
 
         .hero-btn {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #140c0d, #ff3742);
             border: none;
             padding: 18px 40px;
             font-size: 1.1rem;
@@ -68,11 +93,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             animation: fadeInUp 1s ease 0.4s both;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
         }
 
         .hero-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6);
+            background: linear-gradient(45deg, #ff3742, #140c0d);
         }
 
         .floating-elements {
@@ -769,6 +796,14 @@
                 margin-bottom: 0;
             }
 
+            .hero-content {
+                display: none;
+            }
+
+            .mobile-text-overlay {
+                display: block;
+            }
+
             .products-section {
                 flex-direction: column;
                 min-height: auto;
@@ -940,13 +975,26 @@
     <%- include("../partials/user/header") %>
 
     <!-- Breadcrumb Navigation -->
-    <%- include("../partials/user/breadcrumb", { breadcrumbs: [{ name: "Shop", url: "/shop" }] }) %>
+    
 
         <section class="hero-section" id="home">
             
             <div class="floating-elements">
+                
                 <img src="/images/close-up-futuristic-sneakers-showcase_23-2151005675.avif" alt="">
                 
+            </div>
+            
+            <div class="hero-content">
+                
+                <h1 class="hero-title">Not Just Shoes. It's a Movement.</h1>
+                <p class="hero-subtitle">Collect Your Premium Sneakers Today.</p>
+                <button class="hero-btn" onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})">Shop Now</button>
+            </div>
+
+            <div class="mobile-text-overlay">
+                <h2>Not Just Shoes. It's a Movement.</h2>
+                <p>Collect Your Premium Sneakers Today.</p>
             </div>
          
         </section>

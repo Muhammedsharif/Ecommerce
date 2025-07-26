@@ -1023,7 +1023,15 @@
                 if (data.success) {
                     console.log('✅ Success! Moving product to cart');
                     // Show success message
-                    showToast(data.message, 'success');
+                    Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'success',
+                    title: data.message || 'Success',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    });
 
                     // Update cart counter
                     console.log('🔄 Updating cart counter to:', data.cartCount);
@@ -1058,7 +1066,15 @@
 
                 } else {
                     console.error('❌ Failed to move to cart:', data.message);
-                    showToast(data.message || 'Failed to move to cart', 'error');
+                    Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'error', // You can change to 'success', 'info', 'warning'
+                    title: data.message || 'Failed to move to cart',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    });
                     button.innerHTML = originalHTML;
                     button.disabled = false;
                 }
@@ -1094,21 +1110,34 @@
         }
 
         function emptyWishlist() {
-            if (confirm('Are you sure you want to empty your entire wishlist?')) {
-                const productCards = document.querySelectorAll('.product-card');
-                productCards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.classList.add('removing');
-                        setTimeout(() => card.remove(), 300);
-                    }, index * 100);
-                });
-                
-                setTimeout(() => {
-                    itemCount = 0;
-                    updateItemCount();
-                    showEmptyState();
-                }, productCards.length * 100 + 300);
-            }
+             Swal.fire({
+    title: 'Are you sure?',
+    text: 'Your entire wishlist will be cleared!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, empty it!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch('/wishlist/empty', {
+        method: 'DELETE',
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Emptied!', 'Your wishlist has been cleared.', 'success')
+              .then(() => {
+                location.reload(); // Refresh page to show empty state
+              });
+          } else {
+            Swal.fire('Error', 'Failed to empty wishlist', 'error');
+          }
+        })
+        .catch(err => {
+          Swal.fire('Error', 'Something went wrong', 'error');
+        });
+    }
+  });
         }
 
         function updateItemCount() {

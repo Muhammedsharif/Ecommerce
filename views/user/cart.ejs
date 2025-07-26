@@ -478,6 +478,7 @@
             </button>
         </div>
     </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Real cart data from backend
@@ -508,26 +509,58 @@
 
                 // Validate quantity limits
                 if (newQuantity < 1) {
-                    showToast('Quantity cannot be less than 1', 'error');
-                    return;
-                }
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Quantity cannot be less than 1',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+                return;
+            }
 
-                if (newQuantity > 10) {
-                    showToast('Cannot add more than 10 items of the same product', 'error');
-                    return;
-                }
+            if (newQuantity > 10) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Cannot add more than 10 items of the same product',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+                return;
+            }
 
-                // Check stock availability
-                if (item.maxStock && newQuantity > item.maxStock) {
-                    showToast(`Only ${item.maxStock} items available in stock`, 'error');
-                    return;
-                }
+            // Check stock availability
+            if (item.maxStock && newQuantity > item.maxStock) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: `Only ${item.maxStock} items available in stock`,
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+                return;
+            }
 
-                // Check if item is available
-                if (!item.isAvailable) {
-                    showToast(item.unavailableReason || 'Product is no longer available', 'error');
-                    return;
-                }
+            // Check if item is available
+            if (!item.isAvailable) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: item.unavailableReason || 'Product is no longer available',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+                return;
+            }
 
                 await updateCartQuantity(itemId, newQuantity);
             }
@@ -614,7 +647,15 @@
                     if (item) {
                         item.quantity = quantity;
                     }
-                    showToast('Cart updated successfully', 'success');
+                    Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'success',
+                    title: 'Cart updated successfully',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    });
 
                     // Update the UI without page reload
                     updateUI();
@@ -678,7 +719,15 @@
                                 }, 300);
                             }
 
-                            showToast('Item removed from cart', 'success');
+                            Swal.fire({
+                            toast: true,
+                            position: 'bottom-end',
+                            icon: 'success',
+                            title: 'Item removed from cart',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            });
 
                             // Update cart counter in header using server response (number of unique items)
                             const cartCount = data.cartCount || cartItems.length;
@@ -872,6 +921,7 @@
         async function emptyCart() {
             // Show confirmation toast instead of browser alert
             showConfirmationToast(
+                
                 'Are you sure you want to empty your entire cart?',
                 async () => {
                     try {
@@ -881,11 +931,32 @@
                                 'Content-Type': 'application/json'
                             }
                         });
-
+                        
                         const data = await response.json();
+
                         if (data.success) {
+                            if(cartItems.length === 0){
+                            Swal.fire({
+                            toast: true,
+                            position: 'bottom-end',
+                            icon: 'success',
+                            title: 'Already cart is Empty',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            });
+                             return;
+                        }
                             cartItems = [];
-                            showToast('Cart emptied successfully', 'success');
+                            Swal.fire({
+                            toast: true,
+                            position: 'bottom-end',
+                            icon: 'success',
+                            title: 'Cart emptied successfully',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            });
 
                             // Update cart counter in header
                             if (typeof updateCartCounter === 'function') {

@@ -9,5 +9,6 @@ router.get("/", userAuth, wishlistController.loadWishlist);
 router.post("/add", userAuth, wishlistController.addToWishlist);
 router.get('/remove', userAuth, wishlistController.removeProduct);
 router.get("/count", wishlistController.getWishlistCount);
+router.delete('/empty',userAuth,wishlistController.emptyWishlist)
 
 module.exports = router;
