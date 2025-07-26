@@ -51,6 +51,7 @@ app.set("views", [
     path.join(__dirname, "views/admin"),
 ]);
 app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Register all routes
 registerRoutes(app);
