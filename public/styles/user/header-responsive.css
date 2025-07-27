@@ -1,0 +1,348 @@
+/* Enhanced Responsive Design for Header */
+
+/* Large Tablet and Small Desktop */
+@media (max-width: 1024px) {
+    .header {
+        padding: 0 30px;
+    }
+
+    .search-box {
+        width: 180px;
+    }
+
+    .nav-actions {
+        gap: 14px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .nav-links {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .header {
+        padding: 0 25px;
+    }
+
+    .search-box {
+        width: 160px;
+        font-size: 15px;
+        padding: 7px 14px;
+    }
+
+    .nav-actions {
+        gap: 12px;
+    }
+
+    .nav-icon {
+        font-size: 17px;
+        padding: 6px;
+    }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+    /* Hide Profile Menu item from dropdown on mobile */
+    .profile-menu-item {
+        display: none !important;
+    }
+
+    /* Show profile hamburger button on profile pages */
+    .profile-hamburger {
+        display: block;
+    }
+
+    .header {
+        padding: 0 20px;
+    }
+
+    .nav {
+        height: 55px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .search-box {
+        width: 130px;
+        font-size: 14px;
+        padding: 6px 12px;
+        border-radius: 18px;
+    }
+
+    .nav-icon {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    .nav-actions {
+        gap: 10px;
+    }
+
+    .wishlist-badge,
+    .cart-badge {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+        top: -1px;
+        right: -1px;
+    }
+
+    .login-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 16px;
+    }
+
+    .dropdown-content {
+        min-width: 140px;
+        right: -10px;
+    }
+
+    .dropdown-content a {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+}
+
+/* Mobile Medium */
+@media (max-width: 576px) {
+    .header {
+        padding: 0 15px;
+    }
+
+    .nav {
+        height: 50px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .search-box {
+        width: 110px;
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+
+    .nav-icon {
+        font-size: 15px;
+        padding: 6px;
+    }
+
+    .nav-actions {
+        gap: 8px;
+    }
+
+    .login-btn {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .mobile-nav {
+        width: 280px;
+        left: -280px;
+    }
+
+    .mobile-nav ul li a {
+        font-size: 16px;
+        padding: 16px 20px;
+    }
+
+    .wishlist-badge,
+    .cart-badge {
+        width: 15px;
+        height: 15px;
+        font-size: 9px;
+    }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+    .header {
+        padding: 0 12px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .search-box {
+        width: 100px;
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .nav-icon {
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .nav-actions {
+        gap: 6px;
+    }
+
+    .login-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .mobile-nav {
+        width: 260px;
+        left: -260px;
+    }
+
+    .mobile-nav ul li a {
+        font-size: 15px;
+        padding: 14px 18px;
+    }
+
+    .dropdown-content {
+        min-width: 120px;
+        right: -5px;
+    }
+
+    .dropdown-content a {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Mobile Extra Small */
+@media (max-width: 320px) {
+    .header {
+        padding: 0 10px;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+
+    .search-box {
+        width: 80px;
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+
+    .nav-icon {
+        font-size: 13px;
+        padding: 4px;
+    }
+
+    .nav-actions {
+        gap: 4px;
+    }
+
+    .login-btn {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+
+    .mobile-nav {
+        width: 240px;
+        left: -240px;
+    }
+
+    .mobile-nav ul li a {
+        font-size: 14px;
+        padding: 12px 15px;
+    }
+
+    .wishlist-badge,
+    .cart-badge {
+        width: 14px;
+        height: 14px;
+        font-size: 8px;
+    }
+}
+
+/* Landscape orientation for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .nav {
+        height: 45px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .search-box {
+        width: 100px;
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .nav-icon {
+        font-size: 14px;
+        padding: 4px;
+    }
+
+    .login-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .nav-icon,
+    .login-btn,
+    .menu-toggle {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-icon:hover {
+        transform: none;
+    }
+
+    .nav-icon:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+
+    .login-btn:hover {
+        transform: none;
+    }
+
+    .login-btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* High DPI display adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .nav-icon,
+    .wishlist-badge,
+    .cart-badge {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .nav-icon,
+    .login-btn,
+    .mobile-nav,
+    .profile-sidebar,
+    .wishlist-badge,
+    .cart-badge {
+        transition: none;
+    }
+
+    .wishlist-badge,
+    .cart-badge {
+        animation: none;
+    }
+}
