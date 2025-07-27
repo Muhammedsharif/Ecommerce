@@ -141,7 +141,7 @@ const getWishlistCount = async(req, res) => {
             wishlistCount = 0;
         }
 
-        console.log(`API: User ${userId} wishlist count: ${wishlistCount}`); // Debug log
+        
         res.json({ success: true, wishlistCount: wishlistCount });
 
     } catch (error) {

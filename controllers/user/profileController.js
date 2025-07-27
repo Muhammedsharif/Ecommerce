@@ -111,14 +111,23 @@ const verifyForgotPassOtp = async (req,res) =>{
     try {
 
         const enteredOtp = req.body.otp
-        if(enteredOtp===req.session.userOtp){
-            res.json({success:true, redirectUrl:"/reset-Password"})
+        console.log("Entered OTP:", enteredOtp)
+        console.log("Session OTP:", req.session.userOtp)
+        console.log("OTP types:", typeof enteredOtp, typeof req.session.userOtp)
+        
+        // Ensure both OTPs are strings and trim any whitespace
+        const enteredOtpStr = String(enteredOtp).trim()
+        const sessionOtpStr = String(req.session.userOtp).trim()
+        
+        if(enteredOtpStr === sessionOtpStr){
+            res.json({success:true, redirectUrl:"/reset-password"})
         }else{
             res.json({success:false,message:"Invalid OTP, Please try again"})
         }
         
     } catch (error) {
 
+        console.error("Error in verifyForgotPassOtp:", error)
         res.status(500).json({success:false,message:"An error occured. Please try again"})
         
     }
@@ -139,15 +148,25 @@ const loadResetPassword = async (req,res) => {
 const resendOtp = async (req,res) => {
     try {
 
+        // Check if email exists in session
+        const email = req.session.email
+        if (!email) {
+            console.log("No email found in session for resend OTP")
+            return res.status(400).json({success:false, message:"Session expired. Please start the forgot password process again."})
+        }
+
         const otp = generateOtp()
         req.session.userOtp = otp
-        const email = req.session.email
         console.log("resending OTP to email",email)
+        console.log("New OTP generated:",otp)
         const emailSent = await sendVerificationEmail(email,otp)
 
         if(emailSent){
             console.log("OTP sent again",otp)
-            res.status(200).json({success:true, message:"Resend OTP successfull"})
+            res.status(200).json({success:true, message:"OTP resent successfully"})
+        } else {
+            console.log("Failed to send email")
+            res.status(500).json({success:false, message:"Failed to send OTP. Please try again."})
         }
         
     } catch (error) {
@@ -167,7 +186,7 @@ const resetPassword = async (req,res) => {
         if(newPass1===newPass2){
             const passwordHash = await securePassword(newPass1)
             await User.updateOne({email:email},{$set:{password:passwordHash}})
-            res.redirect("/login")
+            res.redirect("/auth/login")
         }else{
             
             res.render("reset-password",{message:"Passwords do not match"})

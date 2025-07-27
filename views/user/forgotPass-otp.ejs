@@ -312,7 +312,7 @@
             <div class="otp-header">
                 <h2 class="otp-title">OTP Verification</h2>
                 <p class="otp-subtitle">Enter OTP sent to bill****s@example.com</p>
-                <div class="timer-display" id="timerDisplay">1:42</div>
+                <div class="timer-display" id="timerDisplay"></div>
             </div>
             
             <form onsubmit="return validateOtpForm()">
@@ -367,6 +367,11 @@
         }
 
         function startOtpTimer() {
+            // Enable resend button initially when timer starts
+            const resendLink = document.getElementById('resendLink');
+            resendLink.classList.add('disabled');
+            resendDisabled = true;
+            
             otpTimerInterval = setInterval(() => {
                 updateTimerDisplay();
                 
@@ -375,6 +380,11 @@
                     document.getElementById('timerDisplay').textContent = 'Expired';
                     document.getElementById('timerDisplay').style.background = '#fee2e2';
                     document.getElementById('timerDisplay').style.color = '#dc2626';
+                    
+                    // Enable resend button when timer expires
+                    resendLink.classList.remove('disabled');
+                    resendLink.textContent = 'Resend OTP';
+                    resendDisabled = false;
                 }
             }, 1000);
         }
@@ -425,7 +435,7 @@
             const otpValue = getOtpValue();
             
             if (otpValue.length !== 4) {
-                showAlert('error', 'Please enter all 5 digits of the OTP');
+                showAlert('error', 'Please enter all 4 digits of the OTP');
                 return false;
             }
 
@@ -470,34 +480,45 @@
             resendLink.classList.add('disabled');
             resendLink.textContent = 'Sending...';
             
-            clearInterval(otpTimerInterval);
-            timer = 60;
-            startOtpTimer();
-            
             $.ajax({
                 type: 'POST',
                 url: '/resend-forgot-otp',
                 success: function(response) {
                     if (response.success) {
+                        // Reset and restart timer
+                        clearInterval(otpTimerInterval);
+                        timer = 60;
+                        startOtpTimer();
+                        
                         Swal.fire({
                             icon: 'success',
                             title: 'OTP Resent Successfully',
                             showConfirmButton: false,
                             timer: 1500
                         });
+                        
+                        // Clear OTP inputs
+                        ['otp1', 'otp2', 'otp3', 'otp4'].forEach(id => {
+                            const input = document.getElementById(id);
+                            input.value = '';
+                            input.classList.remove('filled');
+                        });
+                        
+                        // Focus first input
+                        document.getElementById('otp1').focus();
+                        
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Failed to resend OTP. Please try again.'
+                            text: response.message || 'Failed to resend OTP. Please try again.'
                         });
-                    }
-                    
-                    setTimeout(() => {
+                        
+                        // Re-enable resend button immediately on error
                         resendDisabled = false;
                         resendLink.classList.remove('disabled');
                         resendLink.textContent = 'Resend OTP';
-                    }, 3000);
+                    }
                 },
                 error: function() {
                     Swal.fire({
@@ -506,11 +527,10 @@
                         text: 'Failed to resend OTP. Please try again.'
                     });
                     
-                    setTimeout(() => {
-                        resendDisabled = false;
-                        resendLink.classList.remove('disabled');
-                        resendLink.textContent = 'Resend OTP';
-                    }, 3000);
+                    // Re-enable resend button immediately on error
+                    resendDisabled = false;
+                    resendLink.classList.remove('disabled');
+                    resendLink.textContent = 'Resend OTP';
                 }
             });
         }

@@ -5,6 +5,7 @@ const userController = require("../controllers/user/userController");
 const productController = require("../controllers/user/productController");
 const cartController = require("../controllers/user/cartController");
 const wishlistController = require("../controllers/user/wishlistController");
+const profileController = require("../controllers/user/profileController");
 const { userAuth } = require("../middlewares/auth");
 
 // Import route modules
@@ -41,6 +42,14 @@ router.post("/add-to-cart", userAuth, cartController.addToCart);
 
 // Legacy wishlist routes that need to remain at root level for backward compatibility
 router.post("/addToWishlist", userAuth, wishlistController.addToWishlist);
+
+// Forgot Password routes (accessible directly from root for better UX)
+router.get("/forgot-password", profileController.loadForgotPassword);
+router.post("/forgot-email-valid", profileController.forgotEmailValid);
+router.post("/verify-password-otp", profileController.verifyForgotPassOtp);
+router.get("/reset-password", profileController.loadResetPassword);
+router.post("/resend-forgot-otp", profileController.resendOtp);
+router.post("/reset-password", profileController.resetPassword);
 
 // Mount route modules with prefixes for better organization
 router.use("/auth", authRoutes);
