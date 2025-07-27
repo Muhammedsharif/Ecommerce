@@ -486,10 +486,131 @@
             font-size: 24px;
             color: #ccc;
             cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 8px;
+            border-radius: 50%;
+            overflow: visible;
+        }
+
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 107, 107, 0.1);
         }
 
         .wishlist-btn.active {
-            color: red;
+            color: #ff6b6b;
+            animation: heartBeat 0.6s ease-in-out;
+        }
+
+        .wishlist-btn.active:hover {
+            color: #ff5252;
+        }
+
+        /* Heart animation keyframes */
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        /* Floating heart animation */
+        @keyframes floatingHeart {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.8);
+            }
+            15% {
+                opacity: 1;
+                transform: translateY(-10px) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.6);
+            }
+        }
+
+        /* Sparkle animation */
+        @keyframes sparkle {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(360deg);
+            }
+        }
+
+        /* Pulse ring animation */
+        @keyframes pulseRing {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Floating heart element */
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            color: #ff6b6b;
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatingHeart 1.5s ease-out forwards;
+        }
+
+        /* Sparkle elements */
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+            animation: sparkle 1s ease-out forwards;
+        }
+
+        /* Pulse ring */
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ff6b6b;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 1;
+            pointer-events: none;
+            z-index: 998;
+            animation: pulseRing 0.6s ease-out forwards;
+        }
+
+        /* Enhanced wishlist button states */
+        .wishlist-btn.adding {
+            animation: heartBeat 0.6s ease-in-out;
+        }
+
+        .wishlist-btn.removing {
+            animation: heartBreak 0.4s ease-in-out;
+        }
+
+        @keyframes heartBreak {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.8); }
+            100% { transform: scale(1); }
         }
 
         .product-image {
@@ -1686,58 +1807,227 @@ function hideToast() {
 
 
 
+             // Enhanced wishlist function with Instagram-like animations
              function addToWishlist(productId) {
     if (!productId) {
         showToast('Invalid product ID', 'error');
         return;
     }
 
+    const btn = $(`button[onclick="addToWishlist('${productId}')"]`);
+    const isCurrentlyActive = btn.hasClass('active');
+    
+    // Prevent multiple clicks during animation
+    if (btn.hasClass('adding') || btn.hasClass('removing')) {
+        return;
+    }
+
+    // Add animation class based on current state
+    if (isCurrentlyActive) {
+        btn.addClass('removing');
+    } else {
+        btn.addClass('adding');
+    }
+
     $.ajax({
         url: '/wishlist/add',
-            method: 'POST',
+        method: 'POST',
         data: { productId: productId },
         success: (response) => {
-            const btn = $(`button[onclick="addToWishlist('${productId}')"]`);
-
             if (response.status) {
                 if (response.action === 'added') {
+                    // Adding to wishlist - show Instagram-like animation
                     btn.addClass('active');
+                    createWishlistAnimation(btn[0], 'added');
                     showToast('Product added to wishlist', 'success');
+                    
                     // Update wishlist counter
                     if (typeof window.incrementWishlistCounter === 'function') {
                         window.incrementWishlistCounter();
                     } else {
-                        // Fallback: try again after a short delay
-                setTimeout(() => {
+                        setTimeout(() => {
                             if (typeof window.incrementWishlistCounter === 'function') {
                                 window.incrementWishlistCounter();
                             }
                         }, 100);
                     }
                 } else if (response.action === 'removed') {
+                    // Removing from wishlist - show removal animation
                     btn.removeClass('active');
-                showToast('Product removed from wishlist', 'info');
+                    createWishlistAnimation(btn[0], 'removed');
+                    showToast('Product removed from wishlist', 'info');
+                    
                     // Update wishlist counter
                     if (typeof window.decrementWishlistCounter === 'function') {
                         window.decrementWishlistCounter();
                     } else {
-                        // Fallback: try again after a short delay
                         setTimeout(() => {
                             if (typeof window.decrementWishlistCounter === 'function') {
                                 window.decrementWishlistCounter();
                             }
                         }, 100);
                     }
-            }
-        } else {
+                }
+            } else {
                 showToast(response.message || 'Error processing wishlist request', 'error');
-        }
+            }
+            
+            // Remove animation classes after animation completes
+            setTimeout(() => {
+                btn.removeClass('adding removing');
+            }, 600);
         },
         error: (jqXHR, textStatus, errorThrown) => {
             console.error('AJAX error:', textStatus, errorThrown, jqXHR.responseText);
-        showToast('Error processing wishlist request', 'error');
-    }
+            showToast('Error processing wishlist request', 'error');
+            
+            // Remove animation classes on error
+            setTimeout(() => {
+                btn.removeClass('adding removing');
+            }, 600);
+        }
     });
+}
+
+// Create Instagram-like wishlist animation
+function createWishlistAnimation(button, action) {
+    const rect = button.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    if (action === 'added') {
+        // Create pulse ring effect
+        createPulseRing(button);
+        
+        // Create floating hearts
+        createFloatingHearts(centerX, centerY);
+        
+        // Create sparkles
+        createSparkles(centerX, centerY);
+        
+        // Trigger heart beat animation on button
+        button.style.animation = 'heartBeat 0.6s ease-in-out';
+        
+        setTimeout(() => {
+            button.style.animation = '';
+        }, 600);
+    } else {
+        // Create subtle removal animation
+        button.style.animation = 'heartBreak 0.4s ease-in-out';
+        
+        setTimeout(() => {
+            button.style.animation = '';
+        }, 400);
+    }
+}
+
+// Create pulse ring effect
+function createPulseRing(button) {
+    const ring = document.createElement('div');
+    ring.className = 'pulse-ring';
+    button.style.position = 'relative';
+    button.appendChild(ring);
+    
+    setTimeout(() => {
+        if (ring.parentNode) {
+            ring.parentNode.removeChild(ring);
+        }
+    }, 600);
+}
+
+// Create floating hearts animation
+function createFloatingHearts(centerX, centerY) {
+    const heartCount = 3;
+    const hearts = ['♡', '♥', '💖'];
+    
+    for (let i = 0; i < heartCount; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = hearts[i % hearts.length];
+            
+            // Random position around the button
+            const angle = (Math.PI * 2 * i) / heartCount;
+            const radius = 20;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            
+            heart.style.left = x + 'px';
+            heart.style.top = y + 'px';
+            heart.style.position = 'fixed';
+            heart.style.pointerEvents = 'none';
+            heart.style.zIndex = '1000';
+            
+            document.body.appendChild(heart);
+            
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, 1500);
+        }, i * 100);
+    }
+}
+
+// Create sparkle animation
+function createSparkles(centerX, centerY) {
+    const sparkleCount = 6;
+    
+    for (let i = 0; i < sparkleCount; i++) {
+        setTimeout(() => {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            
+            // Random position around the button
+            const angle = (Math.PI * 2 * i) / sparkleCount;
+            const radius = 30 + Math.random() * 20;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            sparkle.style.position = 'fixed';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.zIndex = '999';
+            
+            // Random sparkle colors
+            const colors = ['#ffd700', '#ff69b4', '#00bfff', '#ff6347', '#98fb98'];
+            sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                if (sparkle.parentNode) {
+                    sparkle.parentNode.removeChild(sparkle);
+                }
+            }, 1000);
+        }, i * 50);
+    }
+}
+
+// Enhanced toast with heart icon for wishlist actions
+function showWishlistToast(message, action) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+
+    const icon = toast.querySelector('.icon');
+    const messageElement = document.getElementById('toast-message');
+
+    if (action === 'added') {
+        icon.textContent = '💖';
+        toast.style.borderLeft = '5px solid #ff6b6b';
+    } else {
+        icon.textContent = '💔';
+        toast.style.borderLeft = '5px solid #ffa500';
+    }
+
+    messageElement.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('visible');
+
+    setTimeout(() => {
+        hideToast();
+    }, 3000);
 }
 
             </script>

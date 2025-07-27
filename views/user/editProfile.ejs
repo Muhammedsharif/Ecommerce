@@ -386,9 +386,54 @@
         </div>
     </div>
 
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        // File validation constants
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+        const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+        function validateFile(file) {
+            // Check file size
+            if (file.size > MAX_FILE_SIZE) {
+                return {
+                    valid: false,
+                    error: 'File size too large. Please select an image smaller than 5MB.'
+                };
+            }
+
+            // Check file type
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                return {
+                    valid: false,
+                    error: 'Invalid file type. Please select a valid image file (JPEG, PNG, GIF, or WebP).'
+                };
+            }
+
+            return { valid: true };
+        }
+
         function previewImage(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validate file before preview
+                const validation = validateFile(file);
+                if (!validation.valid) {
+                    // Show error with SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid File',
+                        text: validation.error,
+                        confirmButtonColor: '#667eea'
+                    });
+                    
+                    // Clear the input
+                    input.value = '';
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.getElementById('profileImagePreview');
@@ -401,11 +446,108 @@
                         avatar.outerHTML = `<img src="${e.target.result}" alt="Profile" class="profile-image" id="profileImagePreview">`;
                     }
                 }
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
-        // Toast notification function
+        // Enhanced form submission with file validation
+        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('profileImageInput');
+            const file = fileInput.files[0];
+            
+            // If a file is selected, validate it
+            if (file) {
+                const validation = validateFile(file);
+                if (!validation.valid) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid File',
+                        text: validation.error,
+                        confirmButtonColor: '#667eea'
+                    });
+                    return;
+                }
+            }
+
+            // Show loading
+            Swal.fire({
+                title: 'Updating Profile...',
+                text: 'Please wait while we update your profile.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Submit form using FormData for file upload
+            const formData = new FormData(this);
+            
+            fetch('/profile/edit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json().catch(() => {
+                        // If response is not JSON (redirect), handle as success
+                        window.location.href = '/Profile?success=' + encodeURIComponent('Profile updated successfully');
+                        return null;
+                    });
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message || 'Profile updated successfully',
+                            confirmButtonColor: '#667eea'
+                        }).then(() => {
+                            if (data.redirectUrl) {
+                                window.location.href = data.redirectUrl;
+                            } else {
+                                window.location.href = '/Profile?success=' + encodeURIComponent('Profile updated successfully');
+                            }
+                        });
+                    } else {
+                        let errorMessage = 'An error occurred while updating your profile.';
+                        
+                        if (data.errorType === 'FILE_SIZE_LIMIT') {
+                            errorMessage = 'File size too large. Please select an image smaller than 5MB.';
+                        } else if (data.errorType === 'INVALID_FILE_TYPE') {
+                            errorMessage = 'Invalid file type. Please select a valid image file.';
+                        } else if (data.error) {
+                            errorMessage = data.error;
+                        }
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload Failed',
+                            text: errorMessage,
+                            confirmButtonColor: '#667eea'
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An unexpected error occurred. Please try again.',
+                    confirmButtonColor: '#667eea'
+                });
+            });
+        });
+
+        // Toast notification function (kept for backward compatibility)
         function showToast(message, type = 'success') {
             const existingToasts = document.querySelectorAll('.toast-notification');
             existingToasts.forEach(toast => toast.remove());
@@ -435,14 +577,34 @@
             }, 3000);
         }
 
-        // Show messages if any
+        // Show messages if any (fallback for server-side messages)
         <% if (typeof success !== 'undefined' && success) { %>
-            showToast('<%= success %>', 'success');
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<%= success %>',
+                confirmButtonColor: '#667eea'
+            });
         <% } %>
         
         <% if (typeof error !== 'undefined' && error) { %>
-            showToast('<%= error %>', 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '<%= error %>',
+                confirmButtonColor: '#667eea'
+            });
         <% } %>
+
+        // Add file size info to the UI
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInfo = document.createElement('p');
+            fileInfo.style.cssText = 'color: #6c757d; font-size: 0.8rem; margin-top: 0.5rem;';
+            fileInfo.textContent = 'Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP';
+            
+            const profileSection = document.querySelector('.profile-image-section');
+            profileSection.appendChild(fileInfo);
+        });
     </script>
     <script src="/js/profile-validation.js"></script>
 </body>

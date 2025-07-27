@@ -1,8 +1,16 @@
-<!-- Clean Breadcrumb Navigation -->
+<!-- Enhanced Responsive Breadcrumb Navigation -->
 <div class="breadcrumb-wrapper" id="breadcrumbWrapper">
     <nav class="breadcrumb-nav" aria-label="Breadcrumb">
         <div class="breadcrumb-container">
-            <ol class="breadcrumb">
+            <!-- Mobile dropdown toggle (hidden by default) -->
+            <button class="breadcrumb-mobile-toggle" id="breadcrumbToggle" aria-expanded="false" aria-label="Toggle breadcrumb menu">
+                <i class="fas fa-ellipsis-h"></i>
+                <span class="breadcrumb-current-mobile"></span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            
+            <!-- Full breadcrumb list -->
+            <ol class="breadcrumb" id="breadcrumbList">
                 <li class="breadcrumb-item">
                     <a href="/" class="breadcrumb-link home-link">
                         <i class="fas fa-home"></i>
@@ -12,17 +20,17 @@
                 
                 <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
                     <% breadcrumbs.forEach((crumb, index) => { %>
-                        <li class="breadcrumb-item">
+                        <li class="breadcrumb-item" data-level="<%= index + 1 %>">
                             <span class="breadcrumb-separator">
                                 <i class="fas fa-chevron-right"></i>
                             </span>
                             
                             <% if (index === breadcrumbs.length - 1) { %>
-                                <span class="breadcrumb-current">
+                                <span class="breadcrumb-current" data-text="<%= crumb.name %>">
                                     <%= crumb.name %>
                                 </span>
                             <% } else { %>
-                                <a href="<%= crumb.url %>" class="breadcrumb-link">
+                                <a href="<%= crumb.url %>" class="breadcrumb-link" data-text="<%= crumb.name %>">
                                     <span><%= crumb.name %></span>
                                 </a>
                             <% } %>
@@ -30,6 +38,29 @@
                     <% }) %>
                 <% } %>
             </ol>
+            
+            <!-- Mobile dropdown menu -->
+            <div class="breadcrumb-dropdown" id="breadcrumbDropdown">
+                <div class="breadcrumb-dropdown-content">
+                    <a href="/" class="breadcrumb-dropdown-item">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
+                        <% breadcrumbs.forEach((crumb, index) => { %>
+                            <% if (index < breadcrumbs.length - 1) { %>
+                                <a href="<%= crumb.url %>" class="breadcrumb-dropdown-item">
+                                    <span><%= crumb.name %></span>
+                                </a>
+                            <% } else { %>
+                                <span class="breadcrumb-dropdown-item current">
+                                    <span><%= crumb.name %></span>
+                                </span>
+                            <% } %>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
         </div>
     </nav>
 </div>
@@ -37,6 +68,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const breadcrumbWrapper = document.getElementById('breadcrumbWrapper');
+    const breadcrumbToggle = document.getElementById('breadcrumbToggle');
+    const breadcrumbDropdown = document.getElementById('breadcrumbDropdown');
+    const breadcrumbList = document.getElementById('breadcrumbList');
+    
     if (!breadcrumbWrapper) return;
     
     // Determine page type and apply appropriate positioning
@@ -70,6 +105,80 @@ document.addEventListener('DOMContentLoaded', function() {
         breadcrumbWrapper.classList.add('animate-in');
     }, 100);
     
+    // Mobile responsiveness logic
+    function handleResponsiveDesign() {
+        const isMobile = window.innerWidth <= 768;
+        const breadcrumbItems = breadcrumbList.querySelectorAll('.breadcrumb-item');
+        const currentItem = breadcrumbList.querySelector('.breadcrumb-current');
+        
+        if (isMobile && breadcrumbItems.length > 3) {
+            // Show dropdown toggle for mobile with many items
+            breadcrumbToggle.style.display = 'flex';
+            breadcrumbList.style.display = 'none';
+            
+            // Set current page in mobile toggle
+            if (currentItem) {
+                const currentText = currentItem.getAttribute('data-text') || currentItem.textContent;
+                breadcrumbToggle.querySelector('.breadcrumb-current-mobile').textContent = currentText;
+            }
+        } else {
+            // Show full breadcrumb list
+            breadcrumbToggle.style.display = 'none';
+            breadcrumbList.style.display = 'flex';
+            breadcrumbDropdown.classList.remove('show');
+        }
+        
+        // Handle long breadcrumb names on mobile
+        if (isMobile) {
+            breadcrumbItems.forEach(item => {
+                const link = item.querySelector('.breadcrumb-link span, .breadcrumb-current');
+                if (link) {
+                    const text = link.textContent;
+                    if (text.length > 15) {
+                        link.setAttribute('title', text);
+                    }
+                }
+            });
+        }
+    }
+    
+    // Mobile dropdown toggle functionality
+    if (breadcrumbToggle) {
+        breadcrumbToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            breadcrumbDropdown.classList.toggle('show');
+            
+            // Rotate chevron
+            const chevron = this.querySelector('.fa-chevron-down');
+            if (chevron) {
+                chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            }
+        });
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!breadcrumbWrapper.contains(e.target)) {
+            breadcrumbDropdown.classList.remove('show');
+            if (breadcrumbToggle) {
+                breadcrumbToggle.setAttribute('aria-expanded', 'false');
+                const chevron = breadcrumbToggle.querySelector('.fa-chevron-down');
+                if (chevron) {
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', handleResponsiveDesign);
+    
+    // Initial responsive setup
+    handleResponsiveDesign();
+    
     // Add hover effects to links
     const breadcrumbLinks = breadcrumbWrapper.querySelectorAll('.breadcrumb-link');
     breadcrumbLinks.forEach(link => {
@@ -81,18 +190,50 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.transform = 'translateY(0)';
         });
     });
+    
+    // Smooth scroll for horizontal overflow
+    const breadcrumb = breadcrumbWrapper.querySelector('.breadcrumb');
+    if (breadcrumb) {
+        let isScrolling = false;
+        
+        breadcrumb.addEventListener('wheel', function(e) {
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                e.preventDefault();
+                this.scrollLeft += e.deltaX;
+            } else if (this.scrollWidth > this.clientWidth) {
+                e.preventDefault();
+                this.scrollLeft += e.deltaY;
+            }
+        });
+        
+        // Touch scroll for mobile
+        let startX = 0;
+        breadcrumb.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+        });
+        
+        breadcrumb.addEventListener('touchmove', function(e) {
+            if (this.scrollWidth > this.clientWidth) {
+                const currentX = e.touches[0].clientX;
+                const diffX = startX - currentX;
+                this.scrollLeft += diffX;
+                startX = currentX;
+            }
+        });
+    }
 });
 </script>
 
 <style>
-/* ===== CLEAN BREADCRUMB DESIGN ===== */
+/* ===== ENHANCED RESPONSIVE BREADCRUMB DESIGN ===== */
 
 .breadcrumb-wrapper {
     opacity: 0;
     transform: translateY(10px);
     transition: all 0.3s ease;
     margin-bottom: 20px;
-    width: 40%;
+    width: 100%;
+    position: relative;
 }
 
 .breadcrumb-wrapper.animate-in {
@@ -106,11 +247,13 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 8px;
     padding: 12px 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
 }
 
 .breadcrumb-container {
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
 }
 
 .breadcrumb {
@@ -119,20 +262,45 @@ document.addEventListener('DOMContentLoaded', function() {
     list-style: none;
     margin: 0;
     padding: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 transparent;
+}
+
+.breadcrumb::-webkit-scrollbar {
+    height: 3px;
+}
+
+.breadcrumb::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.breadcrumb::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+.breadcrumb::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
 }
 
 .breadcrumb-item {
     display: flex;
     align-items: center;
     font-size: 14px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .breadcrumb-separator {
     color: #6c757d;
     margin: 0 8px;
     font-size: 12px;
+    flex-shrink: 0;
 }
 
 .breadcrumb-link {
@@ -145,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 4px;
     transition: all 0.2s ease;
     font-weight: 500;
+    max-width: 200px;
 }
 
 .breadcrumb-link:hover {
@@ -157,12 +326,116 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 14px;
 }
 
+.breadcrumb-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .breadcrumb-current {
     color: #495057;
     font-weight: 600;
     padding: 4px 8px;
     background-color: rgba(73, 80, 87, 0.1);
     border-radius: 4px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Mobile dropdown toggle (hidden by default) */
+.breadcrumb-mobile-toggle {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.breadcrumb-mobile-toggle:hover {
+    background-color: rgba(73, 80, 87, 0.1);
+}
+
+.breadcrumb-mobile-toggle .fa-chevron-down {
+    transition: transform 0.2s ease;
+    font-size: 12px;
+}
+
+.breadcrumb-current-mobile {
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+/* Mobile dropdown menu */
+.breadcrumb-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.breadcrumb-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.breadcrumb-dropdown-content {
+    padding: 8px 0;
+}
+
+.breadcrumb-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    color: #495057;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    font-size: 14px;
+}
+
+.breadcrumb-dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+}
+
+.breadcrumb-dropdown-item.current {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    font-weight: 600;
+    cursor: default;
+}
+
+.breadcrumb-dropdown-item i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
 }
 
 /* ===== POSITIONING VARIANTS ===== */
@@ -252,15 +525,37 @@ document.addEventListener('DOMContentLoaded', function() {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+/* ===== ENHANCED RESPONSIVE DESIGN ===== */
+
+/* Large tablets and small desktops */
+@media (max-width: 1024px) {
+    .breadcrumb-wrapper {
+        width: 100%;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        max-width: 150px;
+    }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
+    .breadcrumb-wrapper {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
     .breadcrumb-nav {
         padding: 10px 16px;
+        margin: 0 10px;
+        border-radius: 6px;
     }
     
     .breadcrumb {
         font-size: 13px;
         gap: 6px;
+        padding-bottom: 4px;
     }
     
     .breadcrumb-separator {
@@ -270,8 +565,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .breadcrumb-link,
     .breadcrumb-current {
-        padding: 3px 6px;
+        padding: 4px 6px;
         font-size: 13px;
+        max-width: 120px;
+    }
+    
+    .breadcrumb-link span {
+        max-width: 100px;
     }
     
     .position-default,
@@ -280,36 +580,25 @@ document.addEventListener('DOMContentLoaded', function() {
     .position-cart,
     .position-checkout,
     .position-wishlist {
-        margin: 15px 10px;
-        padding: 0 10px;
+        margin: 15px 0;
+        padding: 0;
     }
     
     .position-shop {
-        margin: 0 10px 15px 10px;
+        margin: 0 0 15px 0;
     }
 }
 
-@media (max-width: 480px) {
+/* Mobile landscape */
+@media (max-width: 640px) {
     .breadcrumb-nav {
         padding: 8px 12px;
+        margin: 0 8px;
     }
     
     .breadcrumb {
         font-size: 12px;
         gap: 4px;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-    
-    .breadcrumb::-webkit-scrollbar {
-        display: none;
-    }
-    
-    .breadcrumb-item {
-        flex-shrink: 0;
-        white-space: nowrap;
     }
     
     .breadcrumb-separator {
@@ -319,15 +608,101 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .breadcrumb-link,
     .breadcrumb-current {
-        padding: 2px 4px;
+        padding: 3px 5px;
         font-size: 12px;
+        max-width: 100px;
     }
     
     .breadcrumb-link span {
         max-width: 80px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
+    .breadcrumb-wrapper {
+        margin-bottom: 10px;
+    }
+    
+    .breadcrumb-nav {
+        padding: 6px 8px;
+        margin: 0 4px;
+        border-radius: 4px;
+    }
+    
+    .breadcrumb {
+        font-size: 11px;
+        gap: 2px;
+    }
+    
+    .breadcrumb-separator {
+        margin: 0 2px;
+        font-size: 9px;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        padding: 2px 4px;
+        font-size: 11px;
+        max-width: 80px;
+    }
+    
+    .breadcrumb-link span {
+        max-width: 60px;
+    }
+    
+    .breadcrumb-link.home-link span {
+        display: none; /* Hide "Home" text, keep only icon */
+    }
+    
+    .breadcrumb-link.home-link i {
+        font-size: 12px;
+    }
+    
+    .breadcrumb-mobile-toggle {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+    
+    .breadcrumb-dropdown-item {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .breadcrumb-nav {
+        padding: 4px 6px;
+        margin: 0 2px;
+    }
+    
+    .breadcrumb {
+        font-size: 10px;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        max-width: 60px;
+        font-size: 10px;
+    }
+    
+    .breadcrumb-link span {
+        max-width: 45px;
+    }
+    
+    .breadcrumb-separator {
+        font-size: 8px;
+    }
+    
+    .breadcrumb-mobile-toggle {
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+    
+    .breadcrumb-dropdown-item {
+        padding: 4px 8px;
+        font-size: 11px;
     }
 }
 
@@ -379,5 +754,53 @@ document.addEventListener('DOMContentLoaded', function() {
     .breadcrumb-separator {
         color: #9ca3af;
     }
+    
+    .breadcrumb-mobile-toggle {
+        color: #f3f4f6;
+    }
+    
+    .breadcrumb-mobile-toggle:hover {
+        background-color: rgba(156, 163, 175, 0.2);
+    }
+    
+    .breadcrumb-dropdown {
+        background: #374151;
+        border-color: #4b5563;
+    }
+    
+    .breadcrumb-dropdown-item {
+        color: #f3f4f6;
+    }
+    
+    .breadcrumb-dropdown-item:hover {
+        background-color: #4b5563;
+        color: #f3f4f6;
+    }
+    
+    .breadcrumb-dropdown-item.current {
+        background-color: rgba(147, 197, 253, 0.2);
+        color: #93c5fd;
+    }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.breadcrumb-wrapper.compact {
+    margin-bottom: 10px;
+}
+
+.breadcrumb-wrapper.compact .breadcrumb-nav {
+    padding: 6px 12px;
+}
+
+.breadcrumb-wrapper.large {
+    margin-bottom: 30px;
+}
+
+.breadcrumb-wrapper.large .breadcrumb-nav {
+    padding: 16px 24px;
+}
+
+.breadcrumb-wrapper.large .breadcrumb {
+    font-size: 16px;
 }
 </style>

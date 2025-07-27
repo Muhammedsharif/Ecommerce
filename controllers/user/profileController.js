@@ -1194,6 +1194,15 @@ const updateProfile = async (req, res) => {
         }
 
         if (Object.keys(errors).length > 0) {
+            // Check if this is an AJAX request (from frontend file validation)
+            if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+                return res.status(400).json({
+                    success: false,
+                    errors: errors,
+                    errorType: 'VALIDATION_ERROR'
+                });
+            }
+            
             return res.render("editProfile", {
                 user: user,
                 errors: errors,
@@ -1221,10 +1230,29 @@ const updateProfile = async (req, res) => {
 
         await User.findByIdAndUpdate(userId, updateData);
 
+        // Check if this is an AJAX request
+        if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+            return res.json({
+                success: true,
+                message: "Profile updated successfully",
+                redirectUrl: "/Profile?success=" + encodeURIComponent("Profile updated successfully")
+            });
+        }
+
         res.redirect("/Profile?success=" + encodeURIComponent("Profile updated successfully"));
 
     } catch (error) {
         console.error("Error updating profile:", error);
+        
+        // Check if this is an AJAX request
+        if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+            return res.status(500).json({
+                success: false,
+                error: "An error occurred while updating profile",
+                errorType: 'SERVER_ERROR'
+            });
+        }
+        
         const user = await User.findById(req.session.user);
         res.render("editProfile", {
             user: user,
