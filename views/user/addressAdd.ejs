@@ -760,6 +760,12 @@
             }
             return null;
         }
+const nameid = document.getElementById("name")
+        nameid.addEventListener('input', function() {
+        if (this.value.startsWith(' ')) {
+          this.value = this.value.trimStart();
+        }
+      });
 
         // Real-time validation on input change
         function setupRealTimeValidation() {

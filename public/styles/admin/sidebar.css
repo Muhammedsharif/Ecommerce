@@ -25,10 +25,17 @@
             height: 100vh;
             overflow-y: auto;
             transition: transform 0.3s ease;
+            z-index: 1000;
+            left: 0;
+            top: 0;
         }
 
         .sidebar.hidden {
             transform: translateX(-100%);
+        }
+
+        .sidebar.visible {
+            transform: translateX(0);
         }
 
         .sidebar-header {
@@ -114,15 +121,42 @@
         .menu-toggle {
             background: none;
             border: none;
-            font-size: 1.5rem;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
             border-radius: 5px;
             transition: background 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            position: relative;
         }
 
         .menu-toggle:hover {
             background: #f0f0f0;
+        }
+
+        .hamburger-line {
+            width: 24px;
+            height: 3px;
+            background-color: #333;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .menu-toggle.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
         }
 
         .header h2 {
@@ -382,10 +416,119 @@
             display: block;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* Overlay for mobile sidebar */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Enhanced Responsive Design */
+        
+        /* Large Desktop (1200px and up) */
+        @media (min-width: 1200px) {
+            .sidebar {
+                width: 300px;
+            }
+            
+            .main-content {
+                margin-left: 300px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Medium Desktop (992px to 1199px) */
+        @media (max-width: 1199px) and (min-width: 992px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Tablet Landscape (768px to 991px) */
+        @media (max-width: 991px) and (min-width: 768px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                margin-left: 220px;
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .stat-value {
+                font-size: 1.6rem;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .quick-action {
+                padding: 15px;
+            }
+            
+            .quick-action .icon {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Tablet Portrait and Mobile Landscape (576px to 767px) */
+        @media (max-width: 767px) and (min-width: 576px) {
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 1000;
+                width: 280px;
             }
 
             .sidebar.visible {
@@ -394,18 +537,244 @@
 
             .main-content {
                 margin-left: 0;
+                padding: 12px;
             }
 
             .header {
-                padding: 15px 20px;
+                padding: 12px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .header h2 {
+                font-size: 1.2rem;
+            }
+            
+            .user-profile span {
+                display: none;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .stat-header {
+                margin-bottom: 0;
+            }
+            
+            .stat-value {
+                font-size: 1.4rem;
+            }
+            
+            .stat-label {
+                font-size: 0.85rem;
             }
 
             .quick-actions {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .quick-action {
+                padding: 12px;
+            }
+            
+            .quick-action .icon {
+                font-size: 1.3rem;
+                margin-bottom: 6px;
+            }
+
+            .content-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+
+            /* Table responsiveness */
+            .table-container {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+
+        /* Mobile Portrait (up to 575px) */
+        @media (max-width: 575px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+                width: 100%;
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 10px;
+            }
+
+            .header {
+                padding: 10px 12px;
+                margin-bottom: 15px;
+                border-radius: 10px;
+            }
+            
+            .header-left {
+                gap: 10px;
+            }
+            
+            .header h2 {
+                font-size: 1.1rem;
+            }
+            
+            .user-profile span {
+                display: none;
+            }
+            
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .stat-header {
+                margin-bottom: 0;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .quick-action {
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                text-align: left;
+                gap: 10px;
+            }
+            
+            .quick-action .icon {
+                font-size: 1.2rem;
+                margin-bottom: 0;
+            }
+
+            .content-section {
+                padding: 12px;
+                margin-bottom: 15px;
+                border-radius: 10px;
+            }
+            
+            .section-title {
+                font-size: 1rem;
+            }
+
+            /* Mobile table - stack vertically */
+            .table-container {
+                font-size: 0.8rem;
+            }
+            
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            tr {
+                border: 1px solid #ccc;
+                margin-bottom: 10px;
+                padding: 10px;
+                border-radius: 8px;
+                background: white;
+            }
+            
+            td {
+                border: none;
+                position: relative;
+                padding: 8px 8px 8px 35%;
+                text-align: left;
+            }
+            
+            td:before {
+                content: attr(data-label) ": ";
+                position: absolute;
+                left: 6px;
+                width: 30%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: 600;
+                color: #666;
+            }
+        }
+
+        /* Extra small devices (landscape phones, less than 480px) */
+        @media (max-width: 479px) {
+            .main-content {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 8px 10px;
+            }
+            
+            .header h2 {
+                font-size: 1rem;
+            }
+            
+            .stats-grid {
+                gap: 8px;
+            }
+            
+            .stat-card {
+                padding: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .content-section {
+                padding: 10px;
             }
         }
 

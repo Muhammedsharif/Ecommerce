@@ -1485,12 +1485,7 @@
     </div>
 
     <script>
-        // Toggle sidebar for mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('adminSidebar');
-            sidebar.classList.toggle('open');
-        }
-
+        
         // Handle search functionality with debouncing
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function(event) {
@@ -1664,19 +1659,7 @@
             });
         }
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('adminSidebar');
-            const menuToggle = document.querySelector('.menu-toggle');
-            
-            if (window.innerWidth <= 1024 && 
-                !sidebar.contains(event.target) && 
-                !menuToggle.contains(event.target) && 
-                sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-            }
-        });
-
+        
         // View order details function
         function viewOrder(orderId) {
             // Show loading modal

@@ -448,7 +448,7 @@
                                 finalItemPrice = Math.max(0, Math.round(basePrice - couponDiscountPerItem));
                             }
                         %>
-                        ₹<%= finalItemPrice.toLocaleString() %>
+                        ₹<%=Math.round( finalItemPrice).toLocaleString() %>
                     </div>
                 </div>
             <% }) %>
@@ -467,7 +467,7 @@
             <% if (order.couponDiscount && order.couponDiscount > 0) { %>
                 <div class="summary-row">
                     <span class="summary-label">Coupon Discount<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %></span>
-                    <span class="summary-value" style="color: #10b981;">-₹<%= order.couponDiscount.toLocaleString() %></span>
+                    <span class="summary-value" style="color: #10b981;">-₹<%= Math.round(order.couponDiscount).toLocaleString() %></span>
                 </div>
             <% } %>
             <div class="summary-row">

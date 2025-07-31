@@ -114,15 +114,57 @@
         .menu-toggle {
             background: none;
             border: none;
-            font-size: 1.5rem;
             cursor: pointer;
-            padding: 5px;
-            border-radius: 5px;
-            transition: background 0.3s ease;
+            padding: 8px 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+            gap: 4px;
         }
 
         .menu-toggle:hover {
             background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .menu-toggle:active {
+            background: #e0e0e0;
+            transform: scale(0.95);
+        }
+
+        .menu-toggle:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background-color: #333;
+            transition: all 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .menu-toggle:hover .hamburger-line {
+            background-color: #667eea;
+        }
+
+        /* Animated hamburger menu */
+        .menu-toggle.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
         }
 
         .header h2 {
@@ -559,10 +601,43 @@
             display: block;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* Overlay for mobile sidebar */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Enhanced Mobile-First Responsive Design */
+        
+        /* Mobile First - Base styles for small screens */
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+            
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 1000;
+                width: 100vw;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                overflow-y: auto;
             }
 
             .sidebar.visible {
@@ -571,18 +646,616 @@
 
             .main-content {
                 margin-left: 0;
+                padding: 8px;
+                width: 100%;
+                min-height: 100vh;
             }
 
             .header {
-                padding: 15px 20px;
+                padding: 8px 12px;
+                margin-bottom: 12px;
+                border-radius: 8px;
+                flex-wrap: wrap;
+            }
+            
+            .header-left {
+                gap: 8px;
+                flex: 1;
+            }
+            
+            .header h2 {
+                font-size: 0.95rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .header-right {
+                gap: 8px;
+            }
+            
+            .user-profile span {
+                display: none;
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
             }
 
-            .stats-grid {
+            .stats-overview {
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .stat-item {
+                padding: 10px 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+                border-radius: 8px;
+            }
+            
+            .stat-item .stat-label {
+                font-size: 0.75rem;
+                margin-bottom: 0;
+            }
+            
+            .stat-item .stat-value {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .quick-actions {
                 grid-template-columns: 1fr;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+            
+            .quick-action {
+                padding: 8px 12px;
+                display: flex;
+                align-items: center;
+                text-align: left;
+                gap: 8px;
+                border-radius: 8px;
+            }
+            
+            .quick-action .icon {
+                font-size: 1rem;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            
+            .quick-action strong {
+                font-size: 0.85rem;
+            }
+
+            .revenue-section,
+            .content-section {
+                padding: 10px;
+                margin-bottom: 12px;
+                border-radius: 8px;
+            }
+            
+            .section-title {
+                font-size: 1rem;
+            }
+            
+            .revenue-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .revenue-info h3 {
+                font-size: 0.95rem;
+            }
+            
+            .revenue-amount {
+                font-size: 1.3rem;
+            }
+            
+            .chart-legend {
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            
+            .legend-item {
+                font-size: 0.75rem;
+            }
+            
+            .chart-container {
+                height: 80px;
+                gap: 3px;
+                padding: 0;
+                overflow-x: auto;
+            }
+            
+            .bar-group {
+                height: 60px;
+            }
+            
+            .chart-bar {
+                max-width: 20px;
+                min-width: 15px;
+            }
+            
+            .bar {
+                width: 6px;
+            }
+            
+            .chart-label {
+                font-size: 0.6rem;
+            }
+
+            /* Mobile table - completely redesigned */
+            .orders-table {
+                font-size: 0.75rem;
+                overflow-x: hidden;
+            }
+            
+            .orders-table table,
+            .orders-table thead,
+            .orders-table tbody,
+            .orders-table th,
+            .orders-table td,
+            .orders-table tr {
+                display: block;
+            }
+            
+            .orders-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            .orders-table tr {
+                border: 1px solid #e0e0e0;
+                margin-bottom: 8px;
+                padding: 8px;
+                border-radius: 6px;
+                background: white;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .orders-table td {
+                border: none;
+                position: relative;
+                padding: 4px 4px 4px 30%;
+                text-align: left;
+                word-wrap: break-word;
+            }
+            
+            .orders-table td:before {
+                content: attr(data-label) ": ";
+                position: absolute;
+                left: 4px;
+                width: 25%;
+                padding-right: 8px;
+                white-space: nowrap;
+                font-weight: 600;
+                color: #666;
+                font-size: 0.7rem;
+            }
+            
+            .product-info {
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+            
+            .product-image {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .product-name {
+                font-size: 0.75rem;
+            }
+            
+            .product-details {
+                font-size: 0.65rem;
+            }
+            
+            .action-buttons {
+                justify-content: flex-start;
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+            
+            .action-btn {
+                padding: 2px 4px;
+                font-size: 0.7rem;
+            }
+            
+            .order-id {
+                font-size: 0.75rem;
+            }
+            
+            .status {
+                padding: 2px 6px;
+                font-size: 0.65rem;
+            }
+        }
+
+        /* Small Mobile (481px to 575px) */
+        @media (min-width: 481px) and (max-width: 575px) {
+            .sidebar {
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 10px 15px;
+                margin-bottom: 15px;
+            }
+            
+            .header h2 {
+                font-size: 1.05rem;
+            }
+            
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+            }
+
+            .stats-overview {
+                gap: 10px;
+                margin-bottom: 18px;
+            }
+            
+            .stat-item {
+                padding: 12px 15px;
+            }
+            
+            .stat-item .stat-value {
+                font-size: 1.25rem;
+            }
+            
+            .stat-item .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .quick-actions {
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .quick-action {
+                padding: 10px 15px;
+            }
+            
+            .quick-action .icon {
+                font-size: 1.1rem;
+            }
+            
+            .quick-action strong {
+                font-size: 0.9rem;
+            }
+
+            .revenue-section,
+            .content-section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .revenue-amount {
+                font-size: 1.5rem;
+            }
+            
+            .chart-container {
+                height: 90px;
+            }
+            
+            .bar-group {
+                height: 70px;
+            }
+            
+            .bar {
+                width: 8px;
+            }
+            
+            .chart-bar {
+                max-width: 22px;
+            }
+        }
+
+        /* Tablet Portrait (576px to 767px) */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .sidebar {
+                width: 280px;
+            }
+
+            .main-content {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 12px 18px;
+                margin-bottom: 20px;
+            }
+            
+            .header h2 {
+                font-size: 1.15rem;
+            }
+
+            .stats-overview {
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .stat-item {
+                padding: 15px 18px;
+            }
+            
+            .stat-item .stat-value {
+                font-size: 1.35rem;
+            }
+            
+            .stat-item .stat-label {
+                font-size: 0.85rem;
             }
 
             .quick-actions {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .quick-action {
+                padding: 12px;
+                text-align: center;
+            }
+            
+            .quick-action .icon {
+                font-size: 1.25rem;
+                margin-bottom: 6px;
+                display: block;
+            }
+            
+            .quick-action strong {
+                font-size: 0.9rem;
+            }
+
+            .revenue-section,
+            .content-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .revenue-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .revenue-amount {
+                font-size: 1.7rem;
+            }
+            
+            .chart-container {
+                height: 110px;
+                gap: 5px;
+            }
+            
+            .bar-group {
+                height: 90px;
+            }
+            
+            .chart-bar {
+                max-width: 28px;
+            }
+            
+            .bar {
+                width: 10px;
+            }
+
+            /* Better table for tablet */
+            .orders-table {
+                font-size: 0.85rem;
+            }
+            
+            .orders-table th,
+            .orders-table td {
+                padding: 8px 6px;
+            }
+            
+            .product-info {
+                gap: 8px;
+            }
+            
+            .product-image {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        /* Tablet Landscape (768px to 991px) */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                margin-left: 220px;
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h2 {
+                font-size: 1.25rem;
+            }
+            
+            .stats-overview {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .stat-item {
+                padding: 18px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+            
+            .stat-item .stat-value {
+                font-size: 1.45rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .quick-action {
+                padding: 15px;
+                text-align: center;
+            }
+            
+            .quick-action .icon {
+                font-size: 1.4rem;
+                margin-bottom: 8px;
+                display: block;
+            }
+            
+            .revenue-section,
+            .content-section {
+                padding: 20px;
+            }
+            
+            .revenue-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .chart-container {
+                height: 140px;
+                gap: 6px;
+            }
+            
+            .bar-group {
+                height: 110px;
+            }
+            
+            .chart-bar {
+                max-width: 35px;
+            }
+            
+            .bar {
+                width: 12px;
+            }
+        }
+
+        /* Medium Desktop (992px to 1199px) */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+                padding: 18px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stats-overview {
+                gap: 15px;
+            }
+            
+            .revenue-section,
+            .content-section {
+                padding: 25px;
+            }
+        }
+
+        /* Large Desktop (1200px and up) */
+        @media (min-width: 1200px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .main-content {
+                margin-left: 280px;
+                padding: 20px;
+            }
+            
+            .stats-overview {
+                gap: 20px;
+            }
+            
+            .stat-item {
+                padding: 30px 25px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .revenue-section,
+            .content-section {
+                padding: 35px;
+            }
+        }
+
+        /* Force mobile layout on small screens */
+        @media (max-width: 767px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .user-profile span {
+                display: none;
+            }
+            
+            /* Ensure horizontal scrolling is prevented */
+            body {
+                overflow-x: hidden;
+            }
+            
+            .dashboard-container {
+                overflow-x: hidden;
+            }
+            
+            /* Fix any potential overflow issues */
+            .stats-overview,
+            .quick-actions,
+            .revenue-section,
+            .content-section,
+            .orders-table {
+                max-width: 100%;
+                overflow-x: hidden;
             }
         }
 
