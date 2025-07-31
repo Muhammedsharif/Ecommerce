@@ -485,7 +485,7 @@ try {
     }
 
     
-    const categories = await Category.find({ isListed: true }).lean();
+    const categories = await Category.find({ isListed: true,isDeleted:false }).lean();
 
     let wishlistIds = [];
     if (userId) {

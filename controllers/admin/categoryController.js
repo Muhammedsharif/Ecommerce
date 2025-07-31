@@ -100,7 +100,8 @@ const getListCategory = async (req, res) => {
                 success: true,
                 message: "Category unlisted successfully",
                 categoryId: id,
-                isListed: false
+                isListed: false,
+                
             });
         }
 
