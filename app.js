@@ -54,6 +54,7 @@ app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Register all routes
+
 registerRoutes(app);
 
 // Start server

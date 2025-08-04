@@ -688,6 +688,7 @@ try {
 } catch (error) {
     console.error('Error in filterProducts:', error);
     res.status(500).json({ error: 'Internal server error' });
+    res.redirect("/pageNotFound")
 }
 };
 
@@ -832,6 +833,7 @@ try {
 } catch (error) {
     console.error('Error in searchProduct:', error);
     res.status(500).json({ error: 'Internal server error' });
+     res.redirect("/pageNotFound")
 }
 };
 const getAllProducts = async (req, res) => {
@@ -882,6 +884,7 @@ try {
 } catch (error) {
     console.error('Error fetching all products:', error);
     res.status(500).json({ error: 'Internal server error' });
+     res.redirect("/pageNotFound")
 }
 };
 
