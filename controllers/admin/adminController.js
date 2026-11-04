@@ -73,10 +73,10 @@ const loadDashboard = async (req,res) =>{
 
 const logout = async (req, res) => {
     try {
-        // Only clear admin session data, preserve user session if exists
+       
         delete req.session.admin;
 
-        // Save the session to ensure the deletion is persisted
+    
         req.session.save((err) => {
             if (err) {
                 console.log("Error in logout", err);

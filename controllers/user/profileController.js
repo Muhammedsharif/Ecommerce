@@ -1322,11 +1322,8 @@ console.log("hit")
         if (!order) {
             return res.redirect("/orders?error=" + encodeURIComponent("Order not found"));
         }
-
-        // Set displayPrice for each ordered item based on offer/discount
         order.orderedItems.forEach(item => {
             let displayPrice = item.product && item.product.salePrice;
-            // If you have a more complex offer logic, implement it here
             if (item.product && item.product.isOfferActive && item.product.offerPrice) {
                 displayPrice = item.product.offerPrice;
             } else if (item.product && item.product.discount && item.product.discount > 0) {
@@ -1339,11 +1336,9 @@ console.log("hit")
             item.displayPrice = Math.round(displayPrice);
         });
 
-        // Calculate display totals for order views (handles partial returns/cancellations)
         const { getOrderDisplayTotals } = require("../../helpers/couponHelper");
         const displayTotals = getOrderDisplayTotals(order);
         
-        // Add display totals to order object for view rendering
         order.displaySubtotal = displayTotals.subtotal;
         order.displayCouponDiscount = displayTotals.couponDiscount;
         order.displayFinalAmount = displayTotals.finalAmount;

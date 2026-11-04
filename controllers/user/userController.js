@@ -70,16 +70,17 @@ try {
 
 const user = req.session.user;
 
+
 // First, let's check all products in database
 const allProducts = await Product.find({});
-console.log('🔍 DEBUG: Total products in database:', allProducts.length);
+
 
 // Check products that are not blocked/deleted
 const activeProducts = await Product.find({
   isBlocked: false,
   isDeleted: false
 });
-console.log('🔍 DEBUG: Active products (not blocked/deleted):', activeProducts.length);
+
 
 // Get products with proper filters including category validation
 let productData = await Product.find({
@@ -90,7 +91,7 @@ let productData = await Product.find({
   match: { isListed: true }
 });
 
-console.log('🔍 DEBUG: Products after populate:', productData.length);
+                           
 
 // Debug: Check variant quantities for first product
 if (productData.length > 0) {
@@ -160,6 +161,9 @@ async function sendVerificationEmail(email,otp){
         }
         })
 
+        await transporter.verify();
+        console.log("✅ Nodemailer connection successful");
+
         const info = await transporter.sendMail({
             from :process.env.NODEMAILER_EMAIL,
             to:email,
@@ -167,6 +171,10 @@ async function sendVerificationEmail(email,otp){
             text:`Your OTP is ${otp}`,
             html:`<b>Your OTP: ${otp}</b>`
         })
+
+        console.log("Email sent:", info.messageId);
+        console.log("Accepted:", info.accepted);
+        console.log("Rejected:", info.rejected);
 
         return info.accepted.length >0
 
@@ -229,7 +237,7 @@ const signup = async (req,res)=>{
         req.session.userData={name,phone,email,password,referralCode}
         res.render("verify-otp")
         console.log("OTP Sent",otp)
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
     }catch(error){
 
         console.error("signup error",error)
