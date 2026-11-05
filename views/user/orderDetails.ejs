@@ -542,7 +542,7 @@
             
             <% order.orderedItems.forEach(item => { %>
                 <div class="item">
-                    <img src="/uploads/product-images/<%= item.product.productImage[0] %>"
+                    <img src="<%= item.product.productImage[0].startsWith('http') ? item.product.productImage[0] : '/uploads/product-images/' + item.product.productImage[0] %>"
                          alt="<%= item.product.productName %>"
                          class="item-image"
                          onerror="this.src='/uploads/placeholder.jpg'">

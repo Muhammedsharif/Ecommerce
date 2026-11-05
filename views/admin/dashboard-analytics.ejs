@@ -889,7 +889,9 @@
                 
                 if (type === 'product') {
                     name = item.productName;
-                    image = item.productImage ? `/uploads/product-images/${item.productImage}` : '/images/placeholder.jpg';
+                    image = item.productImage
+    ? (item.productImage.startsWith('http') ? item.productImage : `/uploads/product-images/${item.productImage}`)
+    : '/images/placeholder.jpg';
                 } else if (type === 'category') {
                     name = item.categoryName;
                 } 

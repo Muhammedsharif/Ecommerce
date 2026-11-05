@@ -996,9 +996,10 @@
                 <td>
                     <div class="d-flex align-items-center">
                         <% if (data[i].productImage && data[i].productImage.length > 0) { %>
-                            <img style="width: 50px; height: 50px;"  src="/uploads/product-images/<%= data[i].productImage[0] %>" 
-                                 alt="<%= data[i].productName %>" 
-                                 class="product-image me-3" >
+                            <img style="width: 50px; height: 50px;"
+     src="<%= data[i].productImage[0].startsWith('http') ? data[i].productImage[0] : '/uploads/product-images/' + data[i].productImage[0] %>"
+     alt="<%= data[i].productName %>"
+     class="product-image me-3">
                         <% } else { %>
                             <div class="product-image me-3 d-flex align-items-center justify-content-center bg-light">
                                 <i class="fas fa-image text-muted"></i>

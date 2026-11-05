@@ -607,9 +607,9 @@
                                                     <td>
                                                         <div style="display: flex; align-items: center; gap: 10px;">
                                                             <% if (item.product && item.product.productImage && item.product.productImage.length > 0) { %>
-                                                                <img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
-                                                                     alt="<%= item.product.productName %>" 
-                                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                                <img src="<%= item.product.productImage[0].startsWith('http') ? item.product.productImage[0] : '/uploads/product-images/' + item.product.productImage[0] %>"
+     alt="<%= item.product.productName %>"
+     style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                                             <% } %>
                                                             <div>
                                                                 <div style="font-weight: 500; font-size: 13px;"><%= item.product ? item.product.productName : 'Product' %></div>

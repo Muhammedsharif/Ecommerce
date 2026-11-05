@@ -1,14 +1,5 @@
-const multer = require('multer')
-const path = require("path")
+const multer = require('multer');
 
-
-const storage = multer.diskStorage({
-    destination:(req,res,cb)=>{
-        cb(null,path.join(__dirname,"../public/uploads/product-images"))
-    },
-    filename:(req,file,cb)=>{
-        cb(null,Date.now()+"-"+file.originalname)
-    }
-})
+const storage = multer.memoryStorage();
 
 module.exports = storage;

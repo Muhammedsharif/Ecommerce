@@ -1842,10 +1842,10 @@
                     
                     itemsHtml += `
                         <div class="item-card">
-                            <img src="/uploads/product-images/${productImage}"
-                                 alt="${productName}"
-                                 class="item-image"
-                                 onerror="this.src='/uploads/placeholder.jpg'">
+                            <img src="${productImage.startsWith('http') ? productImage : '/uploads/product-images/' + productImage}"
+     alt="${productName}"
+     class="item-image"
+     onerror="this.src='/uploads/placeholder.jpg'">
                             <div class="item-details">
                                 <div class="item-name">${productName}</div>
                                 <div class="item-specs">

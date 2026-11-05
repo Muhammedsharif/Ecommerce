@@ -49,7 +49,7 @@
         <div class="product-card">
           <div class="product-image">
             <a href="/productDetails?id=<%= products[i]._id %>">
-              <img src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+             <img src="<%= products[i].productImage[0].startsWith('http') ? products[i].productImage[0] : '/uploads/product-images/' + products[i].productImage[0] %>" alt="<%= products[i].productName %>">
             </a>
           </div>
           <div class="product-info">
@@ -78,7 +78,7 @@
             <div class="product-card">
                 <div class="product-image">
                     <a href="/productDetails?id=<%=products[i]._id%>">
-                    <img src="/uploads/product-images/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>">
+                    <img src="<%= products[i].productImage[0].startsWith('http') ? products[i].productImage[0] : '/uploads/product-images/' + products[i].productImage[0] %>" alt="<%= products[i].productName %>">
                 </a>
                 </div>
                 <div class="product-info">
@@ -128,7 +128,7 @@
             <div class="product-card">
                 <div class="product-image">
                     <a href="/productDetails?id=<%=products[i]._id%>">
-                    <img src="/uploads/product-images/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>">
+                    <img src="<%= products[i].productImage[0].startsWith('http') ? products[i].productImage[0] : '/uploads/product-images/' + products[i].productImage[0] %>" alt="<%= products[i].productName %>">
                 </a>
                 </div>
                 <div class="product-info">

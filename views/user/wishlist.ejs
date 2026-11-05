@@ -680,7 +680,7 @@
                   
                         
                     <div class="product-image">
-                        <img src="/uploads/product-images/<%=product.productImage[0]%>" alt="Union La X Air Jordan 4">
+                        <img src="<%= product.productImage[0].startsWith('http') ? product.productImage[0] : '/uploads/product-images/' + product.productImage[0] %>" alt="Union La X Air Jordan 4">
                         <div class="discount-badge">
                             <%
                             const productOffers = product.productOffer || 0;

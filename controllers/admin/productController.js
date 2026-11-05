@@ -5,6 +5,26 @@ const User = require("../../models/userSchema");
 const fs = require("fs"); // File system operations
 const path = require("path"); // Path manipulation utilities
 const sharp = require("sharp"); // Image processing library
+const cloudinary = require("../../config/cloudinary");
+
+const uploadToCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: "1notone/product-images",
+                format: "jpg"
+            },
+            (error, result) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(result);
+            }
+        );
+
+        stream.end(buffer);
+    });
+};
 
 // Controller function to render the add product page with categories
 const getProductAddPage = async (req, res) => {
@@ -113,45 +133,35 @@ const addProducts = async (req, res) => {
       return res.status(400).json({ error: "Please select exactly 3 images" });
     }
 
-    // Process images
-    for (let i = 0; i < req.files.length; i++) {
-      try {
-        const originalImagePath = req.files[i].path;
-        const originalExtension = path
-          .extname(req.files[i].originalname)
-          .toLowerCase();
-        const isPng = originalExtension === ".png";
-        
-        // Generate a unique filename using timestamp or UUID
-        const uniqueFilename = `${Date.now()}-${Math.floor(
-          Math.random() * 1000
-        )}${path.extname(req.files[i].originalname)}`;
-        
-        const resizedImagePath = path.join(
-          "public",
-          "uploads",
-          "product-images",
-          uniqueFilename.replace(/\.[^/.]+$/, ".jpg")
-        );
+    
+    // Process images and upload to Cloudinary
+for (let i = 0; i < req.files.length; i++) {
+    try {
+        // Resize image using Sharp and convert to JPEG buffer
+        const resizedImageBuffer = await sharp(req.files[i].buffer)
+            .resize({
+                width: 440,
+                height: 440,
+                fit: "cover"
+            })
+            .flatten({ background: "#ffffff" })
+            .jpeg({ quality: 90 })
+            .toBuffer();
 
-        const sharpInstance = sharp(originalImagePath)
-          .resize({ width: 440, height: 440, fit: "cover" })
-          .flatten({ background: "#ffffff" }); // Force white background
-          
-        if (isPng) {
-          // Output as PNG to preserve transparency handling
-          await sharpInstance.png({ quality: 90 }).toFile(resizedImagePath);
-        } else {
-          // Output as JPEG for other formats
-          await sharpInstance.jpeg({ quality: 90 }).toFile(resizedImagePath);
-        }
+        // Upload resized image to Cloudinary
+        const result = await uploadToCloudinary(resizedImageBuffer);
 
-        image.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
-      } catch (imageError) {
-        console.error("Error processing image:", imageError);
-        return res.status(400).json({ error: "Error processing images. Please try again." });
-      }
+        // Store Cloudinary URL
+        image.push(result.secure_url);
+
+    } catch (imageError) {
+        console.error("Error processing/uploading image:", imageError);
+
+        return res.status(400).json({
+            error: "Error processing images. Please try again."
+        });
     }
+}
 
     // Validate category
     const categoryId = await Category.findById(products.category);
@@ -381,36 +391,35 @@ const editProduct = async (req, res) => {
 
     const images = [];
 
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        const originalImagePath = req.files[i].path;
-        const originalExtension = path
-          .extname(req.files[i].originalname)
-          .toLowerCase();
-        const isPng = originalExtension === ".png";
-        // Generate a unique filename
-        const uniqueFilename = `${Date.now()}-${Math.floor(
-          Math.random() * 1000
-        )}${path.extname(req.files[i].originalname)}`;
-        const resizedImagePath = path.join(
-          "public",
-          "uploads",
-          "product-images",
-          uniqueFilename.replace(/\.[^/.]+$/, ".jpg")
-        );
+if (req.files && req.files.length > 0) {
+    for (let i = 0; i < req.files.length; i++) {
+        try {
+            // Resize image using Sharp
+            const resizedImageBuffer = await sharp(req.files[i].buffer)
+                .resize({
+                    width: 440,
+                    height: 440,
+                    fit: "cover"
+                })
+                .flatten({ background: "#ffffff" })
+                .jpeg({ quality: 90 })
+                .toBuffer();
 
-        const sharpInstance = sharp(originalImagePath)
-          .resize({ width: 440, height: 440, fit: "cover" })
-          .flatten({ background: "#ffffff" }); // Force white background
-        if (isPng) {   
-          await sharpInstance.png({ quality: 90 }).toFile(resizedImagePath);
-        } else {
-          await sharpInstance.jpeg({ quality: 90 }).toFile(resizedImagePath);
+            // Upload image to Cloudinary
+            const result = await uploadToCloudinary(resizedImageBuffer);
+
+            // Save Cloudinary URL
+            images.push(result.secure_url);
+
+        } catch (imageError) {
+            console.error("Image upload error:", imageError);
+
+            return res.status(400).json({
+                error: "Error processing images. Please try again."
+            });
         }
-
-        images.push(uniqueFilename.replace(/\.[^/.]+$/, ".jpg"));
-      }
     }
+}
 
     // Validate total image count (existing + new) equals 3
     const currentImageCount = product.productImage ? product.productImage.length : 0;
@@ -509,37 +518,74 @@ const editProduct = async (req, res) => {
 };
 
 const deleteSingleImage = async (req, res) => {
-  try {
-    const { imageNameToServer, productIdToServer } = req.body;
-    console.log(
-      "Image name:",
-      imageNameToServer,
-      "Product ID:",
-      productIdToServer
-    );
+    try {
+        const { imageNameToServer, productIdToServer } = req.body;
 
-    const product = await Product.findByIdAndUpdate(productIdToServer, {
-      $pull: { productImage: imageNameToServer },
-    });
+        console.log("Image:", imageNameToServer);
 
-    const imagePath = path.join(
-      "public",
-      "uploads",
-      "product-images",
-      imageNameToServer
-    );
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-      console.log(`Image ${imageNameToServer} deleted successfully`);
-    } else {
-      console.log(`Image ${imageNameToServer} not found`);
+        // Check whether the image belongs to this product
+        const product = await Product.findOne({
+            _id: productIdToServer,
+            productImage: imageNameToServer
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                status: false,
+                message: "Image not found"
+            });
+        }
+
+        // Check whether the image is a Cloudinary URL
+        if (imageNameToServer.startsWith("https://res.cloudinary.com/")) {
+
+            const uploadPath = imageNameToServer.split("/upload/")[1];
+
+            if (!uploadPath) {
+                throw new Error("Invalid Cloudinary image URL");
+            }
+
+            // Remove version number and file extension
+            const publicId = uploadPath
+                .replace(/^v\d+\//, "")
+                .replace(/\.[^/.]+$/, "");
+
+            // Delete image from Cloudinary
+            const result = await cloudinary.uploader.destroy(publicId);
+
+            if (result.result !== "ok" && result.result !== "not found") {
+                throw new Error("Cloudinary image deletion failed");
+            }
+
+        } else {
+            // Delete old local image if it exists
+            const imagePath = path.join(
+                "public",
+                "uploads",
+                "product-images",
+                imageNameToServer
+            );
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        // Remove image URL/name from MongoDB
+        await Product.findByIdAndUpdate(productIdToServer, {
+            $pull: { productImage: imageNameToServer }
+        });
+
+        return res.json({ status: true });
+
+    } catch (error) {
+        console.error("Image deletion error:", error);
+
+        return res.status(500).json({
+            status: false,
+            message: "Failed to delete image"
+        });
     }
-
-    res.json({ status: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: false, message: "Failed to delete image" });
-  }
 };
 
 module.exports = {
